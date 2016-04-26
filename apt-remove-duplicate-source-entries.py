@@ -5,8 +5,8 @@ Detects and interactively deactivates duplicate Apt source entries.
 Usage: python3 apt-remove-duplicate-source-entries.py
 """
 
+from __future__ import print_function
 import aptsources.sourceslist
-
 
 EMPTY_COMPONENT_LIST = (None,)
 
@@ -24,32 +24,29 @@ def get_duplicates(sourceslist):
 				previous_se = sentry_map.setdefault(key, se)
 				if previous_se is not se:
 					duplicates.append((se, previous_se))
+					break
 
 	return duplicates
 
 
 if __name__ == '__main__':
-
-	def _strip_longstring(s):
-		s = s.rstrip().lstrip('\n')
-		_s = s.lstrip()
-		n = len(s) - len(_s)
-		if n:
-			s = _s.replace('\n' + s[:n], '\n')
-		return s
+	try:
+		input = raw_input
+	except NameError:
+		pass
 
 	slist = aptsources.sourceslist.SourcesList(False)
 	duplicates = get_duplicates(slist)
 
 	if duplicates:
 		for dupe, orig in duplicates:
-			print(_strip_longstring('''
-				Overlapping source entries:
-				  {0}: {1}
-				  {2}: {3}
-				I disabled the latter entry.
-				''').format(
-					dupe.file, dupe, orig.file, orig))
+			print(
+				'Overlapping source entries:\n'
+				'  1. {0}: {1}\n'
+				'  2. {2}: {3}\n'
+				'I disabled the latter entry.'.format(
+					orig.file, orig, dupe.file, dupe),
+				end='\n\n')
 			dupe.disabled = True
 
 		print('\n{0} source entries were disabled:'.format(len(duplicates)),
