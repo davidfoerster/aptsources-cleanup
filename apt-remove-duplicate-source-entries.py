@@ -17,7 +17,7 @@ def get_duplicates(sourceslist):
 
 	sentry_map = dict()
 	duplicates = list()
-	for se in slist.list:
+	for se in sourceslist.list:
 		if not se.invalid and not se.disabled:
 			for c in (se.comps or EMPTY_COMPONENT_LIST):
 				key = (se.type, se.uri, se.dist, c)
@@ -35,8 +35,8 @@ if __name__ == '__main__':
 	except NameError:
 		pass
 
-	slist = aptsources.sourceslist.SourcesList(False)
-	duplicates = get_duplicates(slist)
+	sourceslist = aptsources.sourceslist.SourcesList(False)
+	duplicates = get_duplicates(sourceslist)
 
 	if duplicates:
 		for dupe, orig in duplicates:
@@ -52,7 +52,7 @@ if __name__ == '__main__':
 		print('\n{0} source entries were disabled:'.format(len(duplicates)),
 			*[dupe for dupe, orig in duplicates], sep='\n  ', end='\n\n')
 		if input('Do you want to save these changes? (y/N) ').upper() == 'Y':
-			slist.save()
+			sourceslist.save()
 
 	else:
 		print('No duplicated entries were found.')
