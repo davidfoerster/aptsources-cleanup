@@ -29,7 +29,7 @@ def get_duplicates(sourceslist):
 	return duplicates
 
 
-if __name__ == '__main__':
+def _main(args):
 	try:
 		input = raw_input
 	except NameError:
@@ -51,8 +51,16 @@ if __name__ == '__main__':
 
 		print('\n{0} source entries were disabled:'.format(len(duplicates)),
 			*[dupe for dupe, orig in duplicates], sep='\n  ', end='\n\n')
-		if input('Do you want to save these changes? (y/N) ').upper() == 'Y':
-			sourceslist.save()
+		if input('Do you want to save these changes? (y/N) ').upper() != 'Y':
+			return 2
+		sourceslist.save()
 
 	else:
 		print('No duplicated entries were found.')
+
+	return 0
+
+
+if __name__ == '__main__':
+	import sys
+	sys.exit(_main(sys.argv[1:]))
