@@ -5,7 +5,25 @@ Detects and interactively deactivates duplicate Apt source entries in
 """
 
 from __future__ import print_function
-import aptsources.sourceslist
+import sys
+
+
+def _get_python_packagename(basename):
+	version = sys.version_info.major
+	version_part = str(version) if version >= 3 else ''
+	return 'python{0}-{1}'.format(version_part, basename)
+
+try:
+	import aptsources.sourceslist
+except ImportError as ex:
+	print(
+		'Error: {0}.\n\n'
+		'Do you have the \'{1}\' package installed?\n'
+		'You can do so with \'sudo apt-get install {1}\'.'
+			.format(ex, _get_python_packagename('apt')),
+		file=sys.stderr)
+	sys.exit(127)
+
 
 EMPTY_COMPONENT_LIST = (None,)
 
@@ -78,5 +96,4 @@ def _main(args):
 
 
 if __name__ == '__main__':
-	import sys
 	sys.exit(_main(sys.argv[1:]))
