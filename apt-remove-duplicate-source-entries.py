@@ -49,7 +49,7 @@ def get_duplicates(sourceslist):
 def _argparse(args):
 	import argparse
 	parser = argparse.ArgumentParser(description=__doc__,
-		epilog='Source code at: https://gist.github.com/davidfoerster/780daa8086b924b1837a06cc486af672')
+		epilog='Source code at: https://github.com/davidfoerster/apt-remove-duplicate-source-entries')
 	parser.add_argument('-y', '--yes',
 		dest='apply_changes', action='store_const', const=True,
 		help='Apply all changes without question.')
