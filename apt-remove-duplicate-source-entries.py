@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
-Detects and interactively deactivates duplicate Apt source entries.
-
-Usage: python3 apt-remove-duplicate-source-entries.py
+Detects and interactively deactivates duplicate Apt source entries in
+`/etc/sources.list' and `/etc/sources.list.d/*.list'.
 """
 
 from __future__ import print_function
@@ -29,12 +28,26 @@ def get_duplicates(sourceslist):
 	return duplicates
 
 
+def _argparse(args):
+	import argparse
+	parser = argparse.ArgumentParser(description=__doc__,
+		epilog='Source code at: https://gist.github.com/davidfoerster/780daa8086b924b1837a06cc486af672')
+	parser.add_argument('-y', '--yes',
+		dest='apply_changes', action='store_const', const=True,
+		help='Apply all changes without question.')
+	parser.add_argument('-n', '--no-act', '--dry-run',
+		dest='apply_changes', action='store_const', const=False,
+		help='Never apply changes; only print what would be done.')
+	return parser.parse_args()
+
+
 def _main(args):
 	try:
 		input = raw_input
 	except NameError:
 		pass
 
+	args = _argparse(args)
 	sourceslist = aptsources.sourceslist.SourcesList(False)
 	duplicates = get_duplicates(sourceslist)
 
@@ -51,12 +64,15 @@ def _main(args):
 
 		print('\n{0} source entries were disabled:'.format(len(duplicates)),
 			*[dupe for dupe, orig in duplicates], sep='\n  ', end='\n\n')
-		if input('Do you want to save these changes? (y/N) ').upper() != 'Y':
-			return 2
-		sourceslist.save()
+
+		if args.apply_changes is None:
+			if input('Do you want to save these changes? (y/N) ').upper() != 'Y':
+				return 2
+		if args.apply_changes is not False:
+			sourceslist.save()
 
 	else:
-		print('No duplicated entries were found.')
+		print('No duplicate entries were found.')
 
 	return 0
 
