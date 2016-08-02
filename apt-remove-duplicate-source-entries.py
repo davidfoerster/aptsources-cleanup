@@ -60,10 +60,7 @@ def _argparse(args):
 
 
 def _main(args):
-	try:
-		input = raw_input
-	except NameError:
-		pass
+	input = getattr(__builtins__, 'raw_input', __builtins__.input)
 
 	args = _argparse(args)
 	sourceslist = aptsources.sourceslist.SourcesList(False)
