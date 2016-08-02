@@ -6,7 +6,7 @@ Detects and interactively deactivates duplicate Apt source entries in
 
 ## Prerequisites
 
-  * Python 3.2+ (or Python 2.6+ if you really can't use Python 3)
+  * Python 3.2+ (or Python 2.7+ if you really can't use Python 3)
 
   * The `aptsources` module. In Debian-based distribution you can find it in
     the `python3-apt` package (or `python-apt` if you only have Python 2).
