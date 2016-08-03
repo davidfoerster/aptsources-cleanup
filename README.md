@@ -13,7 +13,7 @@ Detects and interactively deactivates duplicate Apt source entries in
 
     If you don't have it yet you can install it with:
 
-       sudo apt-get install python3-apt
+        sudo apt-get install python3-apt
 
 
 ## Usage
