@@ -56,7 +56,7 @@ def _argparse(args):
 	parser.add_argument('-n', '--no-act', '--dry-run',
 		dest='apply_changes', action='store_const', const=False,
 		help='Never apply changes; only print what would be done.')
-	return parser.parse_args()
+	return parser.parse_args(args)
 
 
 def _main(args):
