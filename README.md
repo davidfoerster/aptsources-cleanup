@@ -19,3 +19,6 @@ Detects and interactively deactivates duplicate Apt source entries in
 ## Usage
 
     sudo ./apt-remove-duplicate-source-entries.py
+
+For a (slightly more) detailed description and individual command-line options
+see the output of `./apt-remove-duplicate-source-entries.py --help`.
