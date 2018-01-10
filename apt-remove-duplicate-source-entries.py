@@ -2,6 +2,8 @@
 """
 Detects and interactively deactivates duplicate Apt source entries in
 `/etc/sources.list' and `/etc/sources.list.d/*.list'.
+
+Source code at https://github.com/davidfoerster/apt-remove-duplicate-source-entries
 """
 
 from __future__ import print_function
@@ -44,8 +46,8 @@ def get_duplicates(sourceslist):
 
 def _argparse(args):
 	import argparse
-	parser = argparse.ArgumentParser(description=__doc__,
-		epilog='Source code at: https://github.com/davidfoerster/apt-remove-duplicate-source-entries')
+	parser = argparse.ArgumentParser(**dict(zip(
+		('description', 'epilog'), map(str.strip, __doc__.rsplit('\n\n', 1)))))
 	parser.add_argument('-y', '--yes',
 		dest='apply_changes', action='store_const', const=True,
 		help='Apply all changes without question.')
