@@ -28,8 +28,6 @@ except ImportError as ex:
 	sys.exit(127)
 
 
-EMPTY_COMPONENT_LIST = (None,)
-
 def get_duplicates(sourceslist):
 	"""
 	Detects and returns duplicate Apt source entries.
@@ -38,7 +36,7 @@ def get_duplicates(sourceslist):
 	sentry_map = defaultdict(list)
 	for se in sourceslist.list:
 		if not se.invalid and not se.disabled:
-			for c in (se.comps or EMPTY_COMPONENT_LIST):
+			for c in (se.comps or (None,)):
 				sentry_map[(se.type, se.uri, se.dist, c)].append(se)
 
 	return filter(lambda dupe_set: len(dupe_set) > 1, sentry_map.values())
