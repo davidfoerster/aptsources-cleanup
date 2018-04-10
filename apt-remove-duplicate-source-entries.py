@@ -55,10 +55,10 @@ def _argparse(args):
 	return parser.parse_args(args)
 
 
-def _main(args):
+def main(*args):
 	input = getattr(__builtins__, 'raw_input', __builtins__.input)
 
-	args = _argparse(args)
+	args = _argparse(args or None)
 	sourceslist = aptsources.sourceslist.SourcesList(False)
 	duplicates = tuple(get_duplicates(sourceslist))
 
@@ -91,4 +91,4 @@ def _main(args):
 
 
 if __name__ == '__main__':
-	sys.exit(_main(sys.argv[1:]))
+	sys.exit(main())
