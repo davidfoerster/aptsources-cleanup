@@ -1,6 +1,5 @@
 #!/usr/bin/python3 -Es
-"""
-Detects and interactively deactivates duplicate Apt source entries in
+"""Detects and interactively deactivates duplicate Apt source entries in
 `/etc/sources.list' and `/etc/sources.list.d/*.list'.
 
 Source code at https://github.com/davidfoerster/apt-remove-duplicate-source-entries
@@ -12,17 +11,25 @@ import sys, itertools
 from os.path import normpath
 from urllib.parse import urlparse, urlunparse
 
+__all__ = ('get_duplicates', 'main')
+
+
+try:
+	input = raw_input
+except NameError:
+	pass
+
 
 def _get_python_packagename(basename):
 	version = sys.version_info.major
 	version_part = str(version) if version >= 3 else ''
-	return 'python{0:s}-{1:s}'.format(version_part, basename)
+	return 'python{:s}-{:s}'.format(version_part, basename)
 
 try:
 	import aptsources.sourceslist
 except ImportError as ex:
 	print(
-		"Error: {0!s}.\n\n"
+		"Error: {0}.\n\n"
 		"Do you have the '{1:s}' package installed?\n"
 		"You can do so with 'sudo apt-get install {1:s}'."
 			.format(ex, _get_python_packagename('apt')),
@@ -31,9 +38,7 @@ except ImportError as ex:
 
 
 def get_duplicates(sourceslist):
-	"""
-	Detects and returns duplicate Apt source entries.
-	"""
+	"""Detects and returns duplicate Apt source entries."""
 
 	sentry_map = defaultdict(list)
 	for se in sourceslist.list:
@@ -61,8 +66,6 @@ def _argparse(args):
 
 
 def main(*args):
-	input = getattr(__builtins__, 'raw_input', __builtins__.input)
-
 	args = _argparse(args or None)
 	sourceslist = aptsources.sourceslist.SourcesList(False)
 	duplicates = tuple(get_duplicates(sourceslist))
@@ -73,14 +76,14 @@ def main(*args):
 			for dupe in dupe_set:
 				print(
 					'Overlapping source entries:\n'
-					'  1. {0}: {1}\n'
-					'  2. {2}: {3}\n'
+					'  1. {:s}: {}\n'
+					'  2. {:s}: {}\n'
 					'I disabled the latter entry.'.format(
 						orig.file, orig, dupe.file, dupe),
 					end='\n\n')
 				dupe.disabled = True
 
-		print('\n{0} source entries were disabled:'.format(len(duplicates)),
+		print('\n{:d} source entries were disabled:'.format(len(duplicates)),
 			*itertools.chain(*duplicates), sep='\n  ', end='\n\n')
 
 		if args.apply_changes is None:
