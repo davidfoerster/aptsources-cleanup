@@ -9,6 +9,8 @@ Source code at https://github.com/davidfoerster/apt-remove-duplicate-source-entr
 from __future__ import print_function
 from collections import defaultdict
 import sys, itertools
+from os.path import normpath
+from urllib.parse import urlparse, urlunparse
 
 
 def _get_python_packagename(basename):
@@ -36,8 +38,11 @@ def get_duplicates(sourceslist):
 	sentry_map = defaultdict(list)
 	for se in sourceslist.list:
 		if not se.invalid and not se.disabled:
+			uri = urlparse(se.uri)
+			uri = urlunparse(uri._replace(path=normpath(uri.path)))
+			dist = normpath(se.dist)
 			for c in (se.comps or (None,)):
-				sentry_map[(se.type, se.uri, se.dist, c)].append(se)
+				sentry_map[(se.type, uri, dist, c and normpath(c))].append(se)
 
 	return filter(lambda dupe_set: len(dupe_set) > 1, sentry_map.values())
 
