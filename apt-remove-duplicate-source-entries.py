@@ -24,11 +24,6 @@ try:
 except ImportError:
 	pass
 
-
-def _get_python_packagename(basename):
-	version = sys.version_info.major
-	version_part = str(version) if version >= 3 else ''
-	return 'python{:s}-{:s}'.format(version_part, basename)
 try:
 	import urllib.parse
 except ImportError:
@@ -37,14 +32,10 @@ except ImportError:
 
 try:
 	import aptsources.sourceslist
-except ImportError as ex:
-	print(
-		"Error: {0}.\n\n"
-		"Do you have the '{1:s}' package installed?\n"
-		"You can do so with 'sudo apt-get install {1:s}'."
-			.format(ex, _get_python_packagename('apt')),
-		file=sys.stderr)
-	sys.exit(127)
+except ImportError:
+	if __name__ != '__main__':
+		raise
+	aptsources = None
 
 
 def get_duplicates(sourceslist):
@@ -76,11 +67,15 @@ def _argparse(args):
 	parser.add_argument('-n', '--no-act', '--dry-run',
 		dest='apply_changes', action='store_const', const=False,
 		help='Never apply changes; only print what would be done.')
+	parser.add_argument('--debug-import-fail',
+		nargs='?', type=int, const=1, default=0, help=argparse.SUPPRESS)
 	return parser.parse_args(args)
 
 
 def main(*args):
 	args = _argparse(args or None)
+	if aptsources is None or args.debug_import_fail:
+		_import_aptsources_sourceslist(args.debug_import_fail)
 	sourceslist = aptsources.sourceslist.SourcesList(False)
 	duplicates = tuple(get_duplicates(sourceslist))
 
@@ -110,6 +105,97 @@ def main(*args):
 		print('No duplicate entries were found.')
 
 	return 0
+
+
+def samefile(a, b):
+	try:
+		return os.path.samefile(a, b)
+	except OSError:
+		return False
+
+
+try:
+	from os import get_terminal_size
+except ImportError:
+	import struct, fcntl, termios
+
+	terminal_size = collections.namedtuple('terminal_size', ('columns', 'lines'))
+
+	def get_terminal_size(fd=1):
+		lines, columns = struct.unpack(b'hh',
+			fcntl.ioctl(fd, termios.TIOCGWINSZ, b'\0\0\0\0'))
+		return terminal_size(columns, lines)
+
+
+def _check_pkg_integrity(pkg, paragraphs, debug_fail=0):
+	import subprocess
+	md5sum_cmd = ('md5sum', '--check', '--strict', '--warn', '--quiet')
+	md5sums_file = '/var/lib/dpkg/info/{:s}.md5sums'.format(pkg)
+
+	try:
+		md5sums_fd = os.open(md5sums_file, os.O_RDONLY)
+		try:
+			md5sum_proc = subprocess.Popen(
+					md5sum_cmd, cwd='/', stdin=md5sums_fd, close_fds=True)
+		finally:
+			os.close(md5sums_fd)
+	except OSError as ex:
+		paragraphs.append(
+			'Warning: Cannot check package integrity ({:s}: {!s}).'
+				.format(ex.__class__.__name__, ex))
+		return False
+
+	if md5sum_proc.wait() or debug_fail:
+		paragraphs.append(
+			"Warning: Package integrity check failed ('{:s} < {:s}' has exit status {:d})."
+				.format(' '.join(md5sum_cmd), md5sums_file, md5sum_proc.returncode))
+
+	return not (md5sum_proc.returncode or debug_fail)
+
+
+def _wrap_terminal_width(paragraphs):
+	if os.isatty(sys.stderr.fileno()):
+		assert all('\n' not in p for p in paragraphs)
+		from textwrap import TextWrapper
+		text_wrapper = TextWrapper(
+			width=get_terminal_size(sys.stderr.fileno()).columns)
+		paragraphs = map(text_wrapper.fill, paragraphs)
+
+	return paragraphs
+
+
+def _import_aptsources_sourceslist(debug_fail=0):
+	global aptsources
+	try:
+		import aptsources.sourceslist
+		if debug_fail:
+			import __nonexistant_module__ as aptsources
+			raise AssertionError
+
+	except ImportError as exception:
+		python_name = 'python'
+		if sys.version_info.major >= 3:
+			python_name += str(sys.version_info.major)
+		python_exe = '/usr/bin/' + python_name
+		python_pkg = python_name + '-minimal'
+
+		paragraphs = [
+			"{0:s}: {1!s}.  Do you have the '{2:s}' package installed?  You can do so with 'sudo apt install {2:s}'."
+				.format(exception.__class__.__name__, exception, python_name + '-apt')
+		]
+
+		if not samefile(python_exe, sys.executable) or debug_fail:
+			paragraphs.append(
+				"Warning: The current Python interpreter is '{:s}'.  Please use the default '{:s}' if you encounter issues with the import of the 'aptsources' module."
+					.format(sys.executable, python_exe))
+
+		if not _check_pkg_integrity(python_pkg, paragraphs, debug_fail):
+			paragraphs[-1] += (
+				"  Please make sure that the '{:s}' package wasn't corrupted and that '{:s}' refers to the Python interpreter from the same package."
+					.format(python_pkg, python_exe))
+
+		print(*_wrap_terminal_width(paragraphs), sep='\n\n', file=sys.stderr)
+		sys.exit(127)
 
 
 if __name__ == '__main__':
