@@ -196,7 +196,14 @@ def _import_aptsources_sourceslist(debug_fail=0):
 				"  Please make sure that the '{:s}' package wasn't corrupted and that '{:s}' refers to the Python interpreter from the same package."
 					.format(python_pkg, python_exe))
 
-		print(*_wrap_terminal_width(paragraphs), sep='\n\n', file=sys.stderr)
+		try:
+			paragraphs = _wrap_terminal_width(paragraphs)
+		except EnvironmentError as ex:
+			print(
+				'WARNING: Cannot wrap text output due a failure to get the terminal size',
+				ex, sep=': ', end='\n\n', file=sys.stderr)
+
+		print(*paragraphs, sep='\n\n', file=sys.stderr)
 		sys.exit(127)
 
 
