@@ -5,18 +5,23 @@
 Source code at https://github.com/davidfoerster/apt-remove-duplicate-source-entries
 """
 
-from __future__ import print_function
-from collections import defaultdict
-import sys, itertools
-from os.path import normpath
-from urllib.parse import urlparse, urlunparse
+from __future__ import print_function, division, absolute_import, unicode_literals
+import sys
+import os
+import os.path
+import itertools
+import collections
 
 __all__ = ('get_duplicates', 'main')
 
+try:
+	from future_builtins import *
+except ImportError:
+	pass
 
 try:
-	input = raw_input
-except NameError:
+	from __builtin__ import unicode as str, str as bytes, raw_input as input, xrange as range
+except ImportError:
 	pass
 
 
@@ -24,6 +29,11 @@ def _get_python_packagename(basename):
 	version = sys.version_info.major
 	version_part = str(version) if version >= 3 else ''
 	return 'python{:s}-{:s}'.format(version_part, basename)
+try:
+	import urllib.parse
+except ImportError:
+	class urllib:
+		import urlparse as parse
 
 try:
 	import aptsources.sourceslist
@@ -40,7 +50,11 @@ except ImportError as ex:
 def get_duplicates(sourceslist):
 	"""Detects and returns duplicate Apt source entries."""
 
-	sentry_map = defaultdict(list)
+	normpath = os.path.normpath
+	urlparse = urllib.parse.urlparse
+	urlunparse = urllib.parse.urlunparse
+
+	sentry_map = collections.defaultdict(list)
 	for se in sourceslist.list:
 		if not se.invalid and not se.disabled:
 			uri = urlparse(se.uri)
