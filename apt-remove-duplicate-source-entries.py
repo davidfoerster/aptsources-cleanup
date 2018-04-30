@@ -84,19 +84,21 @@ def main(*args):
 			orig = dupe_set.pop(0)
 			for dupe in dupe_set:
 				print(
-					'Overlapping source entries:\n'
-					'  1. {:s}: {}\n'
-					'  2. {:s}: {}\n'
-					'I disabled the latter entry.'.format(
-						orig.file, orig, dupe.file, dupe),
+'''Overlapping source entries:
+  1. file {:s}:
+     {}
+  2. file {:s}:
+     {}
+I disabled the latter entry.'''
+						.format(orig.file, orig, dupe.file, dupe),
 					end='\n\n')
 				dupe.disabled = True
 
 		print('\n{:d} source entries were disabled:'.format(len(duplicates)),
-			*itertools.chain(*duplicates), sep='\n  ', end='\n\n')
+			*itertools.chain(*duplicates), sep='\n  ')
 
 		if args.apply_changes is None:
-			if input('Do you want to save these changes? (y/N) ').upper() != 'Y':
+			if input('\nDo you want to save these changes? (y/N) ').upper() != 'Y':
 				return 2
 		if args.apply_changes is not False:
 			sourceslist.save()
