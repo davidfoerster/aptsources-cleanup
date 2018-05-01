@@ -72,13 +72,8 @@ def _argparse(args):
 	return parser.parse_args(args)
 
 
-def main(*args):
-	args = _argparse(args or None)
-	if aptsources is None or args.debug_import_fail:
-		_import_aptsources_sourceslist(args.debug_import_fail)
-	sourceslist = aptsources.sourceslist.SourcesList(False)
+def _main_duplicates(sourceslist, apply_changes=None):
 	duplicates = tuple(get_duplicates(sourceslist))
-
 	if duplicates:
 		for dupe_set in duplicates:
 			orig = dupe_set.pop(0)
@@ -97,16 +92,27 @@ I disabled the latter entry.'''
 		print('\n{:d} source entries were disabled:'.format(len(duplicates)),
 			*itertools.chain(*duplicates), sep='\n  ')
 
-		if args.apply_changes is None:
+		if apply_changes is None:
 			if input('\nDo you want to save these changes? (y/N) ').upper() != 'Y':
 				return 2
-		if args.apply_changes is not False:
+		if apply_changes is not False:
 			sourceslist.save()
 
 	else:
 		print('No duplicate entries were found.')
 
 	return 0
+
+
+def main(*args):
+	args = _argparse(args or None)
+	if aptsources is None or args.debug_import_fail:
+		_import_aptsources_sourceslist(args.debug_import_fail)
+	sourceslist = aptsources.sourceslist.SourcesList(False)
+
+	rv = _main_duplicates(sourceslist, args.apply_changes)
+
+	return rv
 
 
 def samefile(a, b):
