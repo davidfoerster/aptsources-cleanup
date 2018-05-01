@@ -86,19 +86,32 @@ def try_input(prompt=None, on_eof=''):
 	return on_eof
 
 
-def _argparse(args):
+def _argparse(args, debug=False):
 	import argparse
-	parser = argparse.ArgumentParser(**dict(zip(
+	ap = argparse.ArgumentParser(**dict(zip(
 		('description', 'epilog'), map(str.strip, __doc__.rsplit('\n\n', 1)))))
-	parser.add_argument('-y', '--yes',
+
+	if debug is None:
+		if args is None: args = sys.argv[1:]
+		debug = '--help-debug' in args
+	debug = None if debug else argparse.SUPPRESS
+
+	ap.add_argument('-y', '--yes',
 		dest='apply_changes', action='store_const', const=True,
 		help='Apply all changes without question.')
-	parser.add_argument('-n', '--no-act', '--dry-run',
+	ap.add_argument('-n', '--no-act', '--dry-run',
 		dest='apply_changes', action='store_const', const=False,
 		help='Never apply changes; only print what would be done.')
-	parser.add_argument('--debug-import-fail',
-		nargs='?', type=int, const=1, default=0, help=argparse.SUPPRESS)
-	return parser.parse_args(args)
+
+	dg = ap.add_argument_group('Debugging Options',
+		'For wizards only! Use these if you know and want to test the application source code.')
+	dg.add_argument('--help-debug', action='help',
+		help='Show help for debugging options')
+	dg.add_argument('--debug-import-fail', metavar='LEVEL',
+		nargs='?', type=int, const=1, default=0,
+		help=debug or "Force an ImportError for the 'aptsources.sourceslist' module and fail on all subsequent diagnoses.")
+
+	return ap.parse_args(args)
 
 
 def _main_duplicates(sourceslist, apply_changes=None):
@@ -186,7 +199,7 @@ def _main_empty_files(sourceslist):
 
 
 def main(*args):
-	args = _argparse(args or None)
+	args = _argparse(args or None, None)
 	if aptsources is None or args.debug_import_fail:
 		_import_aptsources_sourceslist(args.debug_import_fail)
 	sourceslist = aptsources.sourceslist.SourcesList(False)
