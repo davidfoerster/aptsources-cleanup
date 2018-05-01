@@ -9,6 +9,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 import sys
 import os
 import os.path
+import errno
 import itertools
 import collections
 
@@ -57,6 +58,17 @@ def get_duplicates(sourceslist):
 	return filter(lambda dupe_set: len(dupe_set) > 1, sentry_map.values())
 
 
+def try_input(prompt=None, on_eof=''):
+	try:
+		return input(prompt)
+	except EOFError:
+		pass
+	except EnvironmentError as ex:
+		if ex.errno != errno.EBADF:
+			raise
+	return on_eof
+
+
 def _argparse(args):
 	import argparse
 	parser = argparse.ArgumentParser(**dict(zip(
@@ -94,7 +106,9 @@ I disabled the latter entry.'''
 			*itertools.chain(*duplicates), sep='\n  ')
 
 		if apply_changes is None:
-			if input('\nDo you want to save these changes? (y/N) ').upper() != 'Y':
+			answer = (
+				try_input('\nDo you want to save these changes? ([y]es/[N]o) ').upper())
+			if answer != 'Y':
 				return 2
 		if apply_changes is not False:
 			sourceslist.save()
