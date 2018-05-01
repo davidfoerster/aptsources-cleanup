@@ -160,15 +160,37 @@ I disabled the latter entry.'''
 	return 0
 
 
+class FileDescriptor:
+	def __init__(self, path, mode=os.O_RDONLY, *args):
+		self._fd = os.open(path, mode, *args)
+
+	@property
+	def fd(self):
+		return self._fd
+
+	def close(self):
+		if self._fd is not None:
+			os.close(self._fd)
+			self._fd = None
+
+	def release(self):
+		fd = self._fd
+		self._fd = None
+		return fd
+
+	def __enter__(self):
+		return self.fd
+
+	def __exit__(self, exc_type, exc_val, exc_tb):
+		self.close()
+
+
 def _display_file(filename):
 	try:
-		fd = os.open(filename, os.O_RDONLY)
-		try:
+		with FileDescriptor(filename) as fd:
 			sys.stdout.flush()
 			if sendfile_all(sys.stdout.fileno(), fd) == 0:
 				print('<empty>')
-		finally:
-			os.close(fd)
 	except OSError as ex:
 		print('Error:', ex, file=sys.stderr)
 
