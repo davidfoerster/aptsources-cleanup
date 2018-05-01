@@ -1,0 +1,2 @@
+deb http://ppa.launchpad.net/adrozdoff/llvm-trusty/ubuntu trusty main #LLVM
+# deb-src http://ppa.launchpad.net/adrozdoff/llvm-trusty/ubuntu trusty main #LLVM

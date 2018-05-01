@@ -1,0 +1,2 @@
+deb http://ppa.launchpad.net/adrozdoff/cmake/ubuntu trusty main #CMake
+# deb-src http://ppa.launchpad.net/adrozdoff/cmake/ubuntu trusty main #CMake

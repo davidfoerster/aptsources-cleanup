@@ -1,0 +1,2 @@
+deb http://dl.winehq.org/wine-builds/ubuntu/ trusty main #Wine
+# deb-src http://dl.winehq.org/wine-builds/ubuntu/ trusty main #Wine

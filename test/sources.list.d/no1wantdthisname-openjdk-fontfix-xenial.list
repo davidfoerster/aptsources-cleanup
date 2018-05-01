@@ -1,0 +1,2 @@
+deb http://ppa.launchpad.net/no1wantdthisname/openjdk-fontfix/ubuntu xenial main #Open JDK patched with font fix
+deb-src http://ppa.launchpad.net/no1wantdthisname/openjdk-fontfix/ubuntu xenial main #Open JDK patched with font fix

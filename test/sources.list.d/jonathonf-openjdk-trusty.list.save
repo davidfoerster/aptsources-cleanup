@@ -1,0 +1,2 @@
+deb http://ppa.launchpad.net/jonathonf/openjdk/ubuntu trusty main #OpenJDK 8 & 9
+# deb-src http://ppa.launchpad.net/jonathonf/openjdk/ubuntu trusty main #OpenJDK 8 & 9

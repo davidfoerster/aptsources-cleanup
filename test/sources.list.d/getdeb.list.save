@@ -1,0 +1,2 @@
+deb http://screenshots.getdeb.net/ trusty-getdeb apps #GetDeb Apps
+deb-src http://screenshots.getdeb.net/ trusty-getdeb apps #GetDeb Apps
