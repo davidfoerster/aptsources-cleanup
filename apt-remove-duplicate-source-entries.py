@@ -10,6 +10,7 @@ import sys
 import os
 import os.path
 import errno
+import operator
 import itertools
 import collections
 
@@ -24,6 +25,11 @@ try:
 	from __builtin__ import unicode as str, str as bytes, raw_input as input, xrange as range
 except ImportError:
 	pass
+
+try:
+	from itertools import filterfalse
+except ImportError:
+	from itertools import ifilterfalse as filterfalse
 
 try:
 	import urllib.parse
@@ -56,6 +62,17 @@ def get_duplicates(sourceslist):
 				sentry_map[(se.type, uri, dist, c and normpath(c))].append(se)
 
 	return filter(lambda dupe_set: len(dupe_set) > 1, sentry_map.values())
+
+
+def get_empty_files(sourceslist):
+	sentry_map = collections.defaultdict(list)
+	for se in sourceslist.list:
+		file_entries = sentry_map[se.file]
+		if not se.disabled and not se.invalid:
+			file_entries.append(se)
+
+	return map(operator.itemgetter(0),
+		filterfalse(operator.itemgetter(1), sentry_map.items()))
 
 
 def try_input(prompt=None, on_eof=''):
