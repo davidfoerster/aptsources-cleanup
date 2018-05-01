@@ -156,7 +156,7 @@ def _main_empty_files(sourceslist):
 					fd = os.open(f, os.O_RDONLY)
 					try:
 						sys.stdout.flush()
-						if os.sendfile(sys.stdout.fileno(), fd, 0, sys.maxsize) == 0:
+						if sendfile_all(sys.stdout.fileno(), fd) == 0:
 							print('<empty>')
 					finally:
 						os.close(fd)
@@ -203,6 +203,28 @@ def samefile(a, b):
 		return os.path.samefile(a, b)
 	except OSError:
 		return False
+
+
+def sendfile_all(out, in_):
+	sendfile = getattr(os, 'sendfile', None)
+	count = 0
+	if sendfile:
+		# Main implementation
+		while True:
+			r = sendfile(out, in_, count, sys.maxsize - count)
+			if not r:
+				break
+			count += r
+	else:
+		# Alternative implementation
+		while True:
+			r = os.read(in_, 1 << 20)
+			if not r:
+				break
+			os.write(out, r)
+			count += len(r)
+
+	return count
 
 
 try:
