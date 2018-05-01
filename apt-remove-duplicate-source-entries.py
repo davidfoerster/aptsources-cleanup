@@ -123,8 +123,9 @@ I disabled the latter entry.'''
 			*itertools.chain(*duplicates), sep='\n  ')
 
 		if apply_changes is None:
-			answer = (
-				try_input('\nDo you want to save these changes? ([y]es/[N]o) ').upper())
+			answer = try_input('\nDo you want to save these changes? ([y]es/[N]o) ')
+			if answer:
+				answer = answer[0].upper()
 			if answer != 'Y':
 				return 2
 		if apply_changes is not False:
@@ -145,11 +146,11 @@ def _main_empty_files(sourceslist):
 	for f in get_empty_files(sourceslist):
 		total_count += 1
 
-		while answer not in ('Y', 'N', 'A', 'O'):
+		while answer is None or answer not in 'YNAO':
 			answer = try_input(
 				"\n'{:s}' contains no valid and enabled repository lines. Do you want to remove it? ([y]es/[N]o/[a]ll/n[o]ne/[d]isplay) ".format(f),
 				'O')
-			answer = answer.upper() if answer else 'N'
+			answer = answer[0].upper() if answer else 'N'
 
 			if answer == 'D':
 				try:
@@ -163,7 +164,7 @@ def _main_empty_files(sourceslist):
 				except OSError as ex:
 					print('Error:', ex, file=sys.stderr)
 
-		if answer in ('Y', 'A'):
+		if answer in 'YA':
 			try:
 				os.remove(f)
 			except OSError as ex:
@@ -173,7 +174,7 @@ def _main_empty_files(sourceslist):
 				removed_count += 1
 				print("'{:s}' removed.".format(f))
 
-		if answer not in ('A', 'O'):
+		if answer not in 'AO':
 			answer = None
 
 	if total_count:
