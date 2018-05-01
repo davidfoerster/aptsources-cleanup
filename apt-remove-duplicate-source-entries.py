@@ -81,15 +81,16 @@ def _main_duplicates(sourceslist, apply_changes=None):
 				print(
 '''Overlapping source entries:
   1. file {:s}:
-     {}
+     {:s}
   2. file {:s}:
-     {}
+     {:s}
 I disabled the latter entry.'''
-						.format(orig.file, orig, dupe.file, dupe),
+						.format(orig.file, orig.line.strip(),
+							dupe.file, dupe.line.strip()),
 					end='\n\n')
 				dupe.disabled = True
 
-		print('\n{:d} source entries were disabled:'.format(len(duplicates)),
+		print('{:d} source entries were disabled:'.format(len(duplicates)),
 			*itertools.chain(*duplicates), sep='\n  ')
 
 		if apply_changes is None:
