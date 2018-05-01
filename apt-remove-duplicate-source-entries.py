@@ -160,6 +160,36 @@ I disabled the latter entry.'''
 	return 0
 
 
+def _display_file(filename):
+	try:
+		fd = os.open(filename, os.O_RDONLY)
+		try:
+			sys.stdout.flush()
+			if sendfile_all(sys.stdout.fileno(), fd) == 0:
+				print('<empty>')
+		finally:
+			os.close(fd)
+	except OSError as ex:
+		print('Error:', ex, file=sys.stderr)
+
+
+def _remove_sources_files(filename):
+	rv = 0
+	removed_count = 0
+	for may_fail_missing, f in enumerate((filename, filename + '.save')):
+		try:
+			os.remove(f)
+		except OSError as ex:
+			if not (may_fail_missing and ex.errno == errno.ENOENT):
+				rv |= 1
+				print('Error:', ex, file=sys.stderr)
+		else:
+			removed_count += not may_fail_missing
+			print("'{:s}' removed.".format(f))
+
+	return rv, removed_count
+
+
 def _main_empty_files(sourceslist):
 	rv = 0
 	total_count = 0
@@ -169,33 +199,21 @@ def _main_empty_files(sourceslist):
 	for file, source_entries in get_empty_files(sourceslist):
 		total_count += 1
 
-		while answer is None or answer not in 'YNAO':
+		while not answer or answer not in 'YNAO':
 			answer = try_input(
 				"\n'{:s}' contains no valid and enabled repository lines. Do you want to remove it? ([y]es/[N]o/[a]ll/n[o]ne/[d]isplay) ".format(file),
 				'O')
 			answer = answer[0].upper() if answer else 'N'
 
 			if answer == 'D':
-				try:
-					fd = os.open(file, os.O_RDONLY)
-					try:
-						sys.stdout.flush()
-						if sendfile_all(sys.stdout.fileno(), fd) == 0:
-							print('<empty>')
-					finally:
-						os.close(fd)
-				except OSError as ex:
-					print('Error:', ex, file=sys.stderr)
+				_display_file(file)
 
 		if answer in 'YA':
-			try:
-				os.remove(file)
-			except OSError as ex:
-				rv |= 1
-				print('Error:', ex, file=sys.stderr)
-			else:
-				removed_count += 1
-				print("'{:s}' removed.".format(file))
+			rv2, rc2 = _remove_sources_files(file)
+			rv |= rv2
+			removed_count += rc2
+			if rc2:
+				foreach(sourceslist.remove, source_entries)
 
 		if answer not in 'AO':
 			answer = None
