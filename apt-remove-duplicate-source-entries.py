@@ -67,12 +67,11 @@ def get_duplicates(sourceslist):
 def get_empty_files(sourceslist):
 	sentry_map = collections.defaultdict(list)
 	for se in sourceslist.list:
-		file_entries = sentry_map[se.file]
-		if not se.disabled and not se.invalid:
-			file_entries.append(se)
+		sentry_map[se.file].append(se)
 
-	return map(operator.itemgetter(0),
-		filterfalse(operator.itemgetter(1), sentry_map.items()))
+	return filter(
+		lambda item: all(se.disabled | se.invalid for se in item[1]),
+		sentry_map.items())
 
 
 def try_input(prompt=None, on_eof=''):
@@ -167,18 +166,18 @@ def _main_empty_files(sourceslist):
 	removed_count = 0
 	answer = None
 
-	for f in get_empty_files(sourceslist):
+	for file, source_entries in get_empty_files(sourceslist):
 		total_count += 1
 
 		while answer is None or answer not in 'YNAO':
 			answer = try_input(
-				"\n'{:s}' contains no valid and enabled repository lines. Do you want to remove it? ([y]es/[N]o/[a]ll/n[o]ne/[d]isplay) ".format(f),
+				"\n'{:s}' contains no valid and enabled repository lines. Do you want to remove it? ([y]es/[N]o/[a]ll/n[o]ne/[d]isplay) ".format(file),
 				'O')
 			answer = answer[0].upper() if answer else 'N'
 
 			if answer == 'D':
 				try:
-					fd = os.open(f, os.O_RDONLY)
+					fd = os.open(file, os.O_RDONLY)
 					try:
 						sys.stdout.flush()
 						if sendfile_all(sys.stdout.fileno(), fd) == 0:
@@ -190,13 +189,13 @@ def _main_empty_files(sourceslist):
 
 		if answer in 'YA':
 			try:
-				os.remove(f)
+				os.remove(file)
 			except OSError as ex:
 				rv |= 1
 				print('Error:', ex, file=sys.stderr)
 			else:
 				removed_count += 1
-				print("'{:s}' removed.".format(f))
+				print("'{:s}' removed.".format(file))
 
 		if answer not in 'AO':
 			answer = None
