@@ -234,7 +234,7 @@ def main(*args):
 	sourceslist = aptsources.sourceslist.SourcesList(False)
 	if args.debug_sources_dir is not None:
 		import glob
-		sourceslist.list.clear()
+		del sourceslist.list[:]
 		foreach(sourceslist.load,
 			glob.iglob(os.path.join(args.debug_sources_dir, '*.list')))
 
