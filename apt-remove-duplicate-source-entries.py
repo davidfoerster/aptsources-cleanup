@@ -86,6 +86,11 @@ def try_input(prompt=None, on_eof=''):
 	return on_eof
 
 
+def foreach(func, iterables):
+	for x in iterables:
+		func(x)
+
+
 def _argparse(args, debug=False):
 	import argparse
 	ap = argparse.ArgumentParser(**dict(zip(
@@ -110,6 +115,12 @@ def _argparse(args, debug=False):
 	dg.add_argument('--debug-import-fail', metavar='LEVEL',
 		nargs='?', type=int, const=1, default=0,
 		help=debug or "Force an ImportError for the 'aptsources.sourceslist' module and fail on all subsequent diagnoses.")
+	debug_sources_dir = os.path.join(
+		os.path.dirname(__file__), 'test/sources.list.d')
+	dg.add_argument('--debug-sources-dir', metavar='DIR',
+		nargs='?', const=debug_sources_dir,
+		help=debug or "Load sources list files from this directory instead of the default root-owned '/etc/apt/sources.list*'. If omitted DIR defaults to '{:s}'."
+				.format(debug_sources_dir))
 
 	return ap.parse_args(args)
 
@@ -202,7 +213,13 @@ def main(*args):
 	args = _argparse(args or None, None)
 	if aptsources is None or args.debug_import_fail:
 		_import_aptsources_sourceslist(args.debug_import_fail)
+
 	sourceslist = aptsources.sourceslist.SourcesList(False)
+	if args.debug_sources_dir is not None:
+		import glob
+		sourceslist.list.clear()
+		foreach(sourceslist.load,
+			glob.iglob(os.path.join(args.debug_sources_dir, '*.list')))
 
 	rv = _main_duplicates(sourceslist, args.apply_changes)
 
