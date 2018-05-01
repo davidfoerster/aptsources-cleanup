@@ -136,6 +136,54 @@ I disabled the latter entry.'''
 	return 0
 
 
+def _main_empty_files(sourceslist):
+	rv = 0
+	total_count = 0
+	removed_count = 0
+	answer = None
+
+	for f in get_empty_files(sourceslist):
+		total_count += 1
+
+		while answer not in ('Y', 'N', 'A', 'O'):
+			answer = try_input(
+				"\n'{:s}' contains no valid and enabled repository lines. Do you want to remove it? ([y]es/[N]o/[a]ll/n[o]ne/[d]isplay) ".format(f),
+				'O')
+			answer = answer.upper() if answer else 'N'
+
+			if answer == 'D':
+				try:
+					fd = os.open(f, os.O_RDONLY)
+					try:
+						sys.stdout.flush()
+						if os.sendfile(sys.stdout.fileno(), fd, 0, sys.maxsize) == 0:
+							print('<empty>')
+					finally:
+						os.close(fd)
+				except OSError as ex:
+					print('Error:', ex, file=sys.stderr)
+
+		if answer in ('Y', 'A'):
+			try:
+				os.remove(f)
+			except OSError as ex:
+				rv |= 1
+				print('Error:', ex, file=sys.stderr)
+			else:
+				removed_count += 1
+				print("'{:s}' removed.".format(f))
+
+		if answer not in ('A', 'O'):
+			answer = None
+
+	if total_count:
+		print(
+			'\n{:d} of {:d} empty sourcelist files removed.'
+				.format(removed_count, total_count))
+
+	return rv
+
+
 def main(*args):
 	args = _argparse(args or None)
 	if aptsources is None or args.debug_import_fail:
@@ -143,6 +191,9 @@ def main(*args):
 	sourceslist = aptsources.sourceslist.SourcesList(False)
 
 	rv = _main_duplicates(sourceslist, args.apply_changes)
+
+	if rv == 0 and args.apply_changes is not False:
+		rv = _main_empty_files(sourceslist)
 
 	return rv
 
