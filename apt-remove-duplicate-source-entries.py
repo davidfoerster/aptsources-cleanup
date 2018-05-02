@@ -40,6 +40,7 @@ try:
 except ImportError:
 	if __name__ != '__main__':
 		raise
+	# Ignore the issue for now to perform some diagnosis later
 	aptsources = None
 
 
@@ -63,6 +64,11 @@ def get_duplicates(sourceslist):
 
 
 def get_empty_files(sourceslist):
+	"""Detects source files without valid enabled entries.
+
+	Returns pairs of file names and lists of their respective source entries.
+	"""
+
 	sentry_map = collections.defaultdict(list)
 	for se in sourceslist.list:
 		sentry_map[se.file].append(se)
@@ -73,6 +79,15 @@ def get_empty_files(sourceslist):
 
 
 def try_input(prompt=None, on_eof='', end='\n? '):
+	"""Similar to input() but return a default response on EOF or EBADF.
+
+	If input() fails with EOFError or due to a bad (e. g. closed) standard output
+	stream return 'on_eof' instead which defaults to the empty string.
+
+	Additionally wrap the prompt string using termwrap (see below). 'end' is
+	always appended to the prompt and defaults to '\n? '.
+	"""
+
 	if prompt:
 		termwrap.stdout().print(prompt, end=end)
 		end = None
@@ -88,6 +103,8 @@ def try_input(prompt=None, on_eof='', end='\n? '):
 
 
 def foreach(func, iterables):
+	"""Call 'func' on each item in 'iterable'."""
+
 	for x in iterables:
 		func(x)
 
@@ -127,6 +144,8 @@ def _argparse(args, debug=False):
 
 
 def _main_duplicates(sourceslist, apply_changes=None):
+	"""Interactive disablement of duplicate source entries"""
+
 	duplicates = tuple(get_duplicates(sourceslist))
 	if duplicates:
 		for dupe_set in duplicates:
@@ -165,6 +184,8 @@ I disabled the latter entry.'''
 
 
 class FileDescriptor:
+	"""A context manager for operating system file descriptors"""
+
 	def __init__(self, path, mode=os.O_RDONLY, *args):
 		self._fd = os.open(path, mode, *args)
 
@@ -190,6 +211,8 @@ class FileDescriptor:
 
 
 def _display_file(filename):
+	"""Copy the content of the file at a path to standard output."""
+
 	try:
 		with FileDescriptor(filename) as fd:
 			sys.stdout.flush()
@@ -200,6 +223,13 @@ def _display_file(filename):
 
 
 def _remove_sources_files(filename):
+	"""Remove the list of a sources list file and its '*.save' companion.
+
+	Returns a tuple of a status code to indicate failure and the number of
+	removed files not including '*.save' (0 or 1). Failure to remove the
+	'*.save' companion is displayed but disregarded.
+	"""
+
 	rv = 0
 	removed_count = 0
 	for may_fail_missing, f in enumerate((filename, filename + '.save')):
@@ -217,6 +247,8 @@ def _remove_sources_files(filename):
 
 
 def _main_empty_files(sourceslist):
+	"""Interactive removal of sources list files without valid enabled entries"""
+
 	rv = 0
 	total_count = 0
 	removed_count = 0
@@ -254,6 +286,11 @@ def _main_empty_files(sourceslist):
 
 
 def main(*args):
+	"""Main program entry point
+
+	See the output of the '--help' option for usage.
+	"""
+
 	args = _argparse(args or None, None)
 	if aptsources is None or args.debug_import_fail:
 		_import_aptsources_sourceslist(args.debug_import_fail)
@@ -274,6 +311,8 @@ def main(*args):
 
 
 def samefile(a, b):
+	"""Like os.path.samefile() but return False on error."""
+
 	try:
 		return os.path.samefile(a, b)
 	except OSError:
@@ -281,6 +320,12 @@ def samefile(a, b):
 
 
 def sendfile_all(out, in_):
+	"""Copies the entire content of one file descriptor to another.
+
+	The implementation uses os.sendfile() if available or os.read()/os.write()
+	otherwise.
+	"""
+
 	sendfile = getattr(os, 'sendfile', None)
 	count = 0
 	if sendfile:
@@ -303,12 +348,23 @@ def sendfile_all(out, in_):
 
 
 class termwrap(textwrap.TextWrapper):
+	"""Text wrapping for terminal output"""
 
 	_instances = {}
 
 
 	@classmethod
 	def get(cls, file=None, use_weakref=True, ignore_errors=True):
+		"""Retrieves a termwrap instance for the given file object.
+
+		Missing instances are created on demand using weak references unless
+		'use_weakref' is False. Errors during terminal size detection are
+		suppressed unless 'ignore_errors' is False.
+
+		'file' defaults to None which is equivalent to the current value of
+		sys.stdout.
+		"""
+
 		if file is None:
 			file = sys.stdout
 
@@ -331,14 +387,22 @@ class termwrap(textwrap.TextWrapper):
 
 	@classmethod
 	def stdout(cls):
+		"""Convenience method for get(sys.stdout)"""
 		return cls.get()
 
 	@classmethod
 	def stderr(cls):
+		"""Convenience method for get(sys.stderr)"""
 		return cls.get(sys.stderr)
 
 
 	def __init__(self, file=None, width=0, **kwargs):
+		"""Initialize with the given parameters as with textwrap.TextWrapper.
+
+		If 'file' is not None and 'with' < 0 the width is initialized to the
+		current terminal width if available.
+		"""
+
 		if file is not None and width <= 0:
 			width = self._refresh_width_impl(file)
 		textwrap.TextWrapper.__init__(self, width=width, **kwargs)
@@ -346,6 +410,7 @@ class termwrap(textwrap.TextWrapper):
 
 
 	def print(self, paragraph, end='\n'):
+		"""Prints a paragraph to the stored file object."""
 		if self.file is None:
 			raise TypeError
 		if self.width > 0:
@@ -356,6 +421,7 @@ class termwrap(textwrap.TextWrapper):
 
 
 	def print_all(self, paragraphs, end='\n', sep='\n\n'):
+		"""Prints a sequence of paragraph to the stored file object."""
 		if self.file is None:
 			raise TypeError
 		if self.width > 0:
@@ -364,6 +430,11 @@ class termwrap(textwrap.TextWrapper):
 
 
 	def refresh_width(self, file=None):
+		"""Sets the wrapping width to the current width of the associated terminal.
+
+		If the associated file descriptor does not report a terminal width the
+		current width value is retained.
+		"""
 		width = self._refresh_width_impl(self.file if file is None else file)
 		if width > 0:
 			self.width = width
@@ -387,12 +458,19 @@ class termwrap(textwrap.TextWrapper):
 
 		@classmethod
 		def get_terminal_size(cls, fd=1):
+			"""A fall-back implementation of os.get_terminal_size()"""
+
 			lines, columns = cls._struct.unpack(b'hh',
 				cls._fcntl.ioctl(fd, cls._termios.TIOCGWINSZ, b'\0\0\0\0'))
 			return cls.terminal_size(columns, lines)
 
 
 def _check_pkg_integrity(pkg, paragraphs, debug_fail=0):
+	"""Check the integrity of an installed Apt package
+
+	...based on its checksum file and warn about possible issues.
+	"""
+
 	import subprocess
 	md5sum_cmd = ('md5sum', '--check', '--strict', '--warn', '--quiet')
 	md5sums_file = '/var/lib/dpkg/info/{:s}.md5sums'.format(pkg)
@@ -419,6 +497,11 @@ def _check_pkg_integrity(pkg, paragraphs, debug_fail=0):
 
 
 def _import_aptsources_sourceslist(debug_fail=0):
+	"""Check for possible issues during the import of the 'aptsource.sourceslist' module
+
+	...and print warnings as appropriate.
+	"""
+
 	global aptsources
 	try:
 		import aptsources.sourceslist
