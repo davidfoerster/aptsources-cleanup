@@ -1,6 +1,7 @@
 #!/usr/bin/python3 -OEs
-"""Detects and interactively deactivates duplicate Apt source entries in
-`/etc/sources.list' and `/etc/sources.list.d/*.list'.
+"""Detects and interactively deactivates duplicate Apt source entries and
+files without valid enabled source entries in `/etc/sources.list' and
+`/etc/sources.list.d/*.list'.
 
 Source code at https://github.com/davidfoerster/apt-remove-duplicate-source-entries
 """
