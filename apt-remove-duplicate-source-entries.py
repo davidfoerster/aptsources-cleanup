@@ -13,6 +13,8 @@ import errno
 import operator
 import itertools
 import collections
+import textwrap
+import weakref
 
 __all__ = ('get_duplicates', 'main')
 
@@ -146,7 +148,7 @@ I disabled the latter entry.'''
 			*itertools.chain(*duplicates), sep='\n  ')
 
 		if apply_changes is None:
-			answer = try_input('\nDo you want to save these changes? ([y]es/[N]o) ')
+			answer = try_input('\nDo you want to save these changes?  ([y]es/[N]o) ')
 			if answer:
 				answer = answer[0].upper()
 			if answer != 'Y':
@@ -223,7 +225,7 @@ def _main_empty_files(sourceslist):
 
 		while not answer or answer not in 'YNAO':
 			answer = try_input(
-				"\n'{:s}' contains no valid and enabled repository lines. Do you want to remove it? ([y]es/[N]o/[a]ll/n[o]ne/[d]isplay) ".format(file),
+				"\n'{:s}' contains no valid and enabled repository lines.  Do you want to remove it?  ([y]es/[N]o/[a]ll/n[o]ne/[d]isplay) ".format(file),
 				'O')
 			answer = answer[0].upper() if answer else 'N'
 
@@ -297,17 +299,94 @@ def sendfile_all(out, in_):
 	return count
 
 
-try:
-	from os import get_terminal_size
-except ImportError:
-	import struct, fcntl, termios
+class termwrap(textwrap.TextWrapper):
 
-	terminal_size = collections.namedtuple('terminal_size', ('columns', 'lines'))
+	_instances = {}
 
-	def get_terminal_size(fd=1):
-		lines, columns = struct.unpack(b'hh',
-			fcntl.ioctl(fd, termios.TIOCGWINSZ, b'\0\0\0\0'))
-		return terminal_size(columns, lines)
+
+	@classmethod
+	def get(cls, file=None, use_weakref=True, ignore_errors=True):
+		if file is None:
+			file = sys.stdout
+
+		tw = cls._instances.get(id(file))
+		if isinstance(tw, weakref.ref):
+			tw = tw()
+
+		if tw is None:
+			try:
+				tw = cls(file)
+			except EnvironmentError:
+				if not ignore_errors:
+					raise
+				tw = cls()
+				tw.file = file
+			cls._instances[id(file)] = weakref.ref(tw) if use_weakref else tw
+
+		return tw
+
+
+	@classmethod
+	def stdout(cls):
+		return cls.get()
+
+	@classmethod
+	def stderr(cls):
+		return cls.get(sys.stderr)
+
+
+	def __init__(self, file=None, width=0, **kwargs):
+		if file is not None and width <= 0:
+			width = self._refresh_width_impl(file)
+		textwrap.TextWrapper.__init__(self, width=width, **kwargs)
+		self.file = file
+
+
+	def print(self, paragraph, end='\n'):
+		if self.file is None:
+			raise TypeError
+		if self.width > 0:
+			paragraph = self.wrap(paragraph)
+		else:
+			paragraph = (paragraph,)
+		print(*paragraph, sep='\n', end=end, file=self.file)
+
+
+	def print_all(self, paragraphs, end='\n', sep='\n\n'):
+		if self.file is None:
+			raise TypeError
+		if self.width > 0:
+			paragraphs = map(self.fill, paragraphs)
+		print(*paragraphs, sep=sep, end=end, file=self.file)
+
+
+	def refresh_width(self, file=None):
+		width = self._refresh_width_impl(self.file if file is None else file)
+		if width > 0:
+			self.width = width
+		return width > 0
+
+
+	@classmethod
+	def _refresh_width_impl(cls, file):
+		if not os.isatty(file.fileno()):
+			return 0
+		return cls.get_terminal_size(file.fileno()).columns
+
+
+	try:
+		from os import terminal_size, get_terminal_size
+	except ImportError:
+		import struct as _struct, fcntl as _fcntl, termios as _termios
+
+		terminal_size = collections.namedtuple(
+			'terminal_size', ('columns', 'lines'))
+
+		@classmethod
+		def get_terminal_size(cls, fd=1):
+			lines, columns = cls._struct.unpack(b'hh',
+				cls._fcntl.ioctl(fd, cls._termios.TIOCGWINSZ, b'\0\0\0\0'))
+			return cls.terminal_size(columns, lines)
 
 
 def _check_pkg_integrity(pkg, paragraphs, debug_fail=0):
@@ -330,21 +409,10 @@ def _check_pkg_integrity(pkg, paragraphs, debug_fail=0):
 
 	if md5sum_proc.wait() or debug_fail:
 		paragraphs.append(
-			"Warning: Package integrity check failed ('{:s} < {:s}' has exit status {:d})."
+			"Warning: Package integrity check failed  ('{:s} < {:s}' has exit status {:d})."
 				.format(' '.join(md5sum_cmd), md5sums_file, md5sum_proc.returncode))
 
 	return not (md5sum_proc.returncode or debug_fail)
-
-
-def _wrap_terminal_width(paragraphs):
-	if os.isatty(sys.stderr.fileno()):
-		assert all('\n' not in p for p in paragraphs)
-		from textwrap import TextWrapper
-		text_wrapper = TextWrapper(
-			width=get_terminal_size(sys.stderr.fileno()).columns)
-		paragraphs = map(text_wrapper.fill, paragraphs)
-
-	return paragraphs
 
 
 def _import_aptsources_sourceslist(debug_fail=0):
@@ -378,13 +446,13 @@ def _import_aptsources_sourceslist(debug_fail=0):
 					.format(python_pkg, python_exe))
 
 		try:
-			paragraphs = _wrap_terminal_width(paragraphs)
+			termwrap.get(sys.stderr, ignore_errors=False)
 		except EnvironmentError as ex:
 			print(
 				'WARNING: Cannot wrap text output due a failure to get the terminal size',
 				ex, sep=': ', end='\n\n', file=sys.stderr)
 
-		print(*paragraphs, sep='\n\n', file=sys.stderr)
+		termwrap.stderr().print_all(paragraphs)
 		sys.exit(127)
 
 
