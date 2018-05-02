@@ -76,9 +76,13 @@ def get_empty_files(sourceslist):
 		sentry_map.items())
 
 
-def try_input(prompt=None, on_eof=''):
+def try_input(prompt=None, on_eof='', end='\n? '):
+	if prompt:
+		termwrap.stdout().print(prompt, end=end)
+		end = None
+
 	try:
-		return input(prompt)
+		return input(end)
 	except EOFError:
 		pass
 	except EnvironmentError as ex:
@@ -148,7 +152,9 @@ I disabled the latter entry.'''
 			*itertools.chain(*duplicates), sep='\n  ')
 
 		if apply_changes is None:
-			answer = try_input('\nDo you want to save these changes?  ([y]es/[N]o) ')
+			print()
+			answer = try_input(
+				'Do you want to save these changes?  ([y]es/[N]o)')
 			if answer:
 				answer = answer[0].upper()
 			if answer != 'Y':
@@ -224,8 +230,9 @@ def _main_empty_files(sourceslist):
 		total_count += 1
 
 		while not answer or answer not in 'YNAO':
+			print()
 			answer = try_input(
-				"\n'{:s}' contains no valid and enabled repository lines.  Do you want to remove it?  ([y]es/[N]o/[a]ll/n[o]ne/[d]isplay) ".format(file),
+				"'{:s}' contains no valid and enabled repository lines.  Do you want to remove it?  ([y]es/[N]o/[a]ll/n[o]ne/[d]isplay)".format(file),
 				'O')
 			answer = answer[0].upper() if answer else 'N'
 
