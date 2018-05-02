@@ -90,7 +90,7 @@ def try_input(prompt=None, on_eof='', end='\n? '):
 
 	if prompt:
 		termwrap.stdout().print(prompt, end=end)
-		end = None
+		end = ''
 
 	try:
 		return input(end)
