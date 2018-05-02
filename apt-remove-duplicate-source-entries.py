@@ -30,11 +30,6 @@ except ImportError:
 	pass
 
 try:
-	from itertools import filterfalse
-except ImportError:
-	from itertools import ifilterfalse as filterfalse
-
-try:
 	import urllib.parse
 except ImportError:
 	class urllib:
