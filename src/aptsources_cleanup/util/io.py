@@ -1,5 +1,6 @@
 from __future__ import print_function, division, absolute_import, unicode_literals
 from ._3to2 import *
+from .gettext import _
 import os
 import sys
 
@@ -57,9 +58,9 @@ def display_file(filename):
 		with FileDescriptor(filename) as fd:
 			sys.stdout.flush()
 			if sendfile_all(sys.stdout.fileno(), fd) == 0:
-				print('<empty>')
+				print('<', _('empty'), '>', sep='')
 	except EnvironmentError as ex:
-		print('Error:', ex, file=sys.stderr)
+		print(_('Error'), ex, sep=': ', file=sys.stderr)
 
 
 def sendfile_all(out, in_):

@@ -1,5 +1,6 @@
 from __future__ import print_function, division, absolute_import, unicode_literals
 from ._3to2 import *
+from .gettext import _
 import sys
 import os, os.path
 import errno
@@ -32,9 +33,9 @@ def remove_sources_files(filename):
 		except EnvironmentError as ex:
 			if not (may_fail_missing and ex.errno == errno.ENOENT):
 				rv |= 1
-				print('Error:', ex, file=sys.stderr)
+				print(_('Error'), ex, sep=': ', file=sys.stderr)
 		else:
 			removed_count += not may_fail_missing
-			print("'{:s}' removed.".format(f))
+			print(_("'{:s}' removed.").format(f))
 
 	return rv, removed_count

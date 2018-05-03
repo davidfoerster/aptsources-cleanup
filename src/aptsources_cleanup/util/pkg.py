@@ -1,5 +1,6 @@
 from __future__ import print_function, division, absolute_import, unicode_literals
 from ._3to2 import *
+from .gettext import _
 from .io import FileDescriptor
 import subprocess
 
@@ -25,13 +26,14 @@ def check_integrity(pkg, paragraphs, debug_fail=0):
 			finally:
 				md5sum_proc.wait()
 	except EnvironmentError as ex:
-		paragraphs.append(
-			'Warning: Cannot check package integrity ({!s}).'.format(ex))
+		paragraphs.append('{:s}: {:s}: {!s}'.format(
+			_('Warning'), _('Cannot check package integrity'), ex))
 		return False
 
 	if md5sum_proc.returncode or debug_fail:
-		paragraphs.append(
-			"Warning: Package integrity check failed  ('{:s} < {:s}' has exit status {:d})."
-				.format(' '.join(md5sum_cmd), md5sums_file, md5sum_proc.returncode))
+		paragraphs.append("{:s}: {:s}: {:s}: '{:s} < {:s}'".format(
+			_('Warning'), _('Package integrity check failed'),
+			_('exit status {:d}').format(md5sum_proc.returncode),
+			' '.join(md5sum_cmd), md5sums_file))
 
 	return not (md5sum_proc.returncode or debug_fail)

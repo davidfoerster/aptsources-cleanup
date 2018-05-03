@@ -4,6 +4,7 @@ from .util.io import *
 from .util.terminal import *
 from .util.itertools import *
 from .util.filesystem import *
+from .util.gettext import *
 import sys
 import os.path
 import itertools
@@ -32,7 +33,7 @@ def main(*args):
 	sourceslist = aptsources.sourceslist.SourcesList(False)
 	if args.debug_sources_dir is not None:
 		if not os.path.isdir(args.debug_sources_dir):
-			print('Error', 'No such directory', args.debug_sources_dir,
+			print(_('Error'), _('No such directory'), args.debug_sources_dir,
 				sep=': ', file=sys.stderr)
 			return 1
 		import glob
@@ -51,7 +52,8 @@ def main(*args):
 def parse_args(args, debug=False):
 	ap = argparse.ArgumentParser(**dict(zip(
 		('description', 'epilog'),
-		map(str.strip, _parent_package.__doc__.rsplit('\n\n', 1)))))
+		(_(s.replace('\n', ' '))
+			for s in _parent_package.__doc__.rsplit('\n\n', 1)))))
 
 	if debug is None:
 		if args is None: args = sys.argv[1:]
@@ -89,35 +91,33 @@ def handle_duplicates(sourceslist, apply_changes=None):
 		for dupe_set in duplicates:
 			orig = dupe_set.pop(0)
 			for dupe in dupe_set:
-				print(
+				print(_(
 '''Overlapping source entries:
   1. file {:s}:
      {:s}
   2. file {:s}:
      {:s}
-I disabled the latter entry.'''
+I disabled the latter entry.''')
 						.format(orig.file, orig.line.strip(),
 							dupe.file, dupe.line.strip()),
 					end='\n\n')
 				dupe.disabled = True
 
-		print('{:d} source entries were disabled:'.format(len(duplicates)),
+		print(_('{:d} source entries were disabled:').format(len(duplicates)),
 			*itertools.chain(*duplicates), sep='\n  ')
 
 		if apply_changes is None:
+			choices = Choices(_U('yes'), _U('no'), default='no')
 			print()
-			answer = try_input(
-				'Do you want to save these changes?  ([y]es/[N]o)')
-			if answer:
-				answer = answer[0].upper()
-			if answer != 'Y':
-				print('Aborted.', file=sys.stderr)
+			answer = choices.ask(_('Do you want to save these changes?'))
+			if answer is None or answer.orig != 'yes':
+				print(_('Aborted.'), file=sys.stderr)
 				return 2
 		if apply_changes is not False:
 			sourceslist.save()
 
 	else:
-		print('No duplicate entries were found.')
+		print(_('No duplicate entries were found.'))
 
 	return 0
 
@@ -128,35 +128,39 @@ def handle_empty_files(sourceslist):
 	rv = 0
 	total_count = 0
 	removed_count = 0
+
+	choices = Choices(
+		_U('yes'), _U('no'), _U('all'), _U('none'), _U('display'),
+		default='no')
+	on_eof = choices.orig['none']
 	answer = None
 
 	for file, source_entries in get_empty_files(sourceslist):
 		total_count += 1
 
-		while not answer or answer not in 'YNAO':
+		while answer is None:
 			print()
-			answer = try_input(
-				"'{:s}' contains no valid and enabled repository lines.  Do you want to remove it?  ([y]es/[N]o/[a]ll/n[o]ne/[d]isplay)".format(file),
-				'O')
-			answer = answer[0].upper() if answer else 'N'
-
-			if answer == 'D':
+			answer = choices.ask(
+				_("'{:s}' contains no valid and enabled repository lines.  Do you want to remove it?").format(file),
+				on_eof=on_eof)
+			if answer is not None and answer.orig == 'display':
 				display_file(file)
 
-		if answer in 'YA':
+		if answer.orig in ('yes', 'all'):
 			rv2, rc2 = remove_sources_files(file)
 			rv |= rv2
 			removed_count += rc2
 			if rc2:
 				foreach(sourceslist.remove, source_entries)
 
-		if answer not in 'AO':
+		if answer.orig not in ('all', 'none'):
 			answer = None
 
 	if total_count:
-		print(
-			'\n{:d} of {:d} empty sourcelist files removed.'
-				.format(removed_count, total_count))
+		print('\n',
+			_('{:d} of {:d} empty sourcelist files removed.')
+				.format(removed_count, total_count),
+			sep='')
 
 	return rv
 
