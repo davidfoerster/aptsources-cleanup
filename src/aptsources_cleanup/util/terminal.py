@@ -43,7 +43,7 @@ def try_input(prompt=None, on_eof='', end='\n? '):
 
 	try:
 		return input(end)
-	except EOFError:
+	except (EOFError, KeyboardInterrupt):
 		pass
 	except EnvironmentError as ex:
 		if ex.errno != errno.EBADF:
