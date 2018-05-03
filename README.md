@@ -19,7 +19,7 @@ deletes sources list files without valid enabled source entries in
 
 ## Usage
 
-    sudo ./apt-remove-duplicate-source-entries.py
+    sudo ./aptsources-cleanup.py
 
 For a (slightly more) detailed description and individual command-line options
-see the output of `./apt-remove-duplicate-source-entries.py --help`.
+see the output of `./aptsources-cleanup.py --help`.
