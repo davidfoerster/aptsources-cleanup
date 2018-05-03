@@ -111,6 +111,7 @@ I disabled the latter entry.'''
 			if answer:
 				answer = answer[0].upper()
 			if answer != 'Y':
+				print('Aborted.', file=sys.stderr)
 				return 2
 		if apply_changes is not False:
 			sourceslist.save()
