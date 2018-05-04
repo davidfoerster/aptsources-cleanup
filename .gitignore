@@ -1,2 +1,4 @@
 *.py[co]
 *.zip
+*.pot
+*.mo
