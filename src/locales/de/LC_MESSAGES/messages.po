@@ -1,0 +1,134 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-05-03 16:44+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: aptsources_cleanup/util/io.py:61
+msgid "empty"
+msgstr "leer"
+
+#: aptsources_cleanup/util/io.py:63 aptsources_cleanup/util/filesystem.py:36
+#: aptsources_cleanup/__main__.py:36
+msgid "Error"
+msgstr "Fehler"
+
+#: aptsources_cleanup/util/filesystem.py:39
+msgid "'{:s}' removed."
+msgstr "'{:s}' entfernt."
+
+#: aptsources_cleanup/util/pkg.py:30 aptsources_cleanup/util/pkg.py:35
+#: aptsources_cleanup/util/import_check.py:58
+msgid "Warning"
+msgstr "Warnung"
+
+#: aptsources_cleanup/util/pkg.py:30
+msgid "Cannot check package integrity"
+msgstr "Kann Paketintegrität nicht üperprüfen"
+
+#: aptsources_cleanup/util/pkg.py:35
+msgid "Package integrity check failed"
+msgstr "Paketintegritätsprüfung schlug fehl"
+
+#: aptsources_cleanup/util/pkg.py:36
+msgid "exit status {:d}"
+msgstr "Ausstiegstatus {:d}"
+
+#: aptsources_cleanup/util/import_check.py:40
+msgid "Do you have the '{:s}' package installed?  You can do so with:"
+msgstr "Haben Sie das Paket '{:s} installiert? Sie können das nachholen mit:'"
+
+#: aptsources_cleanup/util/import_check.py:47
+msgid ""
+"The current Python interpreter is '{:s}'.  Please use the default "
+"'{:s}' if you encounter issues with the import of the '{:s}' module."
+msgstr "Der derzeitige Python-Interpretet ist '{:s}'.  Bitte benutzen sie Vorgabe '{:s}', falls Sie Problemen beim Import des Moduls '{:s}' begegnen."
+
+#: aptsources_cleanup/util/import_check.py:52
+msgid ""
+"Please make sure that the '{:s}' package wasn't corrupted and that '{:s}' "
+"refers to the Python interpreter from the same package."
+msgstr "Bitte stellen Sie sicher, dass das Paket '{:s}' nicht beschädigt wurde und dass '{:s}' sich auf den Python-Interpreter aus dem selben Paket bezieht."
+
+#: aptsources_cleanup/util/import_check.py:59
+msgid "Cannot wrap text output due a failure to get the terminal size"
+msgstr "Kann den Ausgabetext nicht umbrechen wegen eines Fehlers beim Bezug der Terminalgröße"
+
+#: aptsources_cleanup/__main__.py:36
+msgid "No such directory"
+msgstr "Kein solches Verzeichnis"
+
+#: aptsources_cleanup/__main__.py:95
+msgid ""
+"Overlapping source entries:\n"
+"  1. file {:s}:\n"
+"     {:s}\n"
+"  2. file {:s}:\n"
+"     {:s}\n"
+"I disabled the latter entry."
+msgstr ""
+"Überlappende Quelleneinträge:\n"
+"  1. Datei {:s}:\n"
+"     {:s}\n"
+"  2. Datei {:s}:\n"
+"     {:s}\n"
+"Ich habe letzteren Eintrag deaktiviert."
+
+#: aptsources_cleanup/__main__.py:106
+msgid "{:d} source entries were disabled:"
+msgstr "{:d} Quelleneinträge wurden deaktiviert:"
+
+#: aptsources_cleanup/__main__.py:110 aptsources_cleanup/__main__.py:133
+msgid "yes"
+msgstr "ja"
+
+#: aptsources_cleanup/__main__.py:110 aptsources_cleanup/__main__.py:133
+msgid "no"
+msgstr "nein"
+
+#: aptsources_cleanup/__main__.py:112
+msgid "Do you want to save these changes?"
+msgstr "Wollen Sie diese Änderungen sichern?"
+
+#: aptsources_cleanup/__main__.py:114
+msgid "Aborted."
+msgstr "Abgebrochen."
+
+#: aptsources_cleanup/__main__.py:120
+msgid "No duplicate entries were found."
+msgstr "Keine doppelten Einträge gefunden."
+
+#: aptsources_cleanup/__main__.py:133
+msgid "all"
+msgstr "alle"
+
+#: aptsources_cleanup/__main__.py:133
+msgid "none"
+msgstr "keine"
+
+#: aptsources_cleanup/__main__.py:133
+msgid "display"
+msgstr "anzeigen"
+
+#: aptsources_cleanup/__main__.py:144
+msgid ""
+"'{:s}' contains no valid and enabled repository lines.  Do you want to "
+"remove it?"
+msgstr "'{:s}' enthält keine gültigen aktiven Verzeichniszeilen.  Wollen Sie sie entfernen?"
+
+#: aptsources_cleanup/__main__.py:161
+msgid "{:d} of {:d} empty sourcelist files removed."
+msgstr "{:d} von {:d} Quellenlistendateien entfernt."
