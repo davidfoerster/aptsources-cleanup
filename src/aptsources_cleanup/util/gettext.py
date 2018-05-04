@@ -1,23 +1,81 @@
 from __future__ import print_function, division, absolute_import, unicode_literals
 from ._3to2 import *
-from . import terminal
+from . import terminal, strings
 from .operator import identity
+from .itertools import unique
 import gettext as _gettext
 import operator
+import itertools
 import collections
 import collections.abc
+import io
+import os
 import os.path
+import zipimport
 
-__all__ = ('translation', '_', '_U', 'Choices', 'ChoiceInfo')
+
+__all__ = ('translation', 'translations', '_', '_U', 'ChoiceInfo', 'Choices')
 
 
 def get_localedir():
 	return os.path.normpath(os.path.join(
 		os.path.dirname(__file__), os.pardir, os.pardir, 'locales'))
 
-print(*(_gettext.find('messages', get_localedir(), all=True) or (None,)), sep='\n', end='\n\n')
-translation = _gettext.translation('messages', get_localedir(), fallback=True)
-_ = translation.gettext
+
+def get_languages(environ=None):
+	if environ is None:
+		environ = os.environ
+	return itertools.chain(*map(_split_lang_from_environ,
+		filter(None, map(environ.get,
+			('LC_ALL', 'LC_MESSAGES', 'LANG', 'LANGUAGE')))))
+
+
+def _split_lang_from_environ(s):
+	for full_lang in s.split(':'):
+		full_lang = full_lang.partition('.')[0]
+		yield full_lang
+		base_lang, underscore, country = full_lang.partition('_')
+		if country:
+			yield base_lang
+
+
+def translation(domain, localedir=None, languages=None, _class=None,
+	fallback=False, codeset=None
+):
+	if not (localedir is not None and
+		isinstance(__loader__, zipimport.zipimporter) and
+		strings.startswith_token(localedir, __loader__.archive, os.sep)
+	):
+		return _gettext.translation(
+			domain, localedir, languages, _class, fallback, codeset)
+
+	if languages is None:
+		languages = get_languages()
+
+	localedir = os.path.relpath(localedir, __loader__.archive)
+	localepath_suffix = os.path.join('LC_MESSAGES', domain + '.mo')
+	for lang in unique(filter(None, languages)):
+		lang_path = os.path.join(localedir, lang, localepath_suffix)
+		print('Trying', lang, lang_path, '...')
+		try:
+			mo_data = __loader__.get_data(lang_path)
+		except OSError:
+			pass
+		else:
+			print('Found', lang, lang_path)
+			return (_class or _gettext.GNUTranslations)(io.BytesIO(mo_data))
+
+	if not fallback:
+		raise OSError(
+			"No translation in '{:s}/{:s}' for: {:s}"
+				.format(__loader__.archive, localedir, ', '.join(languages)))
+
+	return _gettext.NullTranslations()
+
+
+translations = translation('messages', get_localedir(), fallback=True)
+
+_ = translations.gettext
 
 
 def _U(s):
@@ -60,7 +118,7 @@ class Choices(collections.ChainMap):
 
 		for orig in choices:
 			is_default = orig == default
-			translation = translation.gettext(orig)
+			translation = translations.gettext(orig)
 			if use_shorthands(orig):
 				short, styled = self._get_short_and_styled(translation,
 					shorthand_highlighter
