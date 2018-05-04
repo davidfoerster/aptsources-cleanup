@@ -1,10 +1,10 @@
 APPLICATION_NAME = aptsources-cleanup
 BUILD_DIR = build
 SRC_DIR = src
-ZIP = zip
-ZIP_OPTIONS = -9
+ZIP = zip -9
 
-SOURCES = $(shell find "$(SRC_DIR)" -mindepth 1 -type f -name '*.py')
+rwildcard = $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
+SOURCES = $(call rwildcard, $(SRC_DIR), *.py)
 ZIP_TARGET = $(BUILD_DIR)/$(APPLICATION_NAME).zip
 
 
@@ -15,7 +15,7 @@ clean:
 
 
 $(ZIP_TARGET): $(SOURCES) | $(BUILD_DIR)
-	cd $(SRC_DIR) && exec $(ZIP) -FS $(ZIP_OPTIONS) $(abspath $@) $(patsubst $(SRC_DIR)/%,%,$^)
+	cd $(SRC_DIR) && exec $(ZIP) -FS $(abspath $@) -- $(patsubst $(SRC_DIR)/%,%,$^)
 
 
 $(BUILD_DIR):
