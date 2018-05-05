@@ -14,7 +14,7 @@ __all__.discard('BadZipfile')
 
 _filesystem_encoding = sys.getfilesystemencoding()
 
-_MAX_PATH = 64 << 10
+#_MAX_PATH = 64 << 10
 
 
 def strerror(errno, *args):
@@ -22,6 +22,11 @@ def strerror(errno, *args):
 
 
 class ZipFile(_zipfile.ZipFile):
+
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self._max_path_value = None
+
 
 	def getinfo(self, name, resolve_symlinks=False, pwd=None, fail_missing=True):
 		if resolve_symlinks:
@@ -76,7 +81,7 @@ class ZipFile(_zipfile.ZipFile):
 				print(('Not a symlink', 'Does not exist')[c_info is None],
 					repr(c_full), sep=': ')
 			return c_info
-		if len(c_full) + c_info.file_size > _MAX_PATH:
+		if len(c_full) + c_info.file_size > self._max_path:
 			raise strerror(errno.ENAMETOOLONG, self.filename + ':' + c_full)
 
 		c_seen = resolved = c_full in seen_set
@@ -110,6 +115,21 @@ class ZipFile(_zipfile.ZipFile):
 				"There is no item named '{:s}' in the archive '{:s}'"
 					.format(path, self.filename))
 		return info
+
+
+	@property
+	def _max_path(self):
+		val = self._max_path_value
+		if val is None:
+			fileno = getattr(self.fp, 'fileno', None)
+			if fileno is not None:
+				fileno = fileno()
+				pathconf = os.fpathconf
+			else:
+				fileno = os.curdir
+				pathconf = os.pathconf
+			self._max_path_value = val = pathconf(fileno, 'PC_PATH_MAX')
+		return val
 
 
 _globals = globals()
