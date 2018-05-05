@@ -10,7 +10,7 @@ MSGFMT = msgfmt
 rwildcard = $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
 SOURCES = $(call rwildcard, $(SRC_DIR), *.py)
 ZIP_TARGET = $(BUILD_DIR)/$(APPLICATION_NAME).zip
-MESSAGES_MO = $(patsubst %.po,%.mo,$(call rwildcard, $(LOCALES_DIR), *.po))
+MESSAGES_MO = $(patsubst %.po,%.mo,$(shell find $(LOCALES_DIR) -mindepth 1 -name '*.po'))
 MESSAGES_POT = $(LOCALES_DIR)/$(LOCALES_DOMAIN).pot
 
 
@@ -21,7 +21,8 @@ clean:
 
 
 $(ZIP_TARGET): $(SOURCES) $(MESSAGES_MO) | $(BUILD_DIR)
-	cd $(SRC_DIR) && exec $(ZIP) -FS $(abspath $@) -- $(patsubst $(SRC_DIR)/%,%,$^)
+$(ZIP_TARGET): $(shell find $(LOCALES_DIR) -mindepth 1 -maxdepth 1 -type l)
+	cd $(SRC_DIR) && exec $(ZIP) -FS --symlinks $(abspath $@) -- $(patsubst $(SRC_DIR)/%,%,$^)
 
 
 messages_template: $(MESSAGES_POT)
