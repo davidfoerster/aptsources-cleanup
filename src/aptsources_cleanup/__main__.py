@@ -9,6 +9,7 @@ import sys
 import os.path
 import itertools
 import argparse
+import locale
 import aptsources.sourceslist
 from functools import partial as fpartial
 
@@ -165,4 +166,5 @@ def handle_empty_files(sourceslist):
 	return rv
 
 
+locale.setlocale(locale.LC_ALL, '')
 sys.exit(main())

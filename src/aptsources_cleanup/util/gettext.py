@@ -2,7 +2,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 from ._3to2 import *
 from . import terminal, strings
 from .operator import identity
-from .itertools import unique
+from .itertools import unique, foreach
 from .zipfile import ZipFile
 import gettext as _gettext
 import operator
@@ -13,6 +13,7 @@ import io
 import os
 import os.path
 import errno
+import locale
 
 
 __all__ = ('translation', 'translations', '_', '_U', 'ChoiceInfo', 'Choices')
@@ -24,20 +25,27 @@ def get_localedir():
 
 
 def get_languages(environ=None):
+	langs = []
+
+	loc = locale.getlocale(locale.LC_MESSAGES)[0]
+	if loc is not None:
+		langs.extend(_split_lang_from_environ(loc))
+
 	if environ is None:
 		environ = os.environ
-	return itertools.chain(*map(_split_lang_from_environ,
-		filter(None, map(environ.get,
-			('LC_ALL', 'LC_MESSAGES', 'LANG', 'LANGUAGE')))))
+	langs.extend(filter(None, environ.get('LANGUAGE', '').split(':')))
+
+	langs.append('C')
+	return langs
 
 
-def _split_lang_from_environ(s):
-	for full_lang in s.split(':'):
-		full_lang = full_lang.partition('.')[0]
+def _split_lang_from_environ(full_lang):
+	full_lang = full_lang.partition('.')[0]
+	if full_lang:
 		yield full_lang
-		base_lang, underscore, country = full_lang.partition('_')
-		if country:
-			yield base_lang
+	base_lang, underscore, country = full_lang.partition('_')
+	if base_lang and country:
+		yield base_lang
 
 
 def translation(domain, localedir=None, languages=None, _class=None,
