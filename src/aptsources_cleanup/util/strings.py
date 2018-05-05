@@ -1,3 +1,6 @@
+from __future__ import print_function, division, absolute_import, unicode_literals
+
+
 def startswith_token(s, prefix, sep=None):
 	if sep is None:
 		return s == prefix

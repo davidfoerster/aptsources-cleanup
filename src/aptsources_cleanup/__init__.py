@@ -6,6 +6,7 @@ Source code at https://github.com/davidfoerster/apt-remove-duplicate-source-entr
 """
 
 from __future__ import print_function, division, absolute_import, unicode_literals
+from . import util
 from .util._3to2 import *
 from .util.filesystem import samefile
 from .util.import_check import import_check
