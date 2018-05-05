@@ -42,15 +42,21 @@ def import_check(py_module, apt_pkg_suffix, import_error=None, debug_fail=0):
 			apt_pkg)
 	]
 
-	if not samefile(python_exe, sys.executable) or debug_fail:
+	questional_interpreter = (
+		not samefile(python_exe, sys.executable) or debug_fail)
+	if questional_interpreter:
 		paragraphs.append(_('Warning') + ': ' +
 			_("The current Python interpreter is '{:s}'.  Please use the default '{:s}' if you encounter issues with the import of the '{:s}' module.")
 				.format(sys.executable, python_exe, py_module))
 
 	if not pkg.check_integrity(python_pkg, paragraphs, debug_fail):
-		paragraphs[-1] += ('  ' +
+		msg = (
 			_("Please make sure that the '{:s}' package wasn't corrupted and that '{:s}' refers to the Python interpreter from the same package.")
-				.format(python_pkg, python_exe))
+					.format(python_pkg, python_exe))
+		if questional_interpreter:
+			paragraphs[-1] += '  ' + msg
+		else:
+			paragraphs.append(_('Warning') + ': ' + msg)
 
 	try:
 		termwrap.get(sys.stderr, ignore_errors=False)
