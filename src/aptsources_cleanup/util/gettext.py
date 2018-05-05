@@ -3,6 +3,7 @@ from ._3to2 import *
 from . import terminal, strings
 from .operator import identity
 from .itertools import unique
+from .zipfile import ZipFile
 import gettext as _gettext
 import operator
 import itertools
@@ -11,7 +12,7 @@ import collections.abc
 import io
 import os
 import os.path
-import zipimport
+import errno
 
 
 __all__ = ('translation', 'translations', '_', '_U', 'ChoiceInfo', 'Choices')
@@ -42,32 +43,38 @@ def _split_lang_from_environ(s):
 def translation(domain, localedir=None, languages=None, _class=None,
 	fallback=False, codeset=None
 ):
-	if not (localedir is not None and
-		isinstance(__loader__, zipimport.zipimporter) and
-		strings.startswith_token(localedir, __loader__.archive, os.sep)
+	try:
+		archive = __loader__.archive
+	except AttributeError:
+		archive = None
+
+	if (localedir is None or archive is None or
+		not strings.startswith_token(localedir, archive, os.sep)
 	):
 		return _gettext.translation(
 			domain, localedir, languages, _class, fallback, codeset)
 
 	if languages is None:
 		languages = get_languages()
-
-	localedir = os.path.relpath(localedir, __loader__.archive)
-	localepath_suffix = os.path.join('LC_MESSAGES', domain + '.mo')
-	for lang in unique(filter(None, languages)):
-		lang_path = os.path.join(localedir, lang, localepath_suffix)
-		print('Trying', lang, lang_path, '...')
-		try:
-			mo_data = __loader__.get_data(lang_path)
-		except OSError:
-			pass
-		else:
-			print('Found', lang, lang_path)
-			return (_class or _gettext.GNUTranslations)(io.BytesIO(mo_data))
+	languages = unique(filter(None, languages))
+	if languages:
+		localedir = localedir[len(archive) + 1:].strip(os.sep)
+		locale_suffix = os.path.join('LC_MESSAGES', domain + os.extsep + 'mo')
+		with ZipFile(archive) as archive:
+			#archive.debug = 3
+			for lang in languages:
+				lang_path = os.path.join(localedir, lang, locale_suffix)
+				#print('Trying', lang_path, '...')
+				translation_file = archive.open(lang_path,
+					resolve_symlinks=True, fail_missing=False)
+				if translation_file is not None:
+					with translation_file:
+						#print("Found language '{:s}' at '{:s}'.".format(lang, lang_path))
+						return (_class or _gettext.GNUTranslations)(translation_file)
 
 	if not fallback:
 		raise OSError(
-			"No translation in '{:s}/{:s}' for: {:s}"
+			"No translation in '{:s}:{:s}' for: {:s}"
 				.format(__loader__.archive, localedir, ', '.join(languages)))
 
 	return _gettext.NullTranslations()

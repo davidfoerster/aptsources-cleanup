@@ -1,4 +1,6 @@
-__all__ = ('identity', 'methodcaller')
+from __future__ import print_function, division, absolute_import, unicode_literals
+
+__all__ = ('identity', 'methodcaller', 'starcall')
 
 
 def identity(x):
@@ -17,3 +19,7 @@ class methodcaller:
 
 	def __call__(self, obj):
 		return self.func(obj, *self.args)
+
+
+def starcall(func, args):
+	return func(*args)
