@@ -1,11 +1,9 @@
 from __future__ import print_function, division, absolute_import, unicode_literals
 from ._3to2 import *
-import os
 import sys
 import errno
 import weakref
 import textwrap
-import collections
 
 __all__ = ('try_input', 'termwrap')
 
@@ -14,7 +12,7 @@ try:
 	from os import terminal_size, get_terminal_size
 
 except ImportError:
-	import struct, fcntl, termios
+	import struct, fcntl, termios, collections
 
 	terminal_size = collections.namedtuple(
 		'terminal_size', ('columns', 'lines'))
@@ -147,6 +145,6 @@ class termwrap(textwrap.TextWrapper):
 
 	@staticmethod
 	def _refresh_width_impl(file):
-		if not os.isatty(file.fileno()):
+		if not file.isatty():
 			return 0
 		return get_terminal_size(file.fileno()).columns
