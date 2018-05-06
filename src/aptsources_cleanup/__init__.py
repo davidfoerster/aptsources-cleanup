@@ -2,7 +2,11 @@
 deletes sources list files without valid enabled source entries in
 '/etc/sources.list' and '/etc/sources.list.d/*.list'.
 
-Source code at https://github.com/davidfoerster/apt-remove-duplicate-source-entries
+
+Author: David P. W. Foerster
+
+Source code and bug tracker location:
+  https://github.com/davidfoerster/aptsources-cleanup
 """
 
 from __future__ import print_function, division, absolute_import, unicode_literals
