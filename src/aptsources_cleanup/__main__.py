@@ -4,13 +4,14 @@ from .util.io import *
 from .util.terminal import *
 from .util.itertools import *
 from .util.filesystem import *
-from .util.gettext import *
+from .util.gettext import _, _U, translations, Choices, DictTranslations
 import sys
 import os.path
 import itertools
 import functools
 import argparse
 import locale
+import textwrap
 import aptsources.sourceslist
 
 # Import from parent package without naming it explicitly
@@ -49,14 +50,70 @@ def main(*args):
 	return rv
 
 
+class TerminalHelpFormatter(argparse.HelpFormatter):
+
+	def __init__(self, prog, indent_increment=2, max_help_position=18, width=-2):
+		if width is not None and width <= 0:
+			termwidth = termwrap.stdout().width
+			width = max(termwidth + width, 32) if termwidth > 0 else None
+
+		if width is not None:
+			max_help_position = min(max_help_position, width // 3)
+
+		super().__init__(prog, indent_increment, max_help_position, width)
+
+
+	def _fill_text(self, text, width, indent):
+		return '\n'.join(self._split_lines_gen(
+			text, width, initial_indent=indent, subsequent_indent=indent))
+
+	def _split_lines_gen(self, text, width, **kwargs):
+		for i, paragraph in enumerate(text.split('\n\n')):
+			if i: yield ''
+			yield from textwrap.wrap(paragraph, width, **kwargs)
+
+
+	def format_help(self):
+		lines = [super().format_help(), '']
+		for item in self._get_epilog_data():
+			lines += self._wrap_definition(*item)
+			lines.append('')
+		lines.append('')
+		return '\n'.join(lines)
+
+
+	def _wrap_definition(self, _def, desc):
+		lsep = ':'
+		rsep = ' '
+		lines = textwrap.wrap(_def + lsep, self._width)
+		if len(lines[-1]) + len(rsep) + len(desc) <= self._width:
+			lines[-1] += rsep + desc
+		else:
+			indent = ' ' * self._indent_increment
+			lines += textwrap.wrap(desc, self._width,
+				break_on_hyphens=False, break_long_words=False,
+				initial_indent=indent, subsequent_indent=indent)
+		return lines
+
+
+	@staticmethod
+	def _get_epilog_data():
+		return (
+			(_('Author'), 'David P. W. Foerster'),
+			(_('Source code and bug tracker location'),
+				'https://github.com/davidfoerster/aptsources-cleanup'),
+		)
+
+
+translations.add_fallback(DictTranslations(
+	ID_DESCRIPTION=_parent_package.__doc__.rpartition('\n\n\n')[0].strip()))
+
+
 def parse_args(args):
 	debug = None if args and '--help-debug' in args else argparse.SUPPRESS
 
-	ap = argparse.ArgumentParser(**dict(zip(
-		('description', 'epilog'),
-		(_(s.replace('\n', ' '))
-			for s in _parent_package.__doc__.rsplit('\n\n', 1)))))
-
+	ap = argparse.ArgumentParser(
+		description=_('ID_DESCRIPTION'), formatter_class=TerminalHelpFormatter)
 	ap.add_argument('-y', '--yes',
 		dest='apply_changes', action='store_const', const=True,
 		help=_('Apply all changes without question.'))

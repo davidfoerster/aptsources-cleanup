@@ -97,6 +97,39 @@ def _U(s):
 	return s
 
 
+class DictTranslations(_gettext.NullTranslations):
+
+	def __init__(self, _data=None, **kwargs):
+		super().__init__()
+
+		if not _data:
+			_data = kwargs
+		elif kwargs:
+			_data = _data.copy()
+			_data.update(kwargs)
+		self.data = _data
+
+
+	def gettext(self, msg):
+		translation = self.data.get(msg)
+		if translation is not None:
+			return translation
+		return super().gettext(msg)
+
+
+	def ngettext(self, singular, plural, n):
+		translation = self.data.get(singular if n == 1 else plural)
+		if translation is not None:
+			return translation
+		return super().ngettext(singular, plural, n)
+
+
+	def lgettext(self, msg, *args):
+		raise NotImplementedError
+
+	lngettext = lgettext
+
+
 ChoiceInfo = collections.namedtuple('ChoiceInfo',
 	('orig', 'translation', 'short', 'styled'))
 
