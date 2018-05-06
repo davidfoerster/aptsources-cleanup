@@ -8,16 +8,15 @@ from .util.gettext import *
 import sys
 import os.path
 import itertools
+import functools
 import argparse
 import locale
 import aptsources.sourceslist
-from functools import partial as fpartial
 
 # Import from parent package without naming it explicitly
-import importlib
-_parent_package = importlib.import_module(__package__)
+_parent_package = sys.modules[__package__]
 globals().update(zip(_parent_package.__all__,
-	map(fpartial(getattr, _parent_package), _parent_package.__all__)))
+	map(functools.partial(getattr, _parent_package), _parent_package.__all__)))
 
 
 def main(*args):
