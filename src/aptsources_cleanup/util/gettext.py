@@ -64,7 +64,9 @@ def translation(domain, localedir=None, languages=None, _class=None,
 
 	if languages is None:
 		languages = get_languages()
-	languages = unique(filter(None, languages))
+	languages = tuple(unique(filter(None, languages)))
+
+	translations = None
 	if languages:
 		localedir = localedir[len(archive) + 1:].strip(os.sep)
 		locale_suffix = os.path.join('LC_MESSAGES', domain + os.extsep + 'mo')
@@ -78,14 +80,20 @@ def translation(domain, localedir=None, languages=None, _class=None,
 				if translation_file is not None:
 					with translation_file:
 						#print("Found language '{:s}' at '{:s}'.".format(lang, lang_path))
-						return (_class or _gettext.GNUTranslations)(translation_file)
+						translations = (
+							(_class or _gettext.GNUTranslations)(translation_file))
+					break
 
-	if not fallback:
-		raise OSError(
-			"No translation in '{:s}:{:s}' for: {:s}"
-				.format(__loader__.archive, localedir, ', '.join(languages)))
+	if translations is None:
+		if not fallback:
+			raise OSError(
+				"No translation in '{:s}:{:s}' for: {:s}"
+					.format(archive, localedir, ', '.join(languages)))
+		translations = _gettext.NullTranslations()
+	if codeset is not None:
+		translations.set_output_charset(codeset)
 
-	return _gettext.NullTranslations()
+	return translations
 
 
 translations = translation('messages', get_localedir(), fallback=True)
