@@ -59,22 +59,22 @@ def parse_args(args):
 
 	ap.add_argument('-y', '--yes',
 		dest='apply_changes', action='store_const', const=True,
-		help='Apply all changes without question.')
+		help=_('Apply all changes without question.'))
 	ap.add_argument('-n', '--no-act', '--dry-run',
 		dest='apply_changes', action='store_const', const=False,
-		help='Never apply changes; only print what would be done.')
+		help=_('Never apply changes; only print what would be done.'))
 
-	dg = ap.add_argument_group('Debugging Options',
-		'For wizards only! Use these if you know and want to test the application source code.')
+	dg = ap.add_argument_group(_('Debugging Options'),
+		_('For wizards only! Use these if you know and want to test the application source code.'))
 	dg.add_argument('--help-debug', action='help',
-		help='Show help for debugging options')
+		help=_('Show help for debugging options'))
 	dg.add_argument('--debug-import-fail', metavar='LEVEL',
 		nargs='?', type=int, const=1, default=0,
-		help=debug or "Force an ImportError for the 'aptsources.sourceslist' module and fail on all subsequent diagnoses.")
+		help=debug or _("Force an ImportError for the 'aptsources.sourceslist' module and fail on all subsequent diagnoses."))
 	debug_sources_dir = './test/sources.list.d'
 	dg.add_argument('--debug-sources-dir', metavar='DIR',
 		nargs='?', const=debug_sources_dir,
-		help=debug or "Load sources list files from this directory instead of the default root-owned '/etc/apt/sources.list*'. If omitted DIR defaults to '{:s}'."
+		help=debug or _("Load sources list files from this directory instead of the default root-owned '/etc/apt/sources.list*'. If omitted DIR defaults to '{:s}'.")
 				.format(debug_sources_dir))
 
 	return ap.parse_args(args)
