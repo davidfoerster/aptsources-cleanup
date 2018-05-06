@@ -25,7 +25,7 @@ def main(*args):
 	See the output of the '--help' option for usage.
 	"""
 
-	args = parse_args(args or None, None)
+	args = parse_args(args or sys.argv[1:])
 	if args.debug_import_fail:
 		from .util.import_check import import_check
 		import_check('aptsources.sourceslist', 'apt', None, args.debug_import_fail)
@@ -49,16 +49,13 @@ def main(*args):
 	return rv
 
 
-def parse_args(args, debug=False):
+def parse_args(args):
+	debug = None if args and '--help-debug' in args else argparse.SUPPRESS
+
 	ap = argparse.ArgumentParser(**dict(zip(
 		('description', 'epilog'),
 		(_(s.replace('\n', ' '))
 			for s in _parent_package.__doc__.rsplit('\n\n', 1)))))
-
-	if debug is None:
-		if args is None: args = sys.argv[1:]
-		debug = '--help-debug' in args
-	debug = None if debug else argparse.SUPPRESS
 
 	ap.add_argument('-y', '--yes',
 		dest='apply_changes', action='store_const', const=True,
