@@ -166,5 +166,6 @@ def handle_empty_files(sourceslist):
 	return rv
 
 
-locale.setlocale(locale.LC_ALL, '')
-sys.exit(main())
+if __name__ == '__main__':
+	locale.setlocale(locale.LC_ALL, '')
+	sys.exit(main())
