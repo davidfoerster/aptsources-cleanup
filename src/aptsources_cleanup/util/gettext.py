@@ -24,28 +24,19 @@ def get_localedir():
 		os.path.dirname(__file__), os.pardir, os.pardir, 'locales'))
 
 
-def get_languages(environ=None):
-	langs = []
+def get_languages():
+	langs = os.environ.get('LANGUAGE', '').split(':')
 
 	loc = locale.getlocale(locale.LC_MESSAGES)[0]
-	if loc is not None:
-		langs.extend(_split_lang_from_environ(loc))
+	if loc:
+		loc = loc.partition('.')[0]
+		if loc:
+			langs.append(loc)
 
-	if environ is None:
-		environ = os.environ
-	langs.extend(filter(None, environ.get('LANGUAGE', '').split(':')))
+	if not any(langs):
+		langs = ('C',)
 
-	langs.append('C')
 	return langs
-
-
-def _split_lang_from_environ(full_lang):
-	full_lang = full_lang.partition('.')[0]
-	if full_lang:
-		yield full_lang
-	base_lang, underscore, country = full_lang.partition('_')
-	if base_lang and country:
-		yield base_lang
 
 
 def translation(domain, localedir=None, languages=None, _class=None,
