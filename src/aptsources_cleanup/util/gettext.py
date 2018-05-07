@@ -15,6 +15,7 @@ import os
 import os.path
 import errno
 import locale
+import unicodedata
 
 
 __all__ = (
@@ -155,6 +156,19 @@ def _highlighter_from_termcap(capname, default=None, flags_func=None):
 	return highlighter
 
 
+def normalize_casefold(text):
+	"""Normalize text data for caseless comparison
+
+	Use the "canonical caseless match" algorithm defined in the Unicode Standard,
+	version 10.0, section 3.13, requirement D146 (page 159).
+	"""
+	# Taken from https://stackoverflow.com/questions/319426/how-do-i-do-a-case-insensitive-string-comparison#comment60758553_29247821
+
+	return unicodedata.normalize('NFKD',
+		str.casefold(unicodedata.normalize('NFKD',
+			str.casefold(unicodedata.normalize('NFD', text)))))
+
+
 class Choices(collections.ChainMap):
 
 	Highlighters = collections.namedtuple('Highlighters',
@@ -204,9 +218,9 @@ class Choices(collections.ChainMap):
 
 			c = ChoiceInfo(orig, translation, short, styled)
 
-			if self.orig.setdefault(orig.casefold(), c) is not c:
+			if self.orig.setdefault(normalize_casefold(orig), c) is not c:
 				raise ValueError("Duplicate choice '{:s}'".format(orig))
-			if self.translations.setdefault(translation.casefold(), c) is not c:
+			if self.translations.setdefault(normalize_casefold(translation), c) is not c:
 				raise ValueError(
 					"Duplicate translation '{:s}' for choice '{:s}'"
 						.format(translation, orig))
@@ -252,7 +266,7 @@ class Choices(collections.ChainMap):
 				"No unique shorthand available for choice '{:s}'".format(s))
 
 		styled = s[:ishort] + shorthand_highlighter(short) + s[ishort + 1:]
-		return short.casefold(), styled
+		return normalize_casefold(short), styled
 
 
 	def __str__(self):
@@ -310,5 +324,5 @@ class Choices(collections.ChainMap):
 		self.print_question(question, sep)
 		answer = terminal.try_input(None, *args, **kwargs)
 		if isinstance(answer, str):
-			answer = self.get(answer.casefold()) if answer else self.default
+			answer = self.get(normalize_casefold(answer)) if answer else self.default
 		return answer
