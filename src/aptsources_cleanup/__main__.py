@@ -2,6 +2,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 from .util._3to2 import *
 from .util.io import *
 from .util.terminal import *
+from .util.operator import methodcaller
 from .util.itertools import *
 from .util.filesystem import *
 from .util.gettext import *
@@ -98,6 +99,13 @@ class TerminalHelpFormatter(argparse.HelpFormatter):
 				break_on_hyphens=False, break_long_words=False,
 				initial_indent=indent, subsequent_indent=indent)
 		return lines
+
+
+	def _format_actions_usage(self, actions, groups):
+		return super()._format_actions_usage(
+			tuple(filterfalse(
+				methodcaller(isinstance, argparse._HelpAction), actions)),
+			groups)
 
 
 	@staticmethod
