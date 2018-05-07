@@ -1,0 +1,5 @@
+*		text=auto whitespace=trailing-space,space-before-tab
+
+*.py	text diff=python
+*.po	text
+Makefile	text
