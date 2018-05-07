@@ -1,5 +1,5 @@
 *		text=auto whitespace=trailing-space,space-before-tab
 
 *.py	text diff=python
-*.po	text
+*.po	text diff=po
 Makefile	text
