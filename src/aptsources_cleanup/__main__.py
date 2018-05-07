@@ -67,15 +67,15 @@ def parse_args(args):
 	dg = ap.add_argument_group(_('Debugging Options'),
 		_('For wizards only! Use these if you know and want to test the application source code.'))
 	dg.add_argument('--help-debug', action='help',
-		help=_('Show help for debugging options'))
+		help=_('Show help for debugging options.'))
 	dg.add_argument('--debug-import-fail', metavar='LEVEL',
 		nargs='?', type=int, const=1, default=0,
-		help=debug or _("Force an ImportError for the 'aptsources.sourceslist' module and fail on all subsequent diagnoses."))
+		help=debug or _("Force an ImportError for the '{:s}' module and fail on all subsequent diagnoses.").format('aptsources.sourceslist'))
 	debug_sources_dir = './test/sources.list.d'
 	dg.add_argument('--debug-sources-dir', metavar='DIR',
 		nargs='?', const=debug_sources_dir,
-		help=debug or _("Load sources list files from this directory instead of the default root-owned '/etc/apt/sources.list*'. If omitted DIR defaults to '{:s}'.")
-				.format(debug_sources_dir))
+		help=debug or _("Load sources list files from this directory instead of the default root-owned '{:s}'. If omitted DIR defaults to '{:s}'.")
+				.format('/etc/apt/sources.list*', debug_sources_dir))
 
 	return ap.parse_args(args)
 
