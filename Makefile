@@ -11,11 +11,14 @@ MSGFMT = msgfmt
 MSGMERGE = msgmerge -F
 
 rwildcard = $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
+dirname = $(patsubst %/,%,$(dir $(1)))
+
 SOURCES = $(call rwildcard, $(SRC_DIR), *.py)
 ZIP_TARGET = $(BUILD_DIR)/$(APPLICATION_NAME).zip
 MESSAGES_PO = $(shell find $(LOCALES_DIR) -mindepth 1 -name '*.po')
 MESSAGES_MO = $(patsubst %.po,%.mo,$(MESSAGES_PO))
 MESSAGES_POT = $(LOCALES_DIR)/$(LOCALES_DOMAIN).pot
+MESSAGES_SYMLINKS = $(call dirname,$(call dirname,$(filter-out $(MESSAGES_MO), $(wildcard $(LOCALES_DIR)/*/LC_MESSAGES/*.mo))))
 
 
 zip: $(ZIP_TARGET)
@@ -24,8 +27,7 @@ clean:
 	rm -f -- $(ZIP_TARGET) $(MESSAGES_POT) $(wildcard $(LOCALES_DIR)/*/LC_MESSAGES/*.mo)
 
 
-$(ZIP_TARGET): $(SOURCES) $(MESSAGES_MO) | $(BUILD_DIR)
-$(ZIP_TARGET): $(shell find $(LOCALES_DIR) -mindepth 1 -maxdepth 1 -type l)
+$(ZIP_TARGET): $(SOURCES) $(MESSAGES_MO) $(MESSAGES_SYMLINKS) | $(BUILD_DIR)
 	cd $(SRC_DIR) && exec $(ZIP) -FS --symlinks $(abspath $@) -- $(patsubst $(SRC_DIR)/%,%,$^)
 
 
