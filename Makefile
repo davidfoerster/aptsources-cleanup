@@ -21,7 +21,7 @@ MESSAGES_POT = $(LOCALES_DIR)/$(LOCALES_DOMAIN).pot
 zip: $(ZIP_TARGET)
 
 clean:
-	rm -f -- $(ZIP_TARGET) $(MESSAGES_POT) $(call rwildcard, $(LOCALES_DIR), *.mo)
+	rm -f -- $(ZIP_TARGET) $(MESSAGES_POT) $(wildcard $(LOCALES_DIR)/*/LC_MESSAGES/*.mo)
 
 
 $(ZIP_TARGET): $(SOURCES) $(MESSAGES_MO) | $(BUILD_DIR)
