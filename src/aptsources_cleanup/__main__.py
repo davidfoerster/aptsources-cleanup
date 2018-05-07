@@ -116,20 +116,21 @@ translations.add_fallback(DictTranslations(
 def parse_args(args):
 	debug = None if args and '--help-debug' in args else argparse.SUPPRESS
 
-	ap = argparse.ArgumentParser(
-		description=_('ID_DESCRIPTION'), formatter_class=TerminalHelpFormatter)
+	ap = argparse.ArgumentParser(description=_('ID_DESCRIPTION'),
+		formatter_class=TerminalHelpFormatter, add_help=False)
 	ap.add_argument('-y', '--yes',
 		dest='apply_changes', action='store_const', const=True,
 		help=_('Apply all changes without question.'))
 	ap.add_argument('-n', '--no-act', '--dry-run',
 		dest='apply_changes', action='store_const', const=False,
 		help=_('Never apply changes; only print what would be done.'))
+	ap.add_argument('-h', '--help',
+		action='help', default=argparse.SUPPRESS,
+		help=_('show this help message and exit'))
 
 	dg = ap.add_argument_group(_('Debugging Options'),
 		_('For wizards only! Use these if you know and want to test the '
 				'application source code.'))
-	dg.add_argument('--help-debug', action='help',
-		help=_('Show help for debugging options.'))
 	dg.add_argument('--debug-import-fail', '--d-i-f', metavar='LEVEL',
 		nargs='?', type=int, const=1, default=0,
 		help=debug or
@@ -143,6 +144,9 @@ def parse_args(args):
 			_("Load sources list files from this directory instead of the default "
 					"root-owned '{default:s}'. If omitted DIR defaults to '{const:s}'.")
 				.format(default='/etc/apt/sources.list*', const=debug_sources_dir))
+	dg.add_argument('--help-debug',
+		action='help', default=argparse.SUPPRESS,
+		help=_('Show help for debugging options.'))
 
 	return ap.parse_args(args)
 
