@@ -117,6 +117,14 @@ class TerminalHelpFormatter(argparse.HelpFormatter):
 		)
 
 
+if __debug__:
+	for name in ('_fill_text', '_format_actions_usage'):
+		assert callable(getattr(TerminalHelpFormatter.__base__, name, None)), (
+			'Looks like there was an incompatible change in the private API of '
+			'{0.__module__:s}.{0.__qualname__:s}.{1:s}().'
+				.format(TerminalHelpFormatter.__base__, name))
+
+
 translations.add_fallback(DictTranslations(
 	ID_DESCRIPTION=_parent_package.__doc__.rpartition('\n\n\n')[0].strip()))
 
