@@ -37,8 +37,8 @@ def import_check(py_module, apt_pkg_suffix, import_error=None, debug_fail=0):
 	paragraphs = [
 		'{:s}: {!s}.  {:s}  {:s}'.format(
 			type(import_error).__name__, import_error,
-			_("Do you have the '{:s}' package installed?  You can do so with:")
-				.format(apt_pkg),
+			_("Do you have the '{package:s}' package installed?  You can do so with:")
+				.format(package=apt_pkg),
 			apt_pkg)
 	]
 
@@ -46,13 +46,18 @@ def import_check(py_module, apt_pkg_suffix, import_error=None, debug_fail=0):
 		not samefile(python_exe, sys.executable) or debug_fail)
 	if questional_interpreter:
 		paragraphs.append(_('Warning') + ': ' +
-			_("The current Python interpreter is '{:s}'.  Please use the default '{:s}' if you encounter issues with the import of the '{:s}' module.")
-				.format(sys.executable, python_exe, py_module))
+			_("The current Python interpreter is '{py_exe:s}'.  Please use the "
+					"default '{py_exe_default:s}' if you encounter issues with the "
+					"import of the '{module:s}' module.")
+				.format(py_exe=sys.executable, py_exe_default=python_exe,
+					module=py_module))
 
 	if not pkg.check_integrity(python_pkg, paragraphs, debug_fail):
 		msg = (
-			_("Please make sure that the '{:s}' package wasn't corrupted and that '{:s}' refers to the Python interpreter from the same package.")
-					.format(python_pkg, python_exe))
+			_("Please make sure that the '{package:s}' package wasn't corrupted and "
+					"that '{py_exe:s}' refers to the Python interpreter from the same "
+					"package.")
+				.format(package=python_pkg, py_exe=python_exe))
 		if questional_interpreter:
 			paragraphs[-1] += '  ' + msg
 		else:

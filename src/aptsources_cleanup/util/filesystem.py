@@ -36,6 +36,6 @@ def remove_sources_files(filename):
 				print(_('Error'), ex, sep=': ', file=sys.stderr)
 		else:
 			removed_count += not may_fail_missing
-			print(_("'{:s}' removed.").format(f))
+			print(_("'{path:s}' removed.").format(path=f))
 
 	return rv, removed_count

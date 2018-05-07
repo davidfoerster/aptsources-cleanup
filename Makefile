@@ -6,6 +6,7 @@ LOCALES_DOMAIN = messages
 ZIP = zip -9
 GETTEXT = xgettext -F -L Python -k_ -k_U -k_N:1,2 \
 	--package-name=$(APPLICATION_NAME) --package-version=0.1 \
+	--copyright-holder='David P. W. Forster' \
 	--msgid-bugs-address=https://github.com/davidfoerster/aptsources-cleanup/issues
 MSGFMT = msgfmt
 MSGMERGE = msgmerge -F

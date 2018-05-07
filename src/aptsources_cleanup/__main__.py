@@ -126,17 +126,23 @@ def parse_args(args):
 		help=_('Never apply changes; only print what would be done.'))
 
 	dg = ap.add_argument_group(_('Debugging Options'),
-		_('For wizards only! Use these if you know and want to test the application source code.'))
+		_('For wizards only! Use these if you know and want to test the '
+				'application source code.'))
 	dg.add_argument('--help-debug', action='help',
 		help=_('Show help for debugging options.'))
 	dg.add_argument('--debug-import-fail', '--d-i-f', metavar='LEVEL',
 		nargs='?', type=int, const=1, default=0,
-		help=debug or _("Force an ImportError for the '{:s}' module and fail on all subsequent diagnoses.").format('aptsources.sourceslist'))
+		help=debug or
+			_("Force an ImportError for the '{module:s}' module and fail on all "
+					"subsequent diagnoses.")
+				.format(module='aptsources.sourceslist'))
 	debug_sources_dir = './test/sources.list.d'
 	dg.add_argument('--debug-sources-dir', '--d-s-d', metavar='DIR',
 		nargs='?', const=debug_sources_dir,
-		help=debug or _("Load sources list files from this directory instead of the default root-owned '{:s}'. If omitted DIR defaults to '{:s}'.")
-				.format('/etc/apt/sources.list*', debug_sources_dir))
+		help=debug or
+			_("Load sources list files from this directory instead of the default "
+					"root-owned '{default:s}'. If omitted DIR defaults to '{const:s}'.")
+				.format(default='/etc/apt/sources.list*', const=debug_sources_dir))
 
 	return ap.parse_args(args)
 
@@ -151,19 +157,20 @@ def handle_duplicates(sourceslist, apply_changes=None):
 			for dupe in dupe_set:
 				print(_(
 '''Overlapping source entries:
-  1. file {:s}:
-     {:s}
-  2. file {:s}:
-     {:s}
+  1. file {orig_file:s}:
+     {orig_line:s}
+  2. file {dupe_file:s}:
+     {dupe_line:s}
 I disabled the latter entry.''')
-						.format(orig.file, orig.line.strip(),
-							dupe.file, dupe.line.strip()),
+						.format(orig_file=orig.file, orig_line=orig.line.strip(),
+							dupe_file=dupe.file, dupe_line=dupe.line.strip()),
 					end='\n\n')
 				dupe.disabled = True
 
 		print(
-			_N('{:d} source entry was disabled', '{:d} source entries were disabled',
-				len(duplicates)).format(len(duplicates)) + ':',
+			_N('{nduplicates:d} source entry was disabled',
+				'{nduplicates:d} source entries were disabled',
+				len(duplicates)).format(nduplicates=len(duplicates)) + ':',
 			*itertools.chain(*duplicates), sep='\n  ')
 
 		if apply_changes is None:
@@ -201,7 +208,7 @@ def handle_empty_files(sourceslist):
 		while answer is None:
 			print()
 			answer = choices.ask(
-				_("'{:s}' contains no valid and enabled repository lines.  Do you want to remove it?").format(file),
+				_("'{file:s}' contains no valid and enabled repository lines.  Do you want to remove it?").format(file=file),
 				on_eof=on_eof)
 			if answer is not None and answer.orig == 'display':
 				display_file(file)
@@ -218,8 +225,8 @@ def handle_empty_files(sourceslist):
 
 	if total_count:
 		print('\n',
-			_('{:d} of {:d} empty sourcelist files removed.')
-				.format(removed_count, total_count),
+			_('{nremoved:d} of {ntotal:d} empty sourcelist files removed.')
+				.format(nremoved=removed_count, ntotal=total_count),
 			sep='')
 
 	return rv

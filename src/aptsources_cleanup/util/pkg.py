@@ -33,7 +33,7 @@ def check_integrity(pkg, paragraphs, debug_fail=0):
 	if md5sum_proc.returncode or debug_fail:
 		paragraphs.append("{:s}: {:s}: {:s}: '{:s} < {:s}'".format(
 			_('Warning'), _('Package integrity check failed'),
-			_('exit status {:d}').format(md5sum_proc.returncode),
+			_('exit status {status:d}').format(status=md5sum_proc.returncode),
 			' '.join(md5sum_cmd), md5sums_file))
 
 	return not (md5sum_proc.returncode or debug_fail)
