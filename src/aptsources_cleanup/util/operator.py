@@ -1,10 +1,14 @@
 from __future__ import print_function, division, absolute_import, unicode_literals
 
-__all__ = ('identity', 'methodcaller', 'starcall')
+__all__ = ('identity', 'rapply', 'methodcaller', 'starcall')
 
 
 def identity(x):
 	return x
+
+
+def rapply(arg, func):
+	return func(arg)
 
 
 class methodcaller:

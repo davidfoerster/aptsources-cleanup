@@ -1,6 +1,7 @@
 from __future__ import print_function, division, absolute_import, unicode_literals
 from ._3to2 import *
 from . import terminal, strings
+from . import terminal, functools
 from .operator import identity
 from .itertools import unique, foreach
 from .zipfile import ZipFile
@@ -170,7 +171,7 @@ class Choices(collections.ChainMap):
 				short, styled = self._get_short_and_styled(translation,
 					shorthand_highlighter
 						if not is_default or default_highlighter_all
-						else lambda s: default_highlighter(shorthand_highlighter(s)),
+						else functools.comp(shorthand_highlighter, default_highlighter),
 					self.short)
 			else:
 				short = None
