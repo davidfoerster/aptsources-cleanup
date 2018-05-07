@@ -19,7 +19,7 @@ deletes sources list files without valid enabled source entries in
 
 ## Usage
 
-    sudo ./aptsources-cleanup.py
+    sudo ./aptsources-cleanup
 
 For a (slightly more) detailed description and individual command-line options
-see the output of `./aptsources-cleanup.py --help`.
+see the output of `./aptsources-cleanup --help`.
