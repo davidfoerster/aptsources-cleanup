@@ -1,7 +1,7 @@
 from __future__ import print_function, division, absolute_import, unicode_literals
 from ._3to2 import *
-from . import terminal, strings
 from . import terminal, functools
+from .strings import startswith_token
 from .operator import identity
 from .itertools import unique, foreach
 from .zipfile import ZipFile
@@ -53,7 +53,7 @@ def translation(domain, localedir=None, languages=None, _class=None,
 		archive = None
 
 	if (localedir is None or archive is None or
-		not strings.startswith_token(localedir, archive, os.sep)
+		not startswith_token(localedir, archive, os.sep)
 	):
 		return _gettext.translation(
 			domain, localedir, languages, _class, fallback, codeset)
