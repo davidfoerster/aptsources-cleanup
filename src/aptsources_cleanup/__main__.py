@@ -4,7 +4,7 @@ from .util.io import *
 from .util.terminal import *
 from .util.itertools import *
 from .util.filesystem import *
-from .util.gettext import _, _U, translations, Choices, DictTranslations
+from .util.gettext import *
 import sys
 import os.path
 import itertools
@@ -157,7 +157,9 @@ I disabled the latter entry.''')
 					end='\n\n')
 				dupe.disabled = True
 
-		print(_('{:d} source entries were disabled:').format(len(duplicates)),
+		print(
+			_N('{:d} source entry was disabled', '{:d} source entries were disabled',
+				len(duplicates)).format(len(duplicates)) + ':',
 			*itertools.chain(*duplicates), sep='\n  ')
 
 		if apply_changes is None:
