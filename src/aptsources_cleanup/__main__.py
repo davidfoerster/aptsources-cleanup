@@ -20,6 +20,10 @@ globals().update(zip(_parent_package.__all__,
 	map(functools.partial(getattr, _parent_package), _parent_package.__all__)))
 
 
+argparse._ = _
+argparse.ngettext = _N
+
+
 def main(*args):
 	"""Main program entry point
 
