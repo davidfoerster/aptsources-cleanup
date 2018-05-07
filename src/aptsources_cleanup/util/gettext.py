@@ -139,12 +139,31 @@ ChoiceInfo = collections.namedtuple('ChoiceInfo',
 	('orig', 'translation', 'short', 'styled'))
 
 
+def _highlighter_from_termcap(capname, default=None, flags_func=None):
+	prefix = terminal.TERMMODES[capname]
+	if prefix:
+		suffix = terminal.TERMMODES['normal'] or None
+		suffix_prefix = suffix + prefix
+		highlighter = lambda s: prefix + s.replace(suffix, suffix_prefix) + suffix
+	elif isinstance(default, str):
+		highlighter = default.format
+	else:
+		highlighter = default
+
+	if flags_func is not None:
+		highlighter = (highlighter, flags_func(prefix))
+	return highlighter
+
+
 class Choices(collections.ChainMap):
 
 	Highlighters = collections.namedtuple('Highlighters',
 		('shorthand', 'default'))
 
-	default_highlighters = Highlighters('[{:s}]'.format, (str.upper, False))
+	default_highlighters = Highlighters(
+		_highlighter_from_termcap('underline', '[{:s}]'),
+		_highlighter_from_termcap('bold', str.upper, bool)
+	)
 
 
 	def __init__(self, *choices, default=None, use_shorthands=bool, joiner='/',
