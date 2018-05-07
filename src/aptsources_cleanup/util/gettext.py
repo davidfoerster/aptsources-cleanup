@@ -6,6 +6,7 @@ from .operator import identity
 from .itertools import unique, foreach
 from .zipfile import ZipFile
 import gettext as _gettext
+import string
 import operator
 import itertools
 import collections
@@ -226,6 +227,7 @@ class Choices(collections.ChainMap):
 
 		super().__init__(self.translations, self.short)
 
+		self.joiner = joiner
 		self.choices_string = joiner.join(
 			map(operator.attrgetter('styled'), self.orig.values()))
 
@@ -258,14 +260,56 @@ class Choices(collections.ChainMap):
 		return self.choices_string
 
 
-	def get_question(self, question, sep=None):
-		if sep is None: sep = '  '
+	def get_question(self, question, sep='  '):
 		return '{:s}{:s}({:s})'.format(question, sep, self.choices_string)
 
 
-	def ask(self, question, sep=None, *args, **kwargs):
-		answer = terminal.try_input(
-			self.get_question(question, sep), *args, **kwargs)
+	_whitespace_del = dict.fromkeys(string.whitespace)
+	del _whitespace_del[' ']
+
+
+	def print_question(self, question, sep='  ', debug=False):
+		stdout = terminal.termwrap.stdout()
+		write = stdout.file.write
+		indent = stdout.subsequent_indent
+		n = stdout.print(question, sep, True) % stdout.width
+		i_last = len(self.orig) - 1
+		if debug:
+			debug_data = []
+
+		# For each choice string see if it can fit on the current terminal line and
+		# skip to the next line if not. Take care to not count escape sequences or
+		# other unprintable characters.
+		for i, c in enumerate(self.orig.values()):
+			prefix = ('', '(')[not i]
+			suffix = ')' if i == i_last else self.joiner
+			printable = terminal.termmodes_noctrl_pattern.sub('', c.styled)
+			printable_len = len(prefix) + len(printable) + len(suffix)
+			must_break = 0 <= stdout.width - len(indent) - printable_len < n
+			if debug:
+				debug_data.append(
+					(i, n, printable_len, must_break, prefix + printable + suffix))
+			if must_break:
+				write('\n')
+				write(indent)
+				n = len(indent)
+			write(prefix)
+			write(c.styled.translate(self._whitespace_del))
+			write(suffix)
+			n = (n + printable_len) % stdout.width
+
+		if debug:
+			print('\nWidth: {:d}'.format(stdout.width),
+				*itertools.starmap(
+					'Choice{:3d}: col={:3d}, len={:3d}, {!s:5s}, {!r}'.format, debug),
+				sep='\n')
+
+		return n
+
+
+	def ask(self, question, sep='  ', *args, **kwargs):
+		self.print_question(question, sep)
+		answer = terminal.try_input(None, *args, **kwargs)
 		if isinstance(answer, str):
 			answer = self.get(answer.casefold()) if answer else self.default
 		return answer
