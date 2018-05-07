@@ -8,11 +8,13 @@ GETTEXT = xgettext -L Python -k_ -k_U -k_N:1,2 \
 	--package-name=$(APPLICATION_NAME) --package-version=0.1 \
 	--msgid-bugs-address=https://github.com/davidfoerster/aptsources-cleanup/issues
 MSGFMT = msgfmt
+MSGMERGE = msgmerge
 
 rwildcard = $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
 SOURCES = $(call rwildcard, $(SRC_DIR), *.py)
 ZIP_TARGET = $(BUILD_DIR)/$(APPLICATION_NAME).zip
-MESSAGES_MO = $(patsubst %.po,%.mo,$(shell find $(LOCALES_DIR) -mindepth 1 -name '*.po'))
+MESSAGES_PO = $(shell find $(LOCALES_DIR) -mindepth 1 -name '*.po')
+MESSAGES_MO = $(patsubst %.po,%.mo,$(MESSAGES_PO))
 MESSAGES_POT = $(LOCALES_DIR)/$(LOCALES_DOMAIN).pot
 
 
@@ -33,6 +35,12 @@ $(LOCALES_DIR)/%.pot: $(SOURCES) | $(LOCALES_DIR)
 	cd $(SRC_DIR) && exec $(GETTEXT) -d $(basename $(notdir $@)) -o $(patsubst $(SRC_DIR)/%,%,$@ -- $^)
 
 
+messages_update: $(MESSAGES_POT) $(MESSAGES_PO)
+
+%.po: $(MESSAGES_POT)
+	$(MSGMERGE) -U -- $@ $<
+
+
 messages: $(MESSAGES_MO)
 
 %.mo: %.po
@@ -43,4 +51,4 @@ $(BUILD_DIR) $(LOCALES_DIR):
 	mkdir -p -- $@
 
 
-.PHONY: zip clean messages messages_template
+.PHONY: zip clean messages messages_template messages_update
