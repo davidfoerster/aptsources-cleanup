@@ -1,11 +1,50 @@
 from __future__ import print_function, division, absolute_import, unicode_literals
 from ._3to2 import *
+import re
 import sys
 import errno
 import weakref
 import textwrap
+import operator
 
-__all__ = ('try_input', 'termwrap')
+__all__ = ('try_input', 'termwrap', 'TERMMODES')
+
+
+TERMMODES = ('bold', 'underline smul', 'normal sgr0')
+
+TERMMODES = map(operator.methodcaller('partition', ' '), TERMMODES)
+
+termmodes_noctrl_pattern = '[\0-\x1f]'
+
+if sys.stdout and sys.stdout.isatty():
+	try:
+		import curses
+		curses.setupterm()
+	except (ImportError, OSError) as ex:
+		if __debug__:
+			print('Warning', ex, sep=': ', end='\n\n', file=sys.stderr)
+		curses = None
+else:
+	curses = None
+
+if curses is None:
+	TERMMODES = dict.fromkeys(map(operator.itemgetter(0), TERMMODES), '')
+
+	termmodes_pattern = re.compile(r'\A(?!x)x')  # Never matches
+
+	termmodes_noctrl_pattern = re.compile(termmodes_noctrl_pattern)
+
+else:
+	TERMMODES = {
+		k: (curses.tigetstr(capname or k) or b'').decode('ascii')
+		for k, _, capname in TERMMODES
+	}
+
+	termmodes_pattern = re.compile(
+		'|'.join(map(re.escape, filter(None, TERMMODES.values()))))
+
+	termmodes_noctrl_pattern = re.compile(
+		termmodes_pattern.pattern + '|' + termmodes_noctrl_pattern)
 
 
 try:
