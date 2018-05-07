@@ -17,7 +17,10 @@ import errno
 import locale
 
 
-__all__ = ('translation', 'translations', '_', '_U', 'ChoiceInfo', 'Choices')
+__all__ = (
+	'translation', 'translations', '_', '_N', '_U', 'DictTranslations',
+	'ChoiceInfo', 'Choices'
+)
 
 
 def get_localedir():
@@ -91,6 +94,7 @@ def translation(domain, localedir=None, languages=None, _class=None,
 translations = translation('messages', get_localedir(), fallback=True)
 
 _ = translations.gettext
+_N = translations.ngettext
 
 
 def _U(s):
