@@ -111,24 +111,52 @@ class termwrap(textwrap.TextWrapper):
 		self.file = file
 
 
-	def print(self, paragraph, end='\n'):
+	def print(self, paragraph, end='\n', return_last_line_len=False):
 		"""Prints a paragraph to the stored file object."""
 		if self.file is None:
 			raise TypeError
 		if self.width > 0:
 			paragraph = self.wrap(paragraph)
 		else:
+			assert isinstance(paragraph, str)
 			paragraph = (paragraph,)
+
 		print(*paragraph, sep='\n', end=end, file=self.file)
 
+		if return_last_line_len:
+			return self._get_last_line_len(paragraph[-1], end)
 
-	def print_all(self, paragraphs, end='\n', sep='\n\n'):
+
+	def print_all(self, paragraphs, end='\n', sep='\n\n',
+		return_last_line_len=False
+	):
 		"""Prints a sequence of paragraph to the stored file object."""
 		if self.file is None:
 			raise TypeError
 		if self.width > 0:
 			paragraphs = map(self.fill, paragraphs)
+		if return_last_line_len:
+			paragraphs = tuple(paragraphs)
+
 		print(*paragraphs, sep=sep, end=end, file=self.file)
+
+		if return_last_line_len:
+			return self._get_last_line_len(paragraphs[-1], end)
+
+
+	@staticmethod
+	def _get_last_line_len(s, end):
+		n = len(end)
+		p = end.rfind('\n') + 1
+		if p:
+			return n - p
+
+		n += len(s)
+		p = s.rfind('\n') + 1
+		if p:
+			return n - p
+
+		return n
 
 
 	def refresh_width(self, file=None):
