@@ -30,7 +30,7 @@ $(ZIP_TARGET): $(shell find $(LOCALES_DIR) -mindepth 1 -maxdepth 1 -type l)
 messages_template: $(MESSAGES_POT)
 
 $(LOCALES_DIR)/%.pot: $(SOURCES) | $(LOCALES_DIR)
-	cd $(SRC_DIR) && exec $(GETTEXT) -d $(LOCALES_DOMAIN) -o $(patsubst $(SRC_DIR)/%,%,$@ -- $^)
+	cd $(SRC_DIR) && exec $(GETTEXT) -d $(basename $(notdir $@)) -o $(patsubst $(SRC_DIR)/%,%,$@ -- $^)
 
 
 messages: $(MESSAGES_MO)
