@@ -3,7 +3,7 @@ from ._3to2 import *
 from . import terminal, functools
 from .strings import startswith_token
 from .operator import identity
-from .itertools import unique, foreach
+from .itertools import unique
 from .zipfile import ZipFile
 import gettext as _gettext
 import string
@@ -11,7 +11,6 @@ import operator
 import itertools
 import collections
 import collections.abc
-import io
 import os
 import os.path
 import errno
