@@ -4,11 +4,11 @@ SRC_DIR = src
 LOCALES_DIR = $(SRC_DIR)/locales
 LOCALES_DOMAIN = messages
 ZIP = zip -9
-GETTEXT = xgettext -L Python -k_ -k_U -k_N:1,2 \
+GETTEXT = xgettext -F -L Python -k_ -k_U -k_N:1,2 \
 	--package-name=$(APPLICATION_NAME) --package-version=0.1 \
 	--msgid-bugs-address=https://github.com/davidfoerster/aptsources-cleanup/issues
 MSGFMT = msgfmt
-MSGMERGE = msgmerge
+MSGMERGE = msgmerge -F
 
 rwildcard = $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
 SOURCES = $(call rwildcard, $(SRC_DIR), *.py)
