@@ -31,9 +31,10 @@ clean:
 	rm -f -- $(ZIP_TARGET) $(MESSAGES_POT) $(wildcard $(LOCALES_DIR)/*/LC_MESSAGES/*.mo)
 
 
-$(ZIP_TARGET): $(SOURCES) | $(BUILD_DIR)
+$(ZIP_TARGET): $(SOURCES) README.md | $(BUILD_DIR)
 $(ZIP_TARGET): $(if $(has_msgtools),$(MESSAGES_MO) $(MESSAGES_SYMLINKS),)
-	cd $(SRC_DIR) && exec $(ZIP) -FS --symlinks $(abspath $@) -- $(patsubst $(SRC_DIR)/%,%,$^)
+	cd $(SRC_DIR) && exec $(ZIP) --symlinks $(abspath $@) -- $(patsubst $(SRC_DIR)/%,%,$(filter $(SRC_DIR)/%,$^))
+	$(ZIP) $(abspath $@) -- $(filter-out $(SRC_DIR)/%,$^)
 
 
 messages_template: $(MESSAGES_POT)
