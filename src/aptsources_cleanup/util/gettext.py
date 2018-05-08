@@ -11,7 +11,6 @@ import gettext as _gettext
 import string
 import operator
 import itertools
-import collections.abc
 import os
 import os.path
 import errno
@@ -262,7 +261,7 @@ class Choices(collections.ChainMap):
 		if not x:
 			x = (identity,)
 		if not isinstance(x, tuple):
-			x = tuple(x) if isinstance(x, collections.abc.Container) else (x,)
+			x = tuple(x) if isinstance(x, collections.Container) else (x,)
 		if len(x) <= len(unpack_defaults):
 			x += unpack_defaults[max(len(x) - 1, 0):]
 		return x
