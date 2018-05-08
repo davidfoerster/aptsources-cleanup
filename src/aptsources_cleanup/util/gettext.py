@@ -187,9 +187,14 @@ class Choices(collections.ChainMap):
 	)
 
 
-	def __init__(self, *choices, default=None, use_shorthands=bool, joiner='/',
-		highlighters=None
-	):
+	def __init__(self, *choices, **kwargs):
+		default = kwargs.pop('default', None)
+		use_shorthands = kwargs.pop('use_shorthands', bool)
+		joiner = kwargs.pop('joiner', '/')
+		highlighters = kwargs.pop('highlighters', None)
+		if kwargs:
+			raise TypeError('Unexpected keyword arguments: ' + ', '.join(kwargs))
+
 		if isinstance(default, int):
 			default = choices[default]
 
