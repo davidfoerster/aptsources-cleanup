@@ -1,6 +1,8 @@
 from __future__ import print_function, division, absolute_import, unicode_literals
 from ._3to2 import *
-from . import terminal, functools
+from . import terminal
+from . import functools
+from . import collections
 from .strings import startswith_token
 from .operator import identity
 from .itertools import unique
@@ -9,7 +11,6 @@ import gettext as _gettext
 import string
 import operator
 import itertools
-import collections
 import collections.abc
 import os
 import os.path
