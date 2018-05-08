@@ -75,8 +75,14 @@ class TerminalHelpFormatter(argparse.HelpFormatter):
 
 	def _split_lines_gen(self, text, width, **kwargs):
 		for i, paragraph in enumerate(text.split('\n\n')):
-			if i: yield ''
-			yield from textwrap.wrap(paragraph, width, **kwargs)
+			paragraph = textwrap.wrap(paragraph, width, **kwargs)
+			if not i:
+				text = paragraph
+			else:
+				text.append('')
+				text += paragraph
+
+		return text
 
 
 	def format_help(self):
