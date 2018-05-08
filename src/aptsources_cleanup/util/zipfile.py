@@ -91,7 +91,7 @@ class ZipFile(_zipfile.ZipFile):
 			seen_set.add(c_full)
 			resolved = str(
 				super(ZipFile, self).read(c_info, pwd), _filesystem_encoding)
-			null = resolved.find('\0')
+			null = resolved.find('\x00')
 			if null >= 0:
 				resolved = resolved[:null]
 			if resolved == c or resolved == os.curdir:

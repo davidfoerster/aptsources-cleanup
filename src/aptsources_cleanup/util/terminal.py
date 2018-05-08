@@ -14,7 +14,7 @@ TERMMODES = ('bold', 'underline smul', 'normal sgr0')
 
 TERMMODES = map(operator.methodcaller('partition', ' '), TERMMODES)
 
-termmodes_noctrl_pattern = '[\0-\x1f]'
+termmodes_noctrl_pattern = '[\x00-\x1f]'
 
 if sys.stdout and sys.stdout.isatty():
 	try:
@@ -60,7 +60,7 @@ except ImportError:
 		"""A fall-back implementation of os.get_terminal_size()"""
 
 		lines, columns = struct.unpack(b'hh',
-			fcntl.ioctl(fd, termios.TIOCGWINSZ, b'\0\0\0\0'))
+			fcntl.ioctl(fd, termios.TIOCGWINSZ, b'\x00\x00\x00\x00'))
 		return terminal_size(columns, lines)
 
 
