@@ -7,9 +7,7 @@ from .operator import rapply, identity
 __all__ = ('comp',) + tuple(_functools.__all__)
 
 
-def comp(*funcs, reverse=False):
+def comp(*funcs):
 	if len(funcs) <= 1:
 		return funcs[0] if funcs else identity
-	if reverse:
-		funcs = reversed(funcs)
 	return partial(reduce, rapply, funcs)
