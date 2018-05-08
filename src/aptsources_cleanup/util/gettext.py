@@ -49,7 +49,7 @@ def translation(domain, localedir=None, languages=None, _class=None,
 ):
 	try:
 		archive = __loader__.archive
-	except AttributeError:
+	except (NameError, AttributeError):
 		archive = None
 
 	if (localedir is None or archive is None or
