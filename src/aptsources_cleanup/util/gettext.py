@@ -94,8 +94,12 @@ def translation(domain, localedir=None, languages=None, _class=None,
 
 translations = translation('messages', get_localedir(), fallback=True)
 
-_ = translations.gettext
-_N = translations.ngettext
+try:
+	_ = translations.ugettext
+	_N = translations.ungettext
+except AttributeError:
+	_ = translations.gettext
+	_N = translations.ngettext
 
 
 def _U(s):
@@ -140,6 +144,16 @@ class DictTranslations(_gettext.NullTranslations):
 		raise NotImplementedError
 
 	lngettext = lgettext
+
+
+	try:
+		if __base__.ugettext is not None:
+			ugettext = gettext
+		if __base__.ungettext is not None:
+			ungettext = ngettext
+	except AttributeError:
+		ugettext = None
+		ungettext = None
 
 
 ChoiceInfo = collections.namedtuple('ChoiceInfo',
@@ -220,7 +234,7 @@ class Choices(collections.ChainMap):
 
 		for orig in choices:
 			is_default = orig == default
-			translation = translations.gettext(orig)
+			translation = _(orig)
 			if use_shorthands(orig):
 				short, styled = self._get_short_and_styled(translation,
 					shorthand_highlighter
