@@ -1,4 +1,5 @@
 #!/usr/bin/python3 -OEs
+# -*- coding: utf-8
 from __future__ import print_function, division, absolute_import
 
 import sys

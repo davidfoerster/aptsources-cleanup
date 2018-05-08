@@ -1,3 +1,4 @@
+# -*- coding: utf-8
 """Detects and interactively deactivates duplicate Apt source entries and
 deletes sources list files without valid enabled source entries in
 '/etc/sources.list' and '/etc/sources.list.d/*.list'.

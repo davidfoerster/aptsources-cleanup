@@ -1,3 +1,4 @@
+# -*- coding: utf-8
 from __future__ import print_function, division, absolute_import, unicode_literals
 from ._3to2 import *
 from .gettext import _

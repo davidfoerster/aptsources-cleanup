@@ -1,3 +1,4 @@
+# -*- coding: utf-8
 from __future__ import print_function, division, absolute_import, unicode_literals
 
 __all__ = ('identity', 'rapply', 'methodcaller', 'starcall')
