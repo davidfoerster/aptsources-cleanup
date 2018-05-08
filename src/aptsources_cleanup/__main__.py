@@ -65,7 +65,8 @@ class TerminalHelpFormatter(argparse.HelpFormatter):
 		if width is not None:
 			max_help_position = min(max_help_position, width // 3)
 
-		super().__init__(prog, indent_increment, max_help_position, width)
+		super(TerminalHelpFormatter, self).__init__(
+			prog, indent_increment, max_help_position, width)
 
 
 	def _fill_text(self, text, width, indent):
@@ -79,7 +80,7 @@ class TerminalHelpFormatter(argparse.HelpFormatter):
 
 
 	def format_help(self):
-		lines = [super().format_help(), '']
+		lines = [super(TerminalHelpFormatter, self).format_help(), '']
 		for item in self._get_epilog_data():
 			lines += self._wrap_definition(*item)
 			lines.append('')
@@ -102,10 +103,11 @@ class TerminalHelpFormatter(argparse.HelpFormatter):
 
 
 	def _format_actions_usage(self, actions, groups):
-		return super()._format_actions_usage(
-			tuple(filterfalse(
-				methodcaller(isinstance, argparse._HelpAction), actions)),
-			groups)
+		return (
+			super(TerminalHelpFormatter, self)._format_actions_usage(
+				tuple(filterfalse(
+					methodcaller(isinstance, argparse._HelpAction), actions)),
+				groups))
 
 
 	@staticmethod

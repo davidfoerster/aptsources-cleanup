@@ -106,8 +106,14 @@ def _U(s):
 
 class DictTranslations(_gettext.NullTranslations):
 
+	try:
+		__base__
+	except NameError:
+		__base__ = _gettext.NullTranslations
+
+
 	def __init__(self, _data=None, **kwargs):
-		super().__init__()
+		self.__base__.__init__(self)
 
 		if not _data:
 			_data = kwargs
@@ -121,14 +127,14 @@ class DictTranslations(_gettext.NullTranslations):
 		translation = self.data.get(msg)
 		if translation is not None:
 			return translation
-		return super().gettext(msg)
+		return self.__base__.gettext(self, msg)
 
 
 	def ngettext(self, singular, plural, n):
 		translation = self.data.get(singular if n == 1 else plural)
 		if translation is not None:
 			return translation
-		return super().ngettext(singular, plural, n)
+		return self.__base__.ngettext(self, singular, plural, n)
 
 
 	def lgettext(self, msg, *args):
@@ -239,7 +245,7 @@ class Choices(collections.ChainMap):
 				"The default choice '{:s}' does not appear among the list of choices."
 					.format(default))
 
-		super().__init__(self.translations, self.short)
+		super(Choices, self).__init__(self.translations, self.short)
 
 		self.joiner = joiner
 		self.choices_string = joiner.join(

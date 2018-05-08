@@ -11,7 +11,7 @@ def rapply(arg, func):
 	return func(arg)
 
 
-class methodcaller:
+class methodcaller(object):
 
 	__slots__ = ('func', 'args')
 

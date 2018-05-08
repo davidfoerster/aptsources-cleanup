@@ -7,7 +7,7 @@ import sys
 __all__ = ('FileDescriptor', 'display_file', 'sendfile_all')
 
 
-class FileDescriptor:
+class FileDescriptor(object):
 	"""A context manager for operating system file descriptors"""
 
 	def __init__(self, path, mode=os.O_RDONLY, *args):

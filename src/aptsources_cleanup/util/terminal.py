@@ -91,6 +91,11 @@ def try_input(prompt=None, on_eof='', end='\n? '):
 class termwrap(textwrap.TextWrapper):
 	"""Text wrapping for terminal output"""
 
+	try:
+		__base__
+	except NameError:
+		__base__ = textwrap.TextWrapper
+
 	_instances = {}
 
 
@@ -146,7 +151,7 @@ class termwrap(textwrap.TextWrapper):
 
 		if file is not None and width <= 0:
 			width = self._refresh_width_impl(file)
-		textwrap.TextWrapper.__init__(self, width=width, **kwargs)
+		self.__base__.__init__(self, width=width, **kwargs)
 		self.file = file
 
 
