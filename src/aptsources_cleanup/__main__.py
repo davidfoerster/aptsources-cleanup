@@ -232,6 +232,7 @@ def handle_empty_files(sourceslist):
 				on_eof=on_eof)
 			if answer is not None and answer.orig == 'display':
 				display_file(file)
+				answer = None
 
 		if answer.orig in ('yes', 'all'):
 			rv2, rc2 = remove_sources_files(file)
