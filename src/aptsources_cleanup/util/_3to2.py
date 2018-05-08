@@ -1,5 +1,7 @@
 from __future__ import print_function, division, absolute_import
 
+__all__ = ['basestring']
+
 
 try:
 	from __builtin__ import \
@@ -11,7 +13,7 @@ except ImportError:
 	basestring = (str, bytes)
 
 else:
-	__all__ = tuple(map(bytes, __all__))
+	__all__.extend(('str', 'bytes', 'range', 'input'))
 
 	import locale
 
@@ -24,3 +26,5 @@ try:
 	from future_builtins import *
 except ImportError:
 	pass
+else:
+	__all__.extend(('ascii', 'filter', 'hex', 'map', 'oct', 'zip'))
