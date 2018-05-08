@@ -162,6 +162,12 @@ def _highlighter_from_termcap(capname, default=None, flags_func=None):
 	return highlighter
 
 
+try:
+	_str_casefold = str.casefold
+except AttributeError:
+	_str_casefold = str.lower
+
+
 def normalize_casefold(text):
 	"""Normalize text data for caseless comparison
 
@@ -171,8 +177,8 @@ def normalize_casefold(text):
 	# Taken from https://stackoverflow.com/questions/319426/how-do-i-do-a-case-insensitive-string-comparison#comment60758553_29247821
 
 	return unicodedata.normalize('NFKD',
-		str.casefold(unicodedata.normalize('NFKD',
-			str.casefold(unicodedata.normalize('NFD', text)))))
+		_str_casefold(unicodedata.normalize('NFKD',
+			_str_casefold(unicodedata.normalize('NFD', text)))))
 
 
 class Choices(collections.ChainMap):
