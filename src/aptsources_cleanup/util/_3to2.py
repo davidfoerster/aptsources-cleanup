@@ -1,7 +1,9 @@
 # -*- coding: utf-8
 from __future__ import print_function, division, absolute_import
 
-__all__ = ['basestring']
+__all__ = ['nativestr', 'basestring']
+
+nativestr = str
 
 
 try:

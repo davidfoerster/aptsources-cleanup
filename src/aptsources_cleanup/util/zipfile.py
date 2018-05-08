@@ -130,7 +130,7 @@ class ZipFile(_zipfile.ZipFile):
 			else:
 				fileno = os.curdir
 				pathconf = os.pathconf
-			self._max_path_value = val = pathconf(fileno, 'PC_PATH_MAX')
+			self._max_path_value = val = pathconf(fileno, nativestr('PC_PATH_MAX'))
 		return val
 
 
