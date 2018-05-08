@@ -263,4 +263,7 @@ def handle_empty_files(sourceslist):
 
 if __name__ == '__main__':
 	locale.setlocale(locale.LC_ALL, '')
-	sys.exit(main())
+	try:
+		sys.exit(main())
+	except KeyboardInterrupt:
+		sys.exit(2)
