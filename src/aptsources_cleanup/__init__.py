@@ -10,7 +10,7 @@ Source code and bug tracker location:
   https://github.com/davidfoerster/aptsources-cleanup
 """
 
-from __future__ import print_function, division, absolute_import, unicode_literals
+from __future__ import print_function, division, absolute_import
 from . import util
 from .util._3to2 import *
 from .util.filesystem import samefile

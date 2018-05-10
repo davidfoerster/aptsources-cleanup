@@ -7,19 +7,15 @@ from .util.operator import methodcaller
 from .util.itertools import *
 from .util.filesystem import *
 from .util.gettext import *
+from . import *
 import sys
 import os.path
 import itertools
-import functools
 import argparse
 import locale
 import textwrap
 import aptsources.sourceslist
-
-# Import from parent package without naming it explicitly
-_parent_package = sys.modules[__package__]
-globals().update(zip(_parent_package.__all__,
-	map(functools.partial(getattr, _parent_package), _parent_package.__all__)))
+aptsources_cleanup = sys.modules[__package__]
 
 
 argparse._ = _
@@ -132,10 +128,11 @@ if __debug__:
 			'Looks like there was an incompatible change in the private API of '
 			'{0.__module__:s}.{0.__qualname__:s}.{1:s}().'
 				.format(TerminalHelpFormatter.__base__, name))
+	del name
 
 
 translations.add_fallback(DictTranslations(
-	ID_DESCRIPTION=_parent_package.__doc__.rpartition('\n\n\n')[0].strip()))
+	ID_DESCRIPTION=aptsources_cleanup.__doc__.rpartition('\n\n\n')[0].strip()))
 
 
 def parse_args(args):
