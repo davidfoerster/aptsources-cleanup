@@ -17,7 +17,6 @@ PYTHON = python3 -s
 
 rwildcard = $(foreach d,$(wildcard $(1)*),$(call rwildcard,$(d)/,$(2)) $(filter $(subst *,%,$(2)),$(d)))
 dirname = $(patsubst %/,%,$(dir $(1)))
-pymodule_path = $(shell $(PYTHON) -c 'from __future__ import absolute_import, print_function; import sys, importlib, operator; print(*map(operator.attrgetter("__file__"), map(importlib.import_module, sys.argv[1:])), sep="\n")' $(1))
 has_msgtools = 1 #$(shell for c in $(firstword $(GETTEXT)) $(firstword $(MSGFMT)) $(firstword $(MSGMERGE)); do command -v -- "$$c" || { printf "Warning: \"%s\" is unavailable. Cannot generate translation data.\n\n" "$$c" >&2; exit 1; }; done > /dev/null && echo 1)
 
 SOURCES = $(call rwildcard,$(SRC_DIR),*.py)
@@ -45,7 +44,7 @@ clean:
 
 messages_template: $(MESSAGES_POT)
 
-$(PO_DIR)/%.pot: $(SOURCES) $(call pymodule_path,argparse) | $(LOCALES_DIR)/
+$(PO_DIR)/%.pot: $(SOURCES) $(shell $(PYTHON) tools/get_module_file.py argparse) | $(LOCALES_DIR)/
 	$(GETTEXT) -d $(basename $(notdir $@)) -o $@ -- $^
 
 
