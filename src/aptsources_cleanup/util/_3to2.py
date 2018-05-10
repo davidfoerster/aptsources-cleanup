@@ -18,11 +18,11 @@ except ImportError:
 else:
 	__all__.extend(('str', 'bytes', 'range', 'input'))
 
-	import locale
+	import sys, locale
 
 	def input(prompt=None):
 		answer = raw_input() if prompt is None else raw_input(prompt)
-		return str(answer, locale.getpreferredencoding())
+		return str(answer, sys.stdin.encoding or locale.getpreferredencoding())
 
 
 try:
