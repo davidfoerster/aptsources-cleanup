@@ -12,6 +12,7 @@ import gettext as _gettext
 import string
 import operator
 import itertools
+import sys
 import os
 import os.path
 import errno
@@ -25,9 +26,25 @@ __all__ = (
 )
 
 
-def get_localedir():
-	return os.path.normpath(os.path.join(
-		os.path.dirname(__file__), os.pardir, os.pardir, 'locales'))
+def _get_archive():
+	try:
+		return __loader__.archive
+	except (NameError, AttributeError):
+		return None
+
+
+def get_localedir(locales_subdir='share/locales'):
+	src_root = os.path.dirname(os.path.dirname(
+		sys.modules[(__package__ or __name__).partition('.')[0]].__file__))
+	src_root_locales = os.path.join(src_root, locales_subdir)
+
+	if _get_archive() is None and not os.path.isdir(src_root_locales):
+		src_root_parent_locales = os.path.join(
+			os.path.dirname(src_root), locales_subdir)
+		if os.path.isdir(src_root_parent_locales):
+			return src_root_parent_locales
+
+	return src_root_locales
 
 
 def get_languages():
@@ -48,11 +65,7 @@ def get_languages():
 def translation(domain, localedir=None, languages=None, _class=None,
 	fallback=False, codeset=None
 ):
-	try:
-		archive = __loader__.archive
-	except (NameError, AttributeError):
-		archive = None
-
+	archive = _get_archive()
 	if (localedir is None or archive is None or
 		not startswith_token(localedir, archive, os.sep)
 	):
