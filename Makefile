@@ -57,6 +57,7 @@ $(PO_DIR)/%.pot: $(SOURCES) $(shell $(PYTHON) tools/get_module_file.py argparse)
 
 messages_update: $(MESSAGES_PO)
 
+%.po: GETTEXT += --omit-header
 %.po: $(MESSAGES_POT)
 	$(MSGMERGE) -U -- $@ $<
 	touch $@
