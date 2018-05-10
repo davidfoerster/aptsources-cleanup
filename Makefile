@@ -53,6 +53,7 @@ messages_update: $(MESSAGES_PO)
 
 %.po: $(MESSAGES_POT)
 	$(MSGMERGE) -U -- $@ $<
+	touch $@
 
 
 messages: $(MESSAGES_MO) $(addprefix $(LOCALES_DIR)/,$(MESSAGES_SYMLINKS))
