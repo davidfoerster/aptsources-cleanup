@@ -21,7 +21,8 @@ dirname = $(patsubst %/,%,$(dir $(1)))
 has_msgtools = 1
 # has_msgtools = $(shell for c in $(firstword $(GETTEXT)) $(firstword $(MSGFMT)) $(firstword $(MSGMERGE)); do command -v -- "$$c" || { printf "Warning: \"%s\" is unavailable. Cannot generate translation data.\n\n" "$$c" >&2; exit 1; }; done > /dev/null && echo 1)
 
-SOURCES = $(call rwildcard,$(SRC_DIR),*.py)
+VERSION_DATA = aptsources_cleanup/util/version/_data.py
+SOURCES = $(filter-out $(SRC_DIR)/$(VERSION_DATA),$(call rwildcard,$(SRC_DIR),*.py))
 
 MESSAGES_PO = $(shell find $(PO_DIR) -mindepth 1 -name '*.po')
 MESSAGES_MO = $(patsubst $(PO_DIR)/%.po,$(LOCALES_DIR)/%.mo,$(MESSAGES_PO))
@@ -30,9 +31,7 @@ MESSAGES_SYMLINKS = $(notdir $(call dirname,$(call dirname,$(filter-out $(MESSAG
 
 ZIP_TARGET = $(BUILD_DIR)/$(APPLICATION_NAME).zip
 ZIP_TARGET_PKG = $(basename $(ZIP_TARGET)).pkg
-VERSION_DATA = $(ZIP_TARGET_PKG)/aptsources_cleanup/util/version/_data.py
-
-DIST_FILES = $(addprefix $(ZIP_TARGET_PKG)/,$(patsubst $(SRC_DIR)/%,%,$(SOURCES)) $(MESSAGES_MO) $(addprefix $(LOCALES_DIR)/,$(MESSAGES_SYMLINKS)) VERSION README.md) $(VERSION_DATA)
+DIST_FILES = $(addprefix $(ZIP_TARGET_PKG)/,$(patsubst $(SRC_DIR)/%,%,$(SOURCES)) $(MESSAGES_MO) $(addprefix $(LOCALES_DIR)/,$(MESSAGES_SYMLINKS)) $(VERSION_DATA) VERSION README.md)
 
 
 zip: $(ZIP_TARGET)
@@ -45,8 +44,10 @@ clean:
 	rm -f -- $(ZIP_TARGET) $(MESSAGES_POT) $(wildcard $(LOCALES_DIR)/*/LC_MESSAGES/*.mo) $(DIST_FILES)
 
 
-$(VERSION_DATA): VERSION .git
-	PYTHONPATH=$(SRC_DIR) $(PYTHON) -m aptsources_cleanup.util.version < $< > $@
+%/$(VERSION_DATA): export PYTHONPATH = $(abspath $(SRC_DIR))
+%/$(VERSION_DATA): VERSION .git
+	$(PYTHON) -m aptsources_cleanup.util.version < $< > $@.new~
+	mv -T -- $@.new~ $@
 
 
 messages_template: $(MESSAGES_POT)
@@ -60,7 +61,7 @@ messages_update: $(MESSAGES_PO)
 %.po: GETTEXT += --omit-header
 %.po: $(MESSAGES_POT)
 	$(MSGMERGE) -U -- $@ $<
-	touch $@
+	touch -- $@
 
 
 messages: $(MESSAGES_MO) $(addprefix $(LOCALES_DIR)/,$(MESSAGES_SYMLINKS))
