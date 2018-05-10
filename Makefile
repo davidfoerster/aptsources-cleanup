@@ -1,8 +1,11 @@
 APPLICATION_NAME = aptsources-cleanup
-BUILD_DIR = build
+BUILD_DIR = dist
+
 SRC_DIR = src
-LOCALES_DIR = $(SRC_DIR)/locales
+PO_DIR = po
+LOCALES_DIR = share/locales
 LOCALES_DOMAIN = messages
+
 ZIP = zip -9
 GETTEXT = xgettext -F -L Python -k_ -k_U -k_N:1,2 \
 	--package-name=$(APPLICATION_NAME) --package-version=0.1 \
@@ -12,51 +15,73 @@ MSGFMT = msgfmt
 MSGMERGE = msgmerge -F
 PYTHON = python3 -s
 
-rwildcard = $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
+rwildcard = $(foreach d,$(wildcard $(1)*),$(call rwildcard,$(d)/,$(2)) $(filter $(subst *,%,$(2)),$(d)))
 dirname = $(patsubst %/,%,$(dir $(1)))
 pymodule_path = $(shell $(PYTHON) -c 'from __future__ import absolute_import, print_function; import sys, importlib, operator; print(*map(operator.attrgetter("__file__"), map(importlib.import_module, sys.argv[1:])), sep="\n")' $(1))
 has_msgtools = 1 #$(shell for c in $(firstword $(GETTEXT)) $(firstword $(MSGFMT)) $(firstword $(MSGMERGE)); do command -v -- "$$c" || { printf "Warning: \"%s\" is unavailable. Cannot generate translation data.\n\n" "$$c" >&2; exit 1; }; done > /dev/null && echo 1)
 
-SOURCES = $(call rwildcard, $(SRC_DIR), *.py)
+SOURCES = $(call rwildcard,$(SRC_DIR),*.py)
+
+MESSAGES_PO = $(shell find $(PO_DIR) -mindepth 1 -name '*.po')
+MESSAGES_MO = $(patsubst $(PO_DIR)/%.po,$(LOCALES_DIR)/%.mo,$(MESSAGES_PO))
+MESSAGES_POT = $(PO_DIR)/$(LOCALES_DOMAIN).pot
+MESSAGES_SYMLINKS = $(notdir $(call dirname,$(call dirname,$(filter-out $(MESSAGES_PO), $(wildcard $(PO_DIR)/*/LC_MESSAGES/*.po)))))
+
+DIST_FILES = $(addprefix $(ZIP_TARGET_PKG)/,$(patsubst $(SRC_DIR)/%,%,$(SOURCES)) $(MESSAGES_MO) $(addprefix $(LOCALES_DIR)/,$(MESSAGES_SYMLINKS)) README.md)
+
 ZIP_TARGET = $(BUILD_DIR)/$(APPLICATION_NAME).zip
-MESSAGES_PO = $(shell find $(LOCALES_DIR) -mindepth 1 -name '*.po')
-MESSAGES_MO = $(patsubst %.po,%.mo,$(MESSAGES_PO))
-MESSAGES_POT = $(LOCALES_DIR)/$(LOCALES_DOMAIN).pot
-MESSAGES_SYMLINKS = $(call dirname,$(call dirname,$(filter-out $(MESSAGES_MO), $(wildcard $(LOCALES_DIR)/*/LC_MESSAGES/*.mo))))
+ZIP_TARGET_PKG = $(basename $(ZIP_TARGET)).pkg
 
 
 zip: $(ZIP_TARGET)
 
+
+dist: $(DIST_FILES)
+
+
 clean:
-	rm -f -- $(ZIP_TARGET) $(MESSAGES_POT) $(wildcard $(LOCALES_DIR)/*/LC_MESSAGES/*.mo)
-
-
-$(ZIP_TARGET): $(SOURCES) README.md | $(BUILD_DIR)
-$(ZIP_TARGET): $(if $(has_msgtools),$(MESSAGES_MO) $(MESSAGES_SYMLINKS),)
-	cd $(SRC_DIR) && exec $(ZIP) --symlinks $(abspath $@) -- $(patsubst $(SRC_DIR)/%,%,$(filter $(SRC_DIR)/%,$^))
-	$(ZIP) $(abspath $@) -- $(filter-out $(SRC_DIR)/%,$^)
+	rm -f -- $(ZIP_TARGET) $(MESSAGES_POT) $(wildcard $(LOCALES_DIR)/*/LC_MESSAGES/*.mo) $(DIST_FILES)
 
 
 messages_template: $(MESSAGES_POT)
 
-$(LOCALES_DIR)/%.pot: $(SOURCES) $(call pymodule_path,argparse) | $(LOCALES_DIR)
-	cd $(SRC_DIR) && exec $(GETTEXT) -d $(basename $(notdir $@)) -o $(patsubst $(SRC_DIR)/%,%,$@ -- $^)
+$(PO_DIR)/%.pot: $(SOURCES) $(call pymodule_path,argparse) | $(LOCALES_DIR)/
+	$(GETTEXT) -d $(basename $(notdir $@)) -o $@ -- $^
 
 
-messages_update: $(MESSAGES_POT) $(MESSAGES_PO)
+messages_update: $(MESSAGES_PO)
 
 %.po: $(MESSAGES_POT)
 	$(MSGMERGE) -U -- $@ $<
 
 
-messages: $(MESSAGES_MO)
-
-%.mo: %.po
-	$(MSGFMT) -o $@ -- $<
+messages: $(MESSAGES_MO) $(addprefix $(LOCALES_DIR)/,$(MESSAGES_SYMLINKS))
 
 
-$(BUILD_DIR) $(LOCALES_DIR):
+$(sort $(LOCALES_DIR)/ $(ZIP_TARGET_PKG)/ $(dir $(MESSAGES_MO) $(ZIP_TARGET) $(DIST_FILES))):
 	mkdir -p -- $@
 
 
-.PHONY: zip clean messages messages_template messages_update
+.PHONY: zip clean dist messages messages_template messages_update
+
+.SECONDEXPANSION:
+
+
+DIST_CP_CMP = cp -PT -- $< $@
+
+$(ZIP_TARGET_PKG)/%.py: $(SRC_DIR)/%.py | $$(@D)/
+	$(DIST_CP_CMP)
+
+$(ZIP_TARGET_PKG)/%: % | $$(@D)/
+	$(DIST_CP_CMP)
+
+$(addprefix $(LOCALES_DIR)/,$(MESSAGES_SYMLINKS)): $$(patsubst $$(LOCALES_DIR)/%,$$(PO_DIR)/%,$$@) | $$(@D)/
+	$(DIST_CP_CMP)
+
+
+$(ZIP_TARGET): $(DIST_FILES) | $$(@D)/
+	cd $(ZIP_TARGET_PKG) && exec $(ZIP) -FS --symlinks $(abspath $@) -- $(patsubst $(ZIP_TARGET_PKG)/%,%,$^)
+
+
+$(LOCALES_DIR)/%.mo: $(PO_DIR)/%.po | $$(@D)/
+	$(MSGFMT) -o $@ -- $<
