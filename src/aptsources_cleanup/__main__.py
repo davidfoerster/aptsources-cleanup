@@ -149,8 +149,17 @@ class VersionAction(argparse.Action):
 				version = parser.version
 			except AttributeError:
 				pass
-			if version is None:
-				version = '%(prog)s, version ' + aptsources_cleanup.__version__
+		if version is None:
+			try:
+				if __package__ and __name__ == '__main__':
+					version = sys.modules[__package__].__version__
+				else:
+					version = __version__
+			except (NameError, AttributeError):
+				pass
+			else:
+				if version is not None:
+					version = '%(prog)s, version ' + version
 
 		parser._print_message(
 			parser._get_formatter()._format_text(version).strip() + '\n',
