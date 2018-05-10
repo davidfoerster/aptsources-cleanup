@@ -1,6 +1,6 @@
 APPLICATION_NAME = aptsources-cleanup
+APPLICATION_VERSION = $(shell head -n 1 VERSION)
 BUILD_DIR = dist
-
 SRC_DIR = src
 PO_DIR = po
 LOCALES_DIR = share/locales
@@ -8,7 +8,8 @@ LOCALES_DOMAIN = messages
 
 ZIP = zip -9
 GETTEXT = xgettext -F -L Python -k_ -k_U -k_N:1,2 \
-	--package-name=$(APPLICATION_NAME) --package-version=0.1 \
+	--package-name="$(APPLICATION_NAME)" \
+	--package-version="$(APPLICATION_VERSION)" \
 	--copyright-holder='David P. W. Forster' \
 	--msgid-bugs-address=https://github.com/davidfoerster/aptsources-cleanup/issues
 MSGFMT = msgfmt
@@ -27,10 +28,11 @@ MESSAGES_MO = $(patsubst $(PO_DIR)/%.po,$(LOCALES_DIR)/%.mo,$(MESSAGES_PO))
 MESSAGES_POT = $(PO_DIR)/$(LOCALES_DOMAIN).pot
 MESSAGES_SYMLINKS = $(notdir $(call dirname,$(call dirname,$(filter-out $(MESSAGES_PO), $(wildcard $(PO_DIR)/*/LC_MESSAGES/*.po)))))
 
-DIST_FILES = $(addprefix $(ZIP_TARGET_PKG)/,$(patsubst $(SRC_DIR)/%,%,$(SOURCES)) $(MESSAGES_MO) $(addprefix $(LOCALES_DIR)/,$(MESSAGES_SYMLINKS)) README.md)
-
 ZIP_TARGET = $(BUILD_DIR)/$(APPLICATION_NAME).zip
 ZIP_TARGET_PKG = $(basename $(ZIP_TARGET)).pkg
+VERSION_DATA = $(ZIP_TARGET_PKG)/aptsources_cleanup/util/version/_data.py
+
+DIST_FILES = $(addprefix $(ZIP_TARGET_PKG)/,$(patsubst $(SRC_DIR)/%,%,$(SOURCES)) $(MESSAGES_MO) $(addprefix $(LOCALES_DIR)/,$(MESSAGES_SYMLINKS)) VERSION README.md) $(VERSION_DATA)
 
 
 zip: $(ZIP_TARGET)
@@ -41,6 +43,10 @@ dist: $(DIST_FILES)
 
 clean:
 	rm -f -- $(ZIP_TARGET) $(MESSAGES_POT) $(wildcard $(LOCALES_DIR)/*/LC_MESSAGES/*.mo) $(DIST_FILES)
+
+
+$(VERSION_DATA): VERSION .git
+	PYTHONPATH=$(SRC_DIR) $(PYTHON) -m aptsources_cleanup.util.version < $< > $@
 
 
 messages_template: $(MESSAGES_POT)

@@ -28,6 +28,9 @@ except ImportError:
 
 __all__ = ('get_duplicates', 'get_empty_files')
 
+from .util.version import get_version as __version__
+__version__ = str(__version__())
+
 
 def get_duplicates(sourceslist):
 	"""Detects and returns duplicate Apt source entries."""
