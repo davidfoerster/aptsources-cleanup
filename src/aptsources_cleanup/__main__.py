@@ -131,6 +131,33 @@ if __debug__:
 	del name
 
 
+class VersionAction(argparse.Action):
+
+	def __init__(self, option_strings, version=None, dest=argparse.SUPPRESS,
+		default=argparse.SUPPRESS, help=None
+	):
+		if help is None:
+			help = _("Show program's version number and exit.")
+		super(VersionAction, self).__init__(option_strings, dest, 0, help=help)
+		self.version = version
+
+
+	def __call__(self, parser, namespace, values, option_string):
+		version = self.version
+		if version is None:
+			try:
+				version = parser.version
+			except AttributeError:
+				pass
+			if version is None:
+				version = '%(prog)s, version ' + aptsources_cleanup.__version__
+
+		parser._print_message(
+			parser._get_formatter()._format_text(version).strip() + '\n',
+			sys.stdout)
+		parser.exit()
+
+
 translations.add_fallback(DictTranslations(
 	ID_DESCRIPTION=aptsources_cleanup.__doc__.rpartition('\n\n\n')[0].strip()))
 
@@ -149,6 +176,7 @@ def parse_args(args):
 	ap.add_argument('-h', '--help',
 		action='help', default=argparse.SUPPRESS,
 		help=_('show this help message and exit'))
+	ap.add_argument('--version', action=VersionAction)
 
 	dg = ap.add_argument_group(_('Debugging Options'),
 		_('For wizards only! Use these if you know and want to test the '
