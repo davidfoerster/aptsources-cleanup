@@ -53,5 +53,5 @@ class timezone(tzinfo):
 
 
 	def __repr__(self):
-		return '{:s}.{:s}({!r}, {!r})'.format(
-			__name__, type(self).__name__, self._offset, self._name)
+		return 'datetime.{:s}({!r}, {!r})'.format(
+			type(self).__name__, self._offset, self._name)
