@@ -78,19 +78,19 @@ $(sort $(LOCALES_DIR)/ $(ZIP_TARGET_PKG)/ $(dir $(MESSAGES_MO) $(ZIP_TARGET) $(D
 
 DIST_CP_CMP = cp -PT -- $< $@
 
-$(ZIP_TARGET_PKG)/%.py: $(SRC_DIR)/%.py | $$(@D)/
+$(ZIP_TARGET_PKG)/%.py: $$(SRC_DIR)/%.py | $$(@D)
 	$(DIST_CP_CMP)
 
-$(ZIP_TARGET_PKG)/%: % | $$(@D)/
+$(ZIP_TARGET_PKG)/%: % | $$(@D)
 	$(DIST_CP_CMP)
 
-$(addprefix $(LOCALES_DIR)/,$(MESSAGES_SYMLINKS)): $$(patsubst $$(LOCALES_DIR)/%,$$(PO_DIR)/%,$$@) | $$(@D)/
+$(addprefix $(LOCALES_DIR)/,$(MESSAGES_SYMLINKS)): $$(patsubst $$(LOCALES_DIR)/%,$$(PO_DIR)/%,$$@) | $$(@D)
 	$(DIST_CP_CMP)
 
 
-$(ZIP_TARGET): $(DIST_FILES) | $$(@D)/
+$(ZIP_TARGET): $$(DIST_FILES) | $$(@D)
 	cd $(ZIP_TARGET_PKG) && exec $(ZIP) -FS --symlinks $(abspath $@) -- $(patsubst $(ZIP_TARGET_PKG)/%,%,$^)
 
 
-$(LOCALES_DIR)/%.mo: $(PO_DIR)/%.po | $$(@D)/
+$(LOCALES_DIR)/%.mo: $$(PO_DIR)/%.po | $$(@D)
 	$(MSGFMT) -o $@ -- $<
