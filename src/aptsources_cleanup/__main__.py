@@ -332,7 +332,12 @@ def handle_empty_files(sourceslist):
 
 
 if __name__ == '__main__':
-	locale.setlocale(locale.LC_ALL, '')
+	try:
+		locale.setlocale(locale.LC_ALL, '')
+	except locale.Error as ex:
+		print('Warning: Cannot set locale', ex,
+			sep=': ', end='\n\n', file=sys.stderr)
+
 	try:
 		sys.exit(main())
 	except KeyboardInterrupt:
