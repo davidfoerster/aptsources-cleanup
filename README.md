@@ -33,7 +33,7 @@ Or you can download the source code and run it in Python albeit without translat
 
         sudo python3 -OEs aptsources-cleanup.zip
 
-		I advise the use of the above interpreter options `-OEs` to avoid potential issues with your Python environment but they aren't strictly necessary.
+    I advise the use of the above interpreter options `-OEs` to avoid potential issues with your Python environment but they aren't strictly necessary.
 
   * From source code:
 
