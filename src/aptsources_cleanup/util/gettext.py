@@ -7,7 +7,7 @@ from . import collections
 from .strings import startswith_token
 from .operator import identity
 from .itertools import unique
-from .functools import lazy
+from .functools import LazyInstance
 from .zipfile import ZipFile
 import gettext as _gettext
 import string
@@ -107,22 +107,28 @@ def translation(domain, localedir=None, languages=None, _class=None,
 	return translations
 
 
+def _get_gettext_shorthands(translations):
+	last_error = None
+	base_names = ('gettext', 'ngettext')
+	for names in (map('u'.__add__, base_names), base_names):
+		try:
+			return operator.attrgetter(*names)(translations)
+		except AttributeError as ex:
+			last_error = ex
+	raise last_error
+
+
 def _make_translations():
 	global _, _N, translations
+	assert isinstance(translations, LazyInstance)
 	translations = translation('messages', get_localedir(), fallback=True)
-	try:
-		_, _N = operator.attrgetter('ugettext', 'ungettext')(translations)
-	except AttributeError:
-		_, _N = operator.attrgetter('gettext', 'gettext')(translations)
+	_, _N = _get_gettext_shorthands(translations)
 	return translations
 
 
-translations = lazy(_make_translations)
-
-if hasattr(_gettext.GNUTranslations, 'ugettext'):
-	_, _N = translations._bind_method('ugettext', 'ungettext')
-else:
-	_, _N = translations._bind_method('gettext', 'ngettext')
+translations = LazyInstance(_make_translations, _gettext.NullTranslations, True)
+_, _N = _get_gettext_shorthands(translations)
+assert isinstance(translations, LazyInstance) and translations._li_instance is None
 
 
 def _U(s):

@@ -1,7 +1,7 @@
 # -*- coding: utf-8
 from __future__ import print_function, division, absolute_import
 
-__all__ = ['nativestr', 'basestring']
+__all__ = ['nativestr', 'basestring', 'TypesType']
 
 nativestr = str
 
@@ -31,3 +31,11 @@ except ImportError:
 	pass
 else:
 	__all__.extend(('ascii', 'filter', 'hex', 'map', 'oct', 'zip'))
+
+
+try:
+	from types import ClassType as TypesType
+except ImportError:
+	TypesType = type
+else:
+	TypesType = (type, TypesType)

@@ -87,7 +87,7 @@ msgstr "Lageabhängige Argumente"
 msgid "optional arguments"
 msgstr "Optionale Argumente"
 
-#: /usr/lib/python3.4/argparse.py:1656 src/aptsources_cleanup/__main__.py:214
+#: /usr/lib/python3.4/argparse.py:1656 src/aptsources_cleanup/__main__.py:213
 msgid "show this help message and exit"
 msgstr "Zeige diesen Hilfetext und höre auf."
 
@@ -95,7 +95,7 @@ msgstr "Zeige diesen Hilfetext und höre auf."
 msgid "cannot have multiple subparser arguments"
 msgstr "Kann nicht mehrere Subparserargumente haben."
 
-#: /usr/lib/python3.4/argparse.py:1739 src/aptsources_cleanup/__main__.py:240
+#: /usr/lib/python3.4/argparse.py:1739 src/aptsources_cleanup/__main__.py:239
 #, python-format
 msgid "unrecognized arguments: %s"
 msgstr "Unerkannte Argumente: %s"
@@ -184,34 +184,34 @@ msgid "Show program's version number and exit."
 msgstr "Zeige die Programmversion an und höre auf."
 
 # Detects and interactively deactivates duplicate Apt source entries and deletes sources list files without valid enabled source entries in '/etc/sources.list' and '/etc/sources.list.d/*.list'.
-#: src/aptsources_cleanup/__main__.py:200
+#: src/aptsources_cleanup/__main__.py:199
 msgid "ID_DESCRIPTION"
 msgstr ""
 "Findet und deaktiviert doppelte Apt-Quelleneinträge und löscht "
 "Quellenlistendateien ohne gültige aktive Quelleneinträge in '/etc/sources."
 "list' und '/etc/sources.list.d/*.list' interaktiv."
 
-#: src/aptsources_cleanup/__main__.py:202
+#: src/aptsources_cleanup/__main__.py:201
 msgid "Author"
 msgstr "Autor"
 
-#: src/aptsources_cleanup/__main__.py:203
+#: src/aptsources_cleanup/__main__.py:202
 msgid "Source code and bug tracker location"
 msgstr "Quelltext- und Bug-Tracker-Adresse"
 
-#: src/aptsources_cleanup/__main__.py:208
+#: src/aptsources_cleanup/__main__.py:207
 msgid "Apply all changes without question."
 msgstr "Wende alle Änderungen ohne Nachfrage an."
 
-#: src/aptsources_cleanup/__main__.py:211
+#: src/aptsources_cleanup/__main__.py:210
 msgid "Never apply changes; only print what would be done."
 msgstr "Wende Änderungen nie an; zeige lediglich an, was getan würde."
 
-#: src/aptsources_cleanup/__main__.py:217
+#: src/aptsources_cleanup/__main__.py:216
 msgid "Debugging Options"
 msgstr "Debugging-Optionen"
 
-#: src/aptsources_cleanup/__main__.py:218
+#: src/aptsources_cleanup/__main__.py:217
 msgid ""
 "For wizards only! Use these if you know and want to test the application "
 "source code."
@@ -219,7 +219,7 @@ msgstr ""
 "Nur für Hexenmeister! Benuzte sie, wenn du den Anwendungsquelltext kennst "
 "und ihn testen möchtest."
 
-#: src/aptsources_cleanup/__main__.py:223
+#: src/aptsources_cleanup/__main__.py:222
 #, python-brace-format
 msgid ""
 "Force an ImportError for the '{module:s}' module and fail on all subsequent "
@@ -228,7 +228,7 @@ msgstr ""
 "Erzwinge einen ImportError für das '{module:s}'-Modul und lass alle "
 "anschließenden Diagnosen fehlschlagen."
 
-#: src/aptsources_cleanup/__main__.py:230
+#: src/aptsources_cleanup/__main__.py:229
 #, python-brace-format
 msgid ""
 "Load sources list files from this directory instead of the default root-"
@@ -237,16 +237,16 @@ msgstr ""
 "Lade Quellenlistendateien von diesem Verzeichnis anstelle der Vorgabe in "
 "root-Besitz '{default:s}'. Falls ausgelassen ist das Verzeichnis '{const:s}'."
 
-#: src/aptsources_cleanup/__main__.py:235
+#: src/aptsources_cleanup/__main__.py:234
 msgid "Show help for debugging options."
 msgstr "Zeige die Hilfe für Debugging-Optionen an."
 
-#: src/aptsources_cleanup/__main__.py:241
+#: src/aptsources_cleanup/__main__.py:240
 #, python-brace-format
 msgid "Use '{help_opt:s}' to display the program help."
 msgstr "Benutzen Sie '{help_opt:s}' um die Programmhilfe anzuzeigen."
 
-#: src/aptsources_cleanup/__main__.py:257
+#: src/aptsources_cleanup/__main__.py:256
 #, python-brace-format
 msgid ""
 "Overlapping source entries:\n"
@@ -263,48 +263,48 @@ msgstr ""
 "     {dupe_line:s}\n"
 "Ich habe letzteren Eintrag deaktiviert."
 
-#: src/aptsources_cleanup/__main__.py:269
+#: src/aptsources_cleanup/__main__.py:268
 #, python-brace-format
 msgid "{nduplicates:d} source entry was disabled"
 msgid_plural "{nduplicates:d} source entries were disabled"
 msgstr[0] "{nduplicates:d} Quelleneintrag wurde deaktiviert"
 msgstr[1] "{nduplicates:d} Quelleneinträge wurden deaktiviert"
 
-#: src/aptsources_cleanup/__main__.py:275
-#: src/aptsources_cleanup/__main__.py:298
+#: src/aptsources_cleanup/__main__.py:274
+#: src/aptsources_cleanup/__main__.py:297
 msgid "no"
 msgstr "nein"
 
-#: src/aptsources_cleanup/__main__.py:275
-#: src/aptsources_cleanup/__main__.py:298
+#: src/aptsources_cleanup/__main__.py:274
+#: src/aptsources_cleanup/__main__.py:297
 msgid "yes"
 msgstr "ja"
 
-#: src/aptsources_cleanup/__main__.py:277
+#: src/aptsources_cleanup/__main__.py:276
 msgid "Do you want to save these changes?"
 msgstr "Wollen Sie diese Änderungen sichern?"
 
-#: src/aptsources_cleanup/__main__.py:279
+#: src/aptsources_cleanup/__main__.py:278
 msgid "Aborted."
 msgstr "Abgebrochen."
 
-#: src/aptsources_cleanup/__main__.py:285
+#: src/aptsources_cleanup/__main__.py:284
 msgid "No duplicate entries were found."
 msgstr "Keine doppelten Einträge gefunden."
 
-#: src/aptsources_cleanup/__main__.py:298
+#: src/aptsources_cleanup/__main__.py:297
 msgid "all"
 msgstr "alle"
 
-#: src/aptsources_cleanup/__main__.py:298
+#: src/aptsources_cleanup/__main__.py:297
 msgid "display"
 msgstr "anzeigen"
 
-#: src/aptsources_cleanup/__main__.py:298
+#: src/aptsources_cleanup/__main__.py:297
 msgid "none"
 msgstr "keine"
 
-#: src/aptsources_cleanup/__main__.py:309
+#: src/aptsources_cleanup/__main__.py:308
 #, python-brace-format
 msgid ""
 "'{file:s}' contains no valid and enabled repository lines.  Do you want to "
@@ -313,7 +313,7 @@ msgstr ""
 "'{file:s}' enthält keine gültigen aktiven Verzeichniszeilen.  Wollen Sie sie "
 "entfernen?"
 
-#: src/aptsources_cleanup/__main__.py:327
+#: src/aptsources_cleanup/__main__.py:326
 #, python-brace-format
 msgid "{nremoved:d} of {ntotal:d} empty sourcelist files removed."
 msgstr "{nremoved:d} von {ntotal:d} Quellenlistendateien entfernt."
