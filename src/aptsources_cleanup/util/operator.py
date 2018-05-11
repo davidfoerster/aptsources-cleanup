@@ -28,3 +28,8 @@ class methodcaller(object):
 
 def starcall(func, args):
 	return func(*args)
+
+
+def peek(func, arg0, *args):
+	func(arg0, *args)
+	return arg0

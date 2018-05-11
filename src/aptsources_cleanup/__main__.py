@@ -3,7 +3,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 from .util._3to2 import *
 from .util.io import *
 from .util.terminal import *
-from .util.operator import methodcaller
+from .util.operator import methodcaller, peek
 from .util.itertools import *
 from .util.filesystem import *
 from .util.gettext import *
@@ -14,6 +14,8 @@ import itertools
 import argparse
 import locale
 import textwrap
+from itertools import starmap
+from functools import reduce, partial as fpartial
 import aptsources.sourceslist
 aptsources_cleanup = sys.modules[__package__]
 
@@ -52,6 +54,32 @@ def main(*args):
 	return rv
 
 
+class MyArgumentParser(argparse.ArgumentParser):
+
+	def format_help(self):
+		formatter = self._get_formatter()
+
+		# usage
+		formatter.add_usage(self.usage, self._actions,
+			self._mutually_exclusive_groups)
+
+		# description
+		formatter.add_text(self.description)
+
+		# positionals, optionals and user-defined groups
+		for action_group in self._action_groups:
+			formatter.start_section(action_group.title)
+			formatter.add_text(action_group.description)
+			formatter.add_arguments(action_group._group_actions)
+			formatter.end_section()
+
+		# epilog
+		formatter.add_epilog(self.epilog)
+
+		# determine help from format above
+		return formatter.format_help()
+
+
 class TerminalHelpFormatter(argparse.HelpFormatter):
 
 	def __init__(self, prog, indent_increment=2, max_help_position=18, width=-2):
@@ -70,6 +98,7 @@ class TerminalHelpFormatter(argparse.HelpFormatter):
 		return '\n'.join(self._split_lines_gen(
 			text, width, initial_indent=indent, subsequent_indent=indent))
 
+
 	def _split_lines_gen(self, text, width, **kwargs):
 		for i, paragraph in enumerate(text.split('\n\n')):
 			paragraph = textwrap.wrap(paragraph, width, **kwargs)
@@ -82,13 +111,14 @@ class TerminalHelpFormatter(argparse.HelpFormatter):
 		return text
 
 
-	def format_help(self):
-		lines = [super(TerminalHelpFormatter, self).format_help(), '']
-		for item in self._get_epilog_data():
-			lines += self._wrap_definition(*item)
-			lines.append('')
-		lines.append('')
-		return '\n'.join(lines)
+	def add_epilog(self, items):
+		if items and items is not argparse.SUPPRESS:
+			self._add_item(self._format_epilog, (items,))
+
+
+	def _format_epilog(self, items):
+		return '\n'.join(reduce(
+			fpartial(peek, list.extend), starmap(self._wrap_definition, items)))
 
 
 	def _wrap_definition(self, _def, desc):
@@ -113,13 +143,6 @@ class TerminalHelpFormatter(argparse.HelpFormatter):
 				groups))
 
 
-	@staticmethod
-	def _get_epilog_data():
-		return (
-			(_('Author'), 'David P. W. Foerster'),
-			(_('Source code and bug tracker location'),
-				'https://github.com/davidfoerster/aptsources-cleanup'),
-		)
 
 
 if __debug__:
@@ -174,8 +197,13 @@ translations.add_fallback(DictTranslations(
 def parse_args(args):
 	debug = None if args and '--help-debug' in args else argparse.SUPPRESS
 
-	ap = argparse.ArgumentParser(description=_('ID_DESCRIPTION'),
-		formatter_class=TerminalHelpFormatter, add_help=False)
+	ap = MyArgumentParser(formatter_class=TerminalHelpFormatter,
+		add_help=False, description=_('ID_DESCRIPTION'),
+		epilog=(
+			(_('Author'), 'David P. W. Foerster'),
+			(_('Source code and bug tracker location'),
+				'https://github.com/davidfoerster/aptsources-cleanup')))
+
 	ap.add_argument('-y', '--yes',
 		dest='apply_changes', action='store_const', const=True,
 		help=_('Apply all changes without question.'))
