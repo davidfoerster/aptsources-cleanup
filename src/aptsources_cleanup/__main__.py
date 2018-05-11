@@ -144,8 +144,6 @@ class TerminalHelpFormatter(argparse.HelpFormatter):
 				groups))
 
 
-
-
 if __debug__:
 	for name in ('_fill_text', '_format_actions_usage'):
 		assert callable(getattr(TerminalHelpFormatter.__base__, name, None)), (
@@ -236,7 +234,15 @@ def parse_args(args):
 		action='help', default=argparse.SUPPRESS,
 		help=_('Show help for debugging options.'))
 
-	return ap.parse_args(args)
+	args, unkown = ap.parse_known_args(args)
+	if unkown:
+		msg = (
+			(_('unrecognized arguments: %s') % ' '.join(unkown)) + '\n' +
+			_("Use '{help_opt:s}' to display the program help.")
+				.format(help_opt='--help'))
+		ap.error(msg)
+
+	return args
 
 
 def handle_duplicates(sourceslist, apply_changes=None):
