@@ -7,6 +7,7 @@ from . import collections
 from .strings import startswith_token
 from .operator import identity
 from .itertools import unique
+from .functools import lazy
 from .zipfile import ZipFile
 import gettext as _gettext
 import string
@@ -106,14 +107,22 @@ def translation(domain, localedir=None, languages=None, _class=None,
 	return translations
 
 
-translations = translation('messages', get_localedir(), fallback=True)
+def _make_translations():
+	global _, _N, translations
+	translations = translation('messages', get_localedir(), fallback=True)
+	try:
+		_, _N = operator.attrgetter('ugettext', 'ungettext')(translations)
+	except AttributeError:
+		_, _N = operator.attrgetter('gettext', 'gettext')(translations)
+	return translations
 
-try:
-	_ = translations.ugettext
-	_N = translations.ungettext
-except AttributeError:
-	_ = translations.gettext
-	_N = translations.ngettext
+
+translations = lazy(_make_translations)
+
+if hasattr(_gettext.GNUTranslations, 'ugettext'):
+	_, _N = translations._bind_method('ugettext', 'ungettext')
+else:
+	_, _N = translations._bind_method('gettext', 'ngettext')
 
 
 def _U(s):
