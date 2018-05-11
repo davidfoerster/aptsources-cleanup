@@ -139,7 +139,8 @@ class TerminalHelpFormatter(argparse.HelpFormatter):
 		return (
 			super(TerminalHelpFormatter, self)._format_actions_usage(
 				tuple(filterfalse(
-					methodcaller(isinstance, argparse._HelpAction), actions)),
+					methodcaller(isinstance, (argparse._HelpAction, VersionAction)),
+				actions)),
 				groups))
 
 
