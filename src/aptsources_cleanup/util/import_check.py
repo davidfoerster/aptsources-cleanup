@@ -9,10 +9,9 @@ from .gettext import _
 from .terminal import termwrap
 from .filesystem import samefile
 import sys
-import importlib
 
 
-def import_check(py_module, apt_pkg_suffix, import_error=None, debug_fail=0):
+def import_check(module_name, apt_pkg_suffix, import_error=None, debug_fail=0):
 	"""Check for possible issues during the import of the given module
 
 	...and print warnings as appropriate.
@@ -20,14 +19,14 @@ def import_check(py_module, apt_pkg_suffix, import_error=None, debug_fail=0):
 
 	if import_error is None or debug_fail > 0:
 		try:
-			aptsources = importlib.import_module(py_module)
+			module = __import__(module_name)
 			if debug_fail > 0:
-				import __nonexistant_module__ as aptsources
+				import __nonexistant_module__ as module
 				raise AssertionError
 		except ImportError as ex:
 			import_error = ex
 		else:
-			return aptsources
+			return module
 
 	python_name = 'python'
 	if sys.version_info.major >= 3:
@@ -52,7 +51,7 @@ def import_check(py_module, apt_pkg_suffix, import_error=None, debug_fail=0):
 					"default '{py_exe_default:s}' if you encounter issues with the "
 					"import of the '{module:s}' module.")
 				.format(py_exe=sys.executable, py_exe_default=python_exe,
-					module=py_module))
+					module=module_name))
 
 	if not pkg.check_integrity(python_pkg, paragraphs, debug_fail):
 		msg = (
