@@ -151,7 +151,3 @@ def get_version():
 	if _version is None:
 		_version = version_info.load()
 	return _version
-
-
-def _if_bytes_to_str(obj, *encoding):
-	return obj.decode(*encoding) if isinstance(obj, bytes) else obj
