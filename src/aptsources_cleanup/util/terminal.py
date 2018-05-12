@@ -1,5 +1,8 @@
 # -*- coding: utf-8
 from __future__ import print_function, division, absolute_import, unicode_literals
+
+__all__ = ('try_input', 'termwrap', 'TERMMODES')
+
 from ._3to2 import *
 import re
 import sys
@@ -7,8 +10,6 @@ import errno
 import weakref
 import textwrap
 import operator
-
-__all__ = ('try_input', 'termwrap', 'TERMMODES')
 
 
 TERMMODES = ('bold', 'underline smul', 'normal sgr0')

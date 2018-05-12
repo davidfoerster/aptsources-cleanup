@@ -1,13 +1,14 @@
 # -*- coding: utf-8
 from __future__ import print_function, division, absolute_import, unicode_literals
-from ._3to2 import *
-from functools import *
-from .operator import rapply, identity
 
 __all__ = (
 	'comp', 'cmp_to_key', 'total_ordering', 'reduce', 'update_wrapper', 'wraps',
 	'partial', 'LazyInstance'
 )
+
+from ._3to2 import *
+from functools import *
+from .operator import rapply, identity
 
 
 def comp(*funcs):

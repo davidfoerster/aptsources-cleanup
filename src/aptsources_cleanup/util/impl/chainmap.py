@@ -1,10 +1,11 @@
 # -*- coding: utf-8
 from __future__ import absolute_import, unicode_literals
+
+__all__ = ('ChainMap',)
+
 from .._3to2 import *
 from ..operator import methodcaller
 import operator
-
-__all__ = ('ChainMap',)
 
 
 class ChainMap(object):

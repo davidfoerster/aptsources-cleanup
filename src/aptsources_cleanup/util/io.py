@@ -1,11 +1,11 @@
 # -*- coding: utf-8
 from __future__ import print_function, division, absolute_import, unicode_literals
+__all__ = ('FileDescriptor', 'display_file', 'sendfile_all')
+
 from ._3to2 import *
 from .gettext import _
 import os
 import sys
-
-__all__ = ('FileDescriptor', 'display_file', 'sendfile_all')
 
 
 class FileDescriptor(object):

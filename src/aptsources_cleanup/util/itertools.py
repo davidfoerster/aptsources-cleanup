@@ -1,9 +1,10 @@
 # -*- coding: utf-8
 from __future__ import print_function, division, absolute_import, unicode_literals
-from ._3to2 import *
-from .operator import identity
 
 __all__ = ('filterfalse', 'foreach', 'unique', 'count')
+
+from ._3to2 import *
+from .operator import identity
 
 
 try:

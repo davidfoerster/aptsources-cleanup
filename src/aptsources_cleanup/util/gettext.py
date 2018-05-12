@@ -1,5 +1,11 @@
 # -*- coding: utf-8
 from __future__ import print_function, division, absolute_import, unicode_literals
+
+__all__ = (
+	'translation', 'translations', '_', '_N', '_U', 'DictTranslations',
+	'ChoiceInfo', 'Choices'
+)
+
 from ._3to2 import *
 from . import terminal
 from . import functools
@@ -19,12 +25,6 @@ import os.path
 import errno
 import locale
 import unicodedata
-
-
-__all__ = (
-	'translation', 'translations', '_', '_N', '_U', 'DictTranslations',
-	'ChoiceInfo', 'Choices'
-)
 
 
 def _get_archive():

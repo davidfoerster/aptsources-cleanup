@@ -1,12 +1,13 @@
 # -*- coding: utf-8
 from __future__ import print_function, division, absolute_import, unicode_literals
+
+__all__ = ('samefile', 'remove_sources_files')
+
 from ._3to2 import *
 from .gettext import _
 import sys
 import os, os.path
 import errno
-
-__all__ = ('samefile', 'remove_sources_files')
 
 
 def samefile(a, b):

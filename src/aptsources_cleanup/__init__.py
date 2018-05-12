@@ -11,6 +11,9 @@ Source code and bug tracker location:
 """
 
 from __future__ import print_function, division, absolute_import
+
+__all__ = ('get_duplicates', 'get_empty_files')
+
 from . import util
 from .util._3to2 import *
 from .util.filesystem import samefile
@@ -25,8 +28,6 @@ except ImportError:
 	class urllib:
 		import urlparse as parse
 
-
-__all__ = ('get_duplicates', 'get_empty_files')
 
 from .util.version import get_version as __version__
 __version__ = str(__version__())

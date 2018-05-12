@@ -1,9 +1,10 @@
 # -*- coding: utf-8
 from __future__ import division, absolute_import, unicode_literals
-from .._3to2 import *
-from datetime import *
 
 __all__ = ('timezone',)
+
+from .._3to2 import *
+from datetime import *
 
 
 DELTA_ZERO = timedelta()
