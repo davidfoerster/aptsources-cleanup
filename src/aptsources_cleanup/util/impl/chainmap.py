@@ -9,6 +9,9 @@ import operator
 
 
 class ChainMap(object):
+	"""A minimal implementation of a chained map
+	that is compatible with Python 3's collections.ChainMap.
+	"""
 
 	def __init__(self, *underlying):
 		self._data = underlying or ({},)

@@ -1,4 +1,5 @@
 # -*- coding: utf-8
+"""Various I/O-related utilities"""
 from __future__ import print_function, division, absolute_import, unicode_literals
 __all__ = ('FileDescriptor', 'display_file', 'sendfile_all')
 

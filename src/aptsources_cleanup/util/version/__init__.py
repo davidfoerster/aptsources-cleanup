@@ -11,6 +11,18 @@ __all__ = ('get_version', 'version_info')
 
 
 class version_info(object):
+	"""A version info object
+
+	Attributes:
+	  * version - an arbitrary version string
+	  * commit - a string with a human-readable represenation of a revision
+	       control system commit identifier
+	  * date - a datetime.date (usually even datetime.datetime) instance
+	  * branch_name - a name of the RCS branch used to build the denoted release
+	       version
+
+	All attributes are optional.
+	"""
 
 	__slots__ = ('version', 'date', 'commit', 'branch_name')
 
@@ -24,6 +36,7 @@ class version_info(object):
 
 
 	def items(self):
+		"""Returns the attributes as a sequence of name-value tuples"""
 		return zip(self.__slots__, map(fpartial(getattr, self), self.__slots__))
 
 
@@ -52,6 +65,17 @@ class version_info(object):
 
 	@classmethod
 	def load(cls):
+		"""Load a version object from environment information.
+
+		Tries to load or construct version information based on the environment in
+		the following order:
+
+		 1. using the attributes of the ._data module (relative to this module),
+		 2. the first line of the 'VERSION' file located two directory levels above
+		    the module search path root for this module or package for the 'version'
+		    attribute only,
+		 3. from 'from_repo(version)'.
+		"""
 		try:
 			from . import _data
 		except ImportError:
@@ -77,6 +101,8 @@ class version_info(object):
 
 	@classmethod
 	def from_repo(cls, version=None, repo_dir=None):
+		"""Construct a version_info using the current state of a Git repository"""
+
 		import git
 		try:
 			repo = git.Repo(repo_dir)
@@ -115,6 +141,12 @@ from .. import datetime
 _version = None
 
 def get_version():
+	"""Return the current version info.
+
+	The first call to this function will call version_info.load() and cache the
+	result for later calls.
+	"""
+
 	global _version
 	if _version is None:
 		_version = version_info.load()

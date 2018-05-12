@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+"""Returns the paths of the files behind the given modules."""
 # -*- coding: utf-8
 from __future__ import absolute_import, print_function
 import sys, operator, importlib

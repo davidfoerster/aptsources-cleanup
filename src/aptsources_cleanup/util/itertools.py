@@ -21,6 +21,8 @@ def foreach(func, iterable):
 
 
 def unique(iterable, key=None):
+	"""Removes/skips all duplicate entries after their first occurrence."""
+
 	if key is None:
 		key = identity
 
@@ -34,4 +36,5 @@ def unique(iterable, key=None):
 
 
 def count(iterable):
+	"""Simply returns the number of entries (left) in the given iterable."""
 	return sum(1 for _ in iterable)

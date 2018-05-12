@@ -1,4 +1,5 @@
 # -*- coding: utf-8
+"""Utility methods for DPKG package management"""
 from __future__ import print_function, division, absolute_import, unicode_literals
 
 __all__ = ('check_integrity',)

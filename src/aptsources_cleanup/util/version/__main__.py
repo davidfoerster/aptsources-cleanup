@@ -1,4 +1,5 @@
 # -*- coding: utf-8
+"""Genreate the content of a ._data module for use witht this package"""
 from __future__ import print_function, division, absolute_import, unicode_literals
 from .._3to2 import *
 import sys, locale

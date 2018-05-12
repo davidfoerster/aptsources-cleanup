@@ -66,6 +66,11 @@ def get_languages():
 def translation(domain, localedir=None, languages=None, _class=None,
 	fallback=False, codeset=None
 ):
+	"""Similar to gettext.translation() but also search inside ZIP archives
+
+	if this module is loaded from one.
+	"""
+
 	archive = _get_archive()
 	if (localedir is None or archive is None or
 		not startswith_token(localedir, archive, os.sep)
@@ -137,6 +142,7 @@ def _U(s):
 
 
 class DictTranslations(_gettext.NullTranslations):
+	"""A simple Translations class based on a simple mapping object"""
 
 	try:
 		__base__
@@ -225,6 +231,7 @@ def normalize_casefold(text):
 
 
 class Choices(collections.ChainMap):
+	"""Display a set of options and ask for a choice among them."""
 
 	Highlighters = collections.namedtuple('Highlighters',
 		('shorthand', 'default'))
@@ -236,6 +243,21 @@ class Choices(collections.ChainMap):
 
 
 	def __init__(self, *choices, **kwargs):
+		"""Constructs a Choises object based on a set of options.
+
+		The positional arguments must be (untranslated) strings yet their
+		translations are used for display and shorthand selection.
+
+		Keyword arguments:
+		   * default - the default choice when the user enters nothing
+		   * use_shorthand - Allow the use of a unique shorthand for each option.
+		   * joiner - a string to display between options
+		   * highlighters - a Highligters object with functions to transform the
+		        default option and option shorthands to highlight them visually;
+		        if stdout is a terminal defaults to bold and underling, otherwise
+		        uppercase and brackets respectively.
+		"""
+
 		default = kwargs.pop('default', None)
 		use_shorthands = kwargs.pop('use_shorthands', bool)
 		joiner = kwargs.pop('joiner', '/')
@@ -334,6 +356,7 @@ class Choices(collections.ChainMap):
 
 
 	def get_question(self, question, sep='  '):
+		"""Construct a string combining a question and these choices"""
 		return '{:s}{:s}({:s})'.format(question, sep, self.choices_string)
 
 
@@ -342,6 +365,8 @@ class Choices(collections.ChainMap):
 
 
 	def print_question(self, question, sep='  ', debug=False):
+		"""Print a question and these choices to stdout"""
+
 		stdout = terminal.termwrap.stdout()
 		write = stdout.file.write
 		indent = stdout.subsequent_indent
@@ -381,6 +406,15 @@ class Choices(collections.ChainMap):
 
 
 	def ask(self, question, sep='  ', *args, **kwargs):
+		"""Print a question and choices and return an answer based on stdin.
+
+		The answer string is resolved to a ChoiceInfo object, default, or None
+		depending on the circumstances
+
+		Additional positional and keyword arguments are passed to
+		.terminal.try_input().
+		"""
+
 		self.print_question(question, sep)
 		answer = terminal.try_input(None, *args, **kwargs)
 		if isinstance(answer, str):

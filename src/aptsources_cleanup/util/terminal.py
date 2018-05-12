@@ -1,4 +1,8 @@
 # -*- coding: utf-8
+"""Utilities for and around terminals
+
+namely terminal capablities via Curses and text wrapping.
+"""
 from __future__ import print_function, division, absolute_import, unicode_literals
 
 __all__ = ('try_input', 'termwrap', 'TERMMODES')

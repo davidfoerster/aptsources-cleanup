@@ -1,4 +1,5 @@
 # -*- coding: utf-8
+"""Utilities for and around functional programming"""
 from __future__ import print_function, division, absolute_import, unicode_literals
 
 __all__ = (
@@ -12,17 +13,41 @@ from .operator import rapply, identity
 
 
 def comp(*funcs):
+	"""Returns a function object that concatenates the passed functions from left
+	to right.
+	"""
+
 	if len(funcs) <= 1:
 		return funcs[0] if funcs else identity
 	return partial(reduce, rapply, funcs)
 
 
 class LazyInstance(object):
+	"""Instantiate objects lazily on first access
+
+	Instances of this class provide transparent attribute access to the wrapped
+	instance which is created on demand during the first access or on first call
+	for methods present in the type of the wrapped object (if known).
+	"""
 
 	__slots__ = ('_li_instance', '_li_factory', '_li_type_hint', '_li_strict')
 
 
 	def __init__(self, factory, type_hint=None, strict=False):
+		"""Creates a new lazy instance object
+
+		'factory' must be a nullary function that returns the underlying object as
+		needed and is called at most once.
+
+		'type_hint' is a hint to the type of the return value of 'factory'. If
+		unset or None and if 'factory' is itself a type it defaults to 'factory'.
+		A type hint is necessary for implicit lazy instantion on method call.
+
+		If 'strict' is true and a type hint is available (see above) raise
+		AttributeError when trying to access attributes that exist neither on
+		LazyInstance nor on the type of the (future) wrapped object.
+		"""
+
 		self._li_instance = None
 		self._li_factory = factory
 		self._li_strict = strict
@@ -38,6 +63,11 @@ class LazyInstance(object):
 
 	@property
 	def _instance(self):
+		"""Accesses the wrapped instance
+
+		and create it using the factory method provided earlier if necessary.
+		"""
+
 		if self._li_factory is not None:
 			self._li_instance = self._li_factory()
 			assert (self._li_type_hint is None or
@@ -61,6 +91,16 @@ class LazyInstance(object):
 
 
 	def _bind_method(self, *methods_or_names):
+		"""Wrap a lazy method call
+
+		Returns a function based on an attribute of the (future) wrapped object but
+		don't instantiate the wrapped object until execution.  You can provide both
+		attribute names or an arbitrary getter method for attribute access.
+
+		If you specify multible accessors this returns a sequence of functions as
+		described above.
+		"""
+
 		if len(methods_or_names) == 1:
 			return self._li_bind_method_impl(methods_or_names)
 		return map(self._li_bind_method_impl, methods_or_names)

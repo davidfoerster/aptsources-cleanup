@@ -23,6 +23,7 @@ def strerror(errno, *args):
 
 
 class ZipFile(_zipfile.ZipFile):
+	"""Extends zipfile.ZipFile with in-archive resolution of symbolic links"""
 
 	def __init__(self, *args, **kwargs):
 		super(ZipFile, self).__init__(*args, **kwargs)
