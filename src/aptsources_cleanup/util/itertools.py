@@ -31,8 +31,8 @@ def unique(iterable, key=None):
 	for v in iterable:
 		k = key(v)
 		if k not in seen:
-			seen_add(k)
 			yield v
+			seen_add(k)
 
 
 def count(iterable):
