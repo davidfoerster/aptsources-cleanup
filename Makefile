@@ -15,6 +15,7 @@ GETTEXT = xgettext -F -L Python -k_ -k_U -k_N:1,2 \
 MSGFMT = msgfmt
 MSGMERGE = msgmerge -F
 PYTHON = python3 -s
+GPG = gpg2
 
 rwildcard = $(foreach d,$(wildcard $(1)*),$(call rwildcard,$(d)/,$(2)) $(filter $(subst *,%,$(2)),$(d)))
 dirname = $(patsubst %/,%,$(dir $(1)))
@@ -31,7 +32,8 @@ MESSAGES_SYMLINKS = $(notdir $(call dirname,$(call dirname,$(filter-out $(MESSAG
 
 ZIP_TARGET = $(BUILD_DIR)/$(APPLICATION_NAME).zip
 ZIP_TARGET_PKG = $(basename $(ZIP_TARGET)).pkg
-DIST_FILES = $(addprefix $(ZIP_TARGET_PKG)/,$(patsubst $(SRC_DIR)/%,%,$(SOURCES)) $(MESSAGES_MO) $(addprefix $(LOCALES_DIR)/,$(MESSAGES_SYMLINKS)) $(VERSION_DATA) VERSION README.md)
+CHECKSUMMED_FILES = $(addprefix $(ZIP_TARGET_PKG)/,$(patsubst $(SRC_DIR)/%,%,$(SOURCES)) $(MESSAGES_MO) $(VERSION_DATA) VERSION README.md)
+DIST_FILES = $(CHECKSUMMED_FILES) $(addprefix $(ZIP_TARGET_PKG)/,$(addprefix $(LOCALES_DIR)/,$(MESSAGES_SYMLINKS)) SHA256SUM SHA256SUM.asc)
 
 
 zip: $(ZIP_TARGET)
@@ -48,6 +50,13 @@ clean:
 %/$(VERSION_DATA): VERSION .git
 	$(PYTHON) -m aptsources_cleanup.util.version < $< > $@.new~
 	mv -T -- $@.new~ $@
+
+
+$(ZIP_TARGET_PKG)/SHA256SUM: $(CHECKSUMMED_FILES)
+	cd $(@D) && exec sha256sum -t -- $(patsubst $(@D)/%,%,$^) > $(abspath $@)
+
+%.asc: %
+	$(GPG) --clearsign -o $@ -- $<
 
 
 messages_template: $(MESSAGES_POT)
