@@ -38,3 +38,19 @@ def unique(iterable, key=None):
 def count(iterable):
 	"""Simply returns the number of entries (left) in the given iterable."""
 	return sum(1 for _ in iterable)
+
+
+def last(iterable, *default):
+	"""Return the last item of an iterable or 'default' if there's none."""
+	iterable = iter(iterable)
+
+	try:
+		x = next(iterable)
+	except StopIteration:
+		if default:
+			return default[0]
+		raise
+
+	for x in iterable:
+		pass
+	return x

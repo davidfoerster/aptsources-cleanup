@@ -11,20 +11,21 @@ from . import terminal
 from . import functools
 from . import collections
 from .strings import startswith_token
-from .operator import identity
-from .itertools import unique
-from .functools import LazyInstance
+from .operator import identity, methodcaller, peek
+from .itertools import unique, last
+from .functools import LazyInstance, comp, partial as fpartial
 from .zipfile import ZipFile
 import gettext as _gettext
+import re
 import string
 import operator
-import itertools
 import sys
 import os
 import os.path
 import errno
 import locale
 import unicodedata
+from itertools import islice, starmap
 
 
 def _get_archive():
@@ -191,26 +192,6 @@ class DictTranslations(_gettext.NullTranslations):
 		ungettext = None
 
 
-ChoiceInfo = collections.namedtuple('ChoiceInfo',
-	('orig', 'translation', 'short', 'styled'))
-
-
-def _highlighter_from_termcap(capname, default=None, flags_func=None):
-	prefix = terminal.TERMMODES[capname]
-	if prefix:
-		suffix = terminal.TERMMODES['normal'] or None
-		suffix_prefix = suffix + prefix
-		highlighter = lambda s: prefix + s.replace(suffix, suffix_prefix) + suffix
-	elif isinstance(default, str):
-		highlighter = default.format
-	else:
-		highlighter = default
-
-	if flags_func is not None:
-		highlighter = (highlighter, flags_func(prefix))
-	return highlighter
-
-
 try:
 	_str_casefold = str.casefold
 except AttributeError:
@@ -230,16 +211,63 @@ def normalize_casefold(text):
 			_str_casefold(unicodedata.normalize('NFD', text)))))
 
 
+ChoiceInfo = collections.namedtuple('ChoiceInfo',
+	('orig', 'translation', 'short', 'styled'))
+
+
+class ChoiceHighlighters(
+	collections.namedtuple('ChoiceHighlightersBase', ('shorthand', 'default'))
+):
+
+	unprintable_pattern = re.compile(r'｛｛(.*?)｝｝')
+
+
+	@classmethod
+	def from_termcaps(cls, shorthand_args, default_args):
+		return cls(
+			cls.from_termcap(*shorthand_args), cls.from_termcap(*default_args))
+
+
+	@classmethod
+	def from_termcap(cls, capname, default=None, flags_func=None):
+		prefix = terminal.TERMMODES[capname]
+		if prefix:
+			suffix = terminal.TERMMODES['normal']
+			if not suffix:
+				raise RuntimeError(
+					"Terminal supports '{:s}' but no way to revert to normal???"
+						.format(capname))
+			if '｝｝' in prefix or '｝｝' in suffix:
+				raise ValueError("prefix or suffix contains illegal infix '｝｝'")
+			highlighter = comp(
+				fpartial(peek, cls._verify_unprintable_patterns),
+				methodcaller(str.replace, suffix, suffix + prefix),
+				fpartial('｛｛{0:s}｝｝{2:s}｛｛{1:s}｝｝'.format, prefix, suffix))
+
+		elif isinstance(default, str):
+			highlighter = default.format
+
+		else:
+			highlighter = default
+
+		if flags_func is not None:
+			highlighter = (highlighter, flags_func(prefix))
+
+		return highlighter
+
+
+	@classmethod
+	def _verify_unprintable_patterns(cls, s):
+		m = last(cls.unprintable_pattern.finditer(s), None)
+		if m is not None and s.find('｛｛', m.end()) >= 0:
+			raise ValueError("'{:s}' contains an unmatched infix '｛｛'.".format(s))
+
+
 class Choices(collections.ChainMap):
 	"""Display a set of options and ask for a choice among them."""
 
-	Highlighters = collections.namedtuple('Highlighters',
-		('shorthand', 'default'))
-
-	default_highlighters = Highlighters(
-		_highlighter_from_termcap('underline', '[{:s}]'),
-		_highlighter_from_termcap('bold', str.upper, bool)
-	)
+	default_highlighters = ChoiceHighlighters.from_termcaps(
+		('underline', '[{:s}]'), ('bold', str.upper, bool))
 
 	debug = False
 
@@ -382,24 +410,24 @@ class Choices(collections.ChainMap):
 		for i, c in enumerate(self.orig.values()):
 			prefix = ('', '(')[not i]
 			suffix = ')' if i == i_last else self.joiner
-			printable = terminal.termmodes_noctrl_pattern.sub('', c.styled)
-			printable_len = len(prefix) + len(printable) + len(suffix)
+			unescaped = ChoiceHighlighters.unprintable_pattern.split(c.styled)
+			printable_len = sum(map(len, islice(unescaped, 0, None, 2)))
 			must_break = 0 <= stdout.width - len(indent) - printable_len < n
 			if debug is not None:
-				debug.append(
-					(i, n, printable_len, must_break, prefix + printable + suffix))
+				debug.append((i, n, printable_len, must_break,
+					prefix + ''.join(islice(unescaped, 0, None, 2)) + suffix))
 			if must_break:
 				write('\n')
 				write(indent)
 				n = len(indent)
 			write(prefix)
-			write(c.styled.translate(self._whitespace_del))
+			stdout.file.writelines(unescaped)
 			write(suffix)
 			n = (n + printable_len) % stdout.width
 
 		if debug is not None:
 			print('\nWidth: {:d}'.format(stdout.width),
-				*itertools.starmap(
+				*starmap(
 					'Choice{:3d}: col={:3d}, len={:3d}, {!s:5s}, {!r}'.format, debug),
 				sep='\n')
 
