@@ -241,6 +241,8 @@ class Choices(collections.ChainMap):
 		_highlighter_from_termcap('bold', str.upper, bool)
 	)
 
+	debug = False
+
 
 	def __init__(self, *choices, **kwargs):
 		"""Constructs a Choises object based on a set of options.
@@ -364,7 +366,7 @@ class Choices(collections.ChainMap):
 	del _whitespace_del[' ']
 
 
-	def print_question(self, question, sep='  ', debug=False):
+	def print_question(self, question, sep='  '):
 		"""Print a question and these choices to stdout"""
 
 		stdout = terminal.termwrap.stdout()
@@ -372,8 +374,7 @@ class Choices(collections.ChainMap):
 		indent = stdout.subsequent_indent
 		n = stdout.print(question, sep, True) % stdout.width
 		i_last = len(self.orig) - 1
-		if debug:
-			debug_data = []
+		debug = [] if self.debug else None
 
 		# For each choice string see if it can fit on the current terminal line and
 		# skip to the next line if not. Take care to not count escape sequences or
@@ -384,8 +385,8 @@ class Choices(collections.ChainMap):
 			printable = terminal.termmodes_noctrl_pattern.sub('', c.styled)
 			printable_len = len(prefix) + len(printable) + len(suffix)
 			must_break = 0 <= stdout.width - len(indent) - printable_len < n
-			if debug:
-				debug_data.append(
+			if debug is not None:
+				debug.append(
 					(i, n, printable_len, must_break, prefix + printable + suffix))
 			if must_break:
 				write('\n')
@@ -396,7 +397,7 @@ class Choices(collections.ChainMap):
 			write(suffix)
 			n = (n + printable_len) % stdout.width
 
-		if debug:
+		if debug is not None:
 			print('\nWidth: {:d}'.format(stdout.width),
 				*itertools.starmap(
 					'Choice{:3d}: col={:3d}, len={:3d}, {!s:5s}, {!r}'.format, debug),

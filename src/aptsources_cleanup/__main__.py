@@ -229,6 +229,9 @@ def parse_args(args):
 			_("Load sources list files from this directory instead of the default "
 					"root-owned '{default:s}'. If omitted DIR defaults to '{const:s}'.")
 				.format(default='/etc/apt/sources.list*', const=debug_sources_dir))
+	dg.add_argument('--debug-choices-print', '--d-c-p',
+		action='store_true', default=False,
+		help='Debug the display of translated and formatted choices options.')
 	dg.add_argument('--help-debug',
 		action='help', default=argparse.SUPPRESS,
 		help=_('Show help for debugging options.'))
@@ -240,6 +243,8 @@ def parse_args(args):
 			_("Use '{help_opt:s}' to display the program help.")
 				.format(help_opt='--help'))
 		ap.error(msg)
+
+	Choices.debug = args.debug_choices_print
 
 	return args
 
