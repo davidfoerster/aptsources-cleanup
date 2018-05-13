@@ -8,7 +8,6 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 __all__ = ('try_input', 'termwrap', 'TERMMODES')
 
 from ._3to2 import *
-import re
 import sys
 import errno
 import weakref
@@ -35,22 +34,11 @@ else:
 
 if curses is None:
 	TERMMODES = dict.fromkeys(map(operator.itemgetter(0), TERMMODES), '')
-
-	termmodes_pattern = re.compile(r'\A(?!x)x')  # Never matches
-
-	termmodes_noctrl_pattern = re.compile(termmodes_noctrl_pattern)
-
 else:
 	TERMMODES = {
 		k: (curses.tigetstr(capname or k) or b'').decode('ascii')
 		for k, _, capname in TERMMODES
 	}
-
-	termmodes_pattern = re.compile(
-		'|'.join(map(re.escape, filter(None, TERMMODES.values()))))
-
-	termmodes_noctrl_pattern = re.compile(
-		termmodes_pattern.pattern + '|' + termmodes_noctrl_pattern)
 
 
 try:
