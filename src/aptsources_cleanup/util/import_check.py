@@ -43,15 +43,16 @@ def import_check(module_name, apt_pkg_suffix, import_error=None, debug_fail=0):
 			apt_pkg)
 	]
 
-	questional_interpreter = (
-		not samefile(python_exe, sys.executable) or debug_fail)
-	if questional_interpreter:
+	if not samefile(python_exe, sys.executable) or debug_fail:
+		questional_interpreter_msg = len(paragraphs)
 		paragraphs.append(_('Warning') + ': ' +
 			_("The current Python interpreter is '{py_exe:s}'.  Please use the "
 					"default '{py_exe_default:s}' if you encounter issues with the "
 					"import of the '{module:s}' module.")
 				.format(py_exe=sys.executable, py_exe_default=python_exe,
 					module=module_name))
+	else:
+		questional_interpreter_msg = None
 
 	if not pkg.check_integrity(python_pkg, paragraphs, debug_fail):
 		msg = (
@@ -59,8 +60,8 @@ def import_check(module_name, apt_pkg_suffix, import_error=None, debug_fail=0):
 					"that '{py_exe:s}' refers to the Python interpreter from the same "
 					"package.")
 				.format(package=python_pkg, py_exe=python_exe))
-		if questional_interpreter:
-			paragraphs[-1] += '  ' + msg
+		if questional_interpreter_msg is not None:
+			paragraphs[questional_interpreter_msg] += '  ' + msg
 		else:
 			paragraphs.append(_('Warning') + ': ' + msg)
 
