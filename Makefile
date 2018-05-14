@@ -98,7 +98,7 @@ $(addprefix $(LOCALES_DIR)/,$(MESSAGES_SYMLINKS)): $$(patsubst $$(LOCALES_DIR)/%
 
 
 $(ZIP_TARGET): $$(DIST_FILES) | $$(@D)
-	cd $(ZIP_TARGET_PKG) && exec $(ZIP) -FS --symlinks $(abspath $@) -- $(patsubst $(ZIP_TARGET_PKG)/%,%,$^)
+	cd $(ZIP_TARGET_PKG) && exec $(ZIP) -FS -XD --symlinks $(abspath $@) -- $(patsubst $(ZIP_TARGET_PKG)/%,%,$^)
 
 
 $(LOCALES_DIR)/%.mo: $$(PO_DIR)/%.po | $$(@D)
