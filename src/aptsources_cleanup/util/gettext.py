@@ -386,10 +386,6 @@ class Choices(collections.ChainMap):
 		return '{:s}{:s}({:s})'.format(question, sep, self.choices_string)
 
 
-	_whitespace_del = dict.fromkeys(string.whitespace)
-	del _whitespace_del[' ']
-
-
 	def print_question(self, question, sep='  '):
 		"""Print a question and these choices to stdout"""
 
