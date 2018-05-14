@@ -2,7 +2,8 @@
 from __future__ import print_function, division, absolute_import, unicode_literals
 
 __all__ = (
-	'translation', 'translations', '_', '_N', '_U', 'DictTranslations',
+	'translation', 'translations', '_', '_N', '_U',
+	'NullTranslations', 'GNUTranslations', 'DictTranslations',
 	'ChoiceInfo', 'Choices'
 )
 
@@ -26,6 +27,7 @@ import errno
 import locale
 import unicodedata
 from itertools import islice, starmap
+from gettext import NullTranslations, GNUTranslations
 
 
 def _get_archive():
@@ -98,7 +100,7 @@ def translation(domain, localedir=None, languages=None, _class=None,
 					with translation_file:
 						#print("Found language '{:s}' at '{:s}'.".format(lang, lang_path))
 						translations = (
-							(_class or _gettext.GNUTranslations)(translation_file))
+							(_class or GNUTranslations)(translation_file))
 					break
 
 	if translations is None:
@@ -106,7 +108,7 @@ def translation(domain, localedir=None, languages=None, _class=None,
 			raise OSError(
 				"No translation in '{:s}:{:s}' for: {:s}"
 					.format(archive, localedir, ', '.join(languages)))
-		translations = _gettext.NullTranslations()
+		translations = NullTranslations()
 	if codeset is not None:
 		translations.set_output_charset(codeset)
 
@@ -132,7 +134,7 @@ def _make_translations():
 	return translations
 
 
-translations = LazyInstance(_make_translations, _gettext.NullTranslations, True)
+translations = LazyInstance(_make_translations, NullTranslations, True)
 _, _N = _get_gettext_shorthands(translations)
 assert isinstance(translations, LazyInstance) and translations._li_instance is None
 
@@ -142,7 +144,7 @@ def _U(s):
 	return s
 
 
-class DictTranslations(_gettext.NullTranslations):
+class DictTranslations(NullTranslations):
 	"""A simple Translations class based on a simple mapping object"""
 
 	try:
