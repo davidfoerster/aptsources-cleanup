@@ -192,7 +192,8 @@ class VersionAction(argparse.Action):
 
 
 def parse_args(args):
-	debug = None if args and '--help-debug' in args else argparse.SUPPRESS
+	suppress_debug = (
+		None if args and '--help-debug' in args else argparse.SUPPRESS)
 
 	translations.add_fallback(DictTranslations(
 		ID_DESCRIPTION=aptsources_cleanup.__doc__.rpartition('\n\n\n')[0].strip()))
@@ -220,20 +221,21 @@ def parse_args(args):
 				'application source code.'))
 	dg.add_argument('--debug-import-fail', '--d-i-f', metavar='LEVEL',
 		nargs='?', type=int, const=1, default=0,
-		help=debug or
+		help=suppress_debug or
 			_("Force an ImportError for the '{module:s}' module and fail on all "
 					"subsequent diagnoses.")
 				.format(module='aptsources.sourceslist'))
 	debug_sources_dir = './test/sources.list.d'
 	dg.add_argument('--debug-sources-dir', '--d-s-d', metavar='DIR',
 		nargs='?', const=debug_sources_dir,
-		help=debug or
+		help=suppress_debug or
 			_("Load sources list files from this directory instead of the default "
 					"root-owned '{default:s}'. If omitted DIR defaults to '{const:s}'.")
 				.format(default='/etc/apt/sources.list*', const=debug_sources_dir))
 	dg.add_argument('--debug-choices-print', '--d-c-p',
 		action='store_true', default=False,
-		help=_('Debug the display of translated and formatted choices options.'))
+		help=suppress_debug or
+			_('Debug the display of translated and formatted choices options.'))
 	dg.add_argument('--help-debug',
 		action='help', default=argparse.SUPPRESS,
 		help=_('Show help for debugging options.'))
