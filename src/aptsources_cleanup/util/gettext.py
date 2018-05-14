@@ -147,14 +147,8 @@ def _U(s):
 class DictTranslations(NullTranslations):
 	"""A simple Translations class based on a simple mapping object"""
 
-	try:
-		__base__
-	except NameError:
-		__base__ = _gettext.NullTranslations
-
-
 	def __init__(self, _data=None, **kwargs):
-		self.__base__.__init__(self)
+		NullTranslations.__init__(self)
 
 		if not _data:
 			_data = kwargs
@@ -168,14 +162,14 @@ class DictTranslations(NullTranslations):
 		translation = self.data.get(msg)
 		if translation is not None:
 			return translation
-		return self.__base__.gettext(self, msg)
+		return NullTranslations.gettext(self, msg)
 
 
 	def ngettext(self, singular, plural, n):
 		translation = self.data.get(singular if n == 1 else plural)
 		if translation is not None:
 			return translation
-		return self.__base__.ngettext(self, singular, plural, n)
+		return NullTranslations.ngettext(self, singular, plural, n)
 
 
 	def lgettext(self, msg, *args):
@@ -185,9 +179,9 @@ class DictTranslations(NullTranslations):
 
 
 	try:
-		if __base__.ugettext is not None:
+		if NullTranslations.ugettext is not None:
 			ugettext = gettext
-		if __base__.ungettext is not None:
+		if NullTranslations.ungettext is not None:
 			ungettext = ngettext
 	except AttributeError:
 		ugettext = None
