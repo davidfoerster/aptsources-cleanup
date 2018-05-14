@@ -18,7 +18,6 @@ from .functools import LazyInstance, comp, partial as fpartial
 from .zipfile import ZipFile
 import gettext as _gettext
 import re
-import string
 import operator
 import sys
 import os
@@ -61,7 +60,7 @@ def get_languages():
 			langs.append(loc)
 
 	if not any(langs):
-		langs = ('C',)
+		langs.append('C')
 
 	return langs
 
@@ -87,7 +86,7 @@ def translation(domain, localedir=None, languages=None, _class=None,
 
 	translations = None
 	if languages:
-		localedir = localedir[len(archive) + 1:].strip(os.sep)
+		localedir = localedir[len(archive) + len(os.sep):].strip(os.sep)
 		locale_suffix = os.path.join('LC_MESSAGES', domain + os.extsep + 'mo')
 		with ZipFile(archive) as archive:
 			#archive.debug = 3
@@ -118,9 +117,11 @@ def translation(domain, localedir=None, languages=None, _class=None,
 def _get_gettext_shorthands(translations):
 	last_error = None
 	base_names = ('gettext', 'ngettext')
-	for names in (map('u'.__add__, base_names), base_names):
+	for names_getter in starmap(operator.attrgetter,
+		(map('u'.__add__, base_names), base_names)
+	):
 		try:
-			return operator.attrgetter(*names)(translations)
+			return names_getter(translations)
 		except AttributeError as ex:
 			last_error = ex
 	raise last_error
@@ -147,15 +148,15 @@ def _U(s):
 class DictTranslations(NullTranslations):
 	"""A simple Translations class based on a simple mapping object"""
 
-	def __init__(self, _data=None, **kwargs):
+	def __init__(self, data=None, **kwargs):
 		NullTranslations.__init__(self)
 
-		if not _data:
-			_data = kwargs
+		if not data:
+			data = kwargs
 		elif kwargs:
-			_data = _data.copy()
-			_data.update(kwargs)
-		self.data = _data
+			data = data.copy()
+			data.update(kwargs)
+		self.data = data
 
 
 	def gettext(self, msg):
@@ -202,9 +203,10 @@ def normalize_casefold(text):
 	"""
 	# Taken from https://stackoverflow.com/questions/319426/how-do-i-do-a-case-insensitive-string-comparison#comment60758553_29247821
 
-	return unicodedata.normalize('NFKD',
-		_str_casefold(unicodedata.normalize('NFKD',
-			_str_casefold(unicodedata.normalize('NFD', text)))))
+	normalize = unicodedata.normalize
+	return normalize('NFKD',
+		_str_casefold(normalize('NFKD',
+			_str_casefold(normalize('NFD', text)))))
 
 
 ChoiceInfo = collections.namedtuple('ChoiceInfo',
@@ -240,11 +242,11 @@ class ChoiceHighlighters(
 				methodcaller(str.replace, suffix, suffix + prefix),
 				fpartial('｛｛{0:s}｝｝{2:s}｛｛{1:s}｝｝'.format, prefix, suffix))
 
-		elif isinstance(default, str):
-			highlighter = default.format
+		elif callable(default):
+			highlighter = default
 
 		else:
-			highlighter = default
+			highlighter = default.format
 
 		if flags_func is not None:
 			highlighter = (highlighter, flags_func(prefix))
@@ -316,7 +318,7 @@ class Choices(collections.ChainMap):
 				short, styled = self._get_short_and_styled(translation,
 					shorthand_highlighter
 						if not is_default or default_highlighter_all
-						else functools.comp(shorthand_highlighter, default_highlighter),
+						else comp(shorthand_highlighter, default_highlighter),
 					self.short)
 			else:
 				short = None
@@ -357,7 +359,7 @@ class Choices(collections.ChainMap):
 	def _get_string_transformer(x, unpack_defaults=()):
 		if not x:
 			x = (identity,)
-		if not isinstance(x, tuple):
+		elif not isinstance(x, tuple):
 			x = tuple(x) if isinstance(x, collections.Container) else (x,)
 		if len(x) <= len(unpack_defaults):
 			x += unpack_defaults[max(len(x) - 1, 0):]

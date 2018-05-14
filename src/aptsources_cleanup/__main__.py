@@ -42,7 +42,7 @@ def main(*args):
 				sep=': ', file=sys.stderr)
 			return 1
 		import glob
-		del sourceslist.list[:]
+		sourceslist.list.clear()
 		foreach(sourceslist.load,
 			glob.iglob(os.path.join(args.debug_sources_dir, '*.list')))
 
@@ -100,15 +100,17 @@ class TerminalHelpFormatter(argparse.HelpFormatter):
 
 
 	def _split_lines_gen(self, text, width, **kwargs):
-		for i, paragraph in enumerate(text.split('\n\n')):
+		first = True
+		for paragraph in text.split('\n\n'):
 			paragraph = textwrap.wrap(paragraph, width, **kwargs)
-			if not i:
-				text = paragraph
+			if first:
+				lines = paragraph
+				first = False
 			else:
-				text.append('')
-				text += paragraph
+				lines.append('')
+				lines += paragraph
 
-		return text
+		return lines
 
 
 	def add_epilog(self, items):
@@ -121,10 +123,10 @@ class TerminalHelpFormatter(argparse.HelpFormatter):
 			fpartial(peek, list.extend), starmap(self._wrap_definition, items)))
 
 
-	def _wrap_definition(self, _def, desc):
+	def _wrap_definition(self, def_, desc):
 		lsep = ':'
 		rsep = ' '
-		lines = textwrap.wrap(_def + lsep, self._width)
+		lines = textwrap.wrap(def_ + lsep, self._width)
 		if len(lines[-1]) + len(rsep) + len(desc) <= self._width:
 			lines[-1] += rsep + desc
 		else:
@@ -140,7 +142,7 @@ class TerminalHelpFormatter(argparse.HelpFormatter):
 			super(TerminalHelpFormatter, self)._format_actions_usage(
 				tuple(filterfalse(
 					methodcaller(isinstance, (argparse._HelpAction, VersionAction)),
-				actions)),
+					actions)),
 				groups))
 
 
@@ -238,11 +240,10 @@ def parse_args(args):
 
 	args, unkown = ap.parse_known_args(args)
 	if unkown:
-		msg = (
+		ap.error(
 			(_('unrecognized arguments: %s') % ' '.join(unkown)) + '\n' +
 			_("Use '{help_opt:s}' to display the program help.")
 				.format(help_opt='--help'))
-		ap.error(msg)
 
 	Choices.debug = args.debug_choices_print
 
@@ -298,6 +299,7 @@ def handle_empty_files(sourceslist):
 	total_count = 0
 	removed_count = 0
 
+	question = _("'{file:s}' contains no valid and enabled repository lines.  Do you want to remove it?")
 	choices = Choices(
 		_U('yes'), _U('no'), _U('all'), _U('none'), _U('display'),
 		default='no')
@@ -309,9 +311,7 @@ def handle_empty_files(sourceslist):
 
 		while answer is None:
 			print()
-			answer = choices.ask(
-				_("'{file:s}' contains no valid and enabled repository lines.  Do you want to remove it?").format(file=file),
-				on_eof=on_eof)
+			answer = choices.ask(question.format(file=file), on_eof=on_eof)
 			if answer is not None and answer.orig == 'display':
 				display_file(file)
 				answer = None
@@ -319,8 +319,8 @@ def handle_empty_files(sourceslist):
 		if answer.orig in ('yes', 'all'):
 			rv2, rc2 = remove_sources_files(file)
 			rv |= rv2
-			removed_count += rc2
 			if rc2:
+				removed_count += rc2
 				foreach(sourceslist.remove, source_entries)
 
 		if answer.orig not in ('all', 'none'):

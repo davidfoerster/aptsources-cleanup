@@ -60,7 +60,7 @@ def display_file(filename):
 		with FileDescriptor(filename) as fd:
 			sys.stdout.flush()
 			if sendfile_all(sys.stdout.fileno(), fd) == 0:
-				print('<', _('empty'), '>', sep='')
+				print('<{:s}>'.format(_('empty')))
 	except EnvironmentError as ex:
 		print(_('Error'), ex, sep=': ', file=sys.stderr)
 
