@@ -13,6 +13,7 @@ import errno
 import weakref
 import textwrap
 import operator
+import itertools
 from functools import partial as fpartial
 
 
@@ -213,11 +214,12 @@ class termwrap(textwrap.TextWrapper):
 
 
 	def copy(self, **kwargs):
-		for n in (
-			'break_long_words', 'break_on_hyphens', 'drop_whitespace', 'expand_tabs',
-			'fix_sentence_endings', 'initial_indent', 'max_lines', 'placeholder',
-			'replace_whitespace', 'subsequent_indent', 'tabsize', 'width', 'file'
+		for n in itertools.chain(
+			('break_long_words', 'break_on_hyphens', 'drop_whitespace', 'expand_tabs',
+				'fix_sentence_endings', 'initial_indent', 'replace_whitespace',
+				'subsequent_indent', 'width', 'file'),
+			filter(fpartial(hasattr, self), ('max_lines', 'placeholder', 'tabsize'))
 		):
 			kwargs.setdefault(n, getattr(self, n))
 
-		return type(self)(**kwargs)
+		return self.__class__(**kwargs)
