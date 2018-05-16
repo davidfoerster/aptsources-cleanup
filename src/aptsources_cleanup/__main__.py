@@ -100,12 +100,11 @@ class TerminalHelpFormatter(argparse.HelpFormatter):
 
 
 	def _split_lines_gen(self, text, width, **kwargs):
-		first = True
+		lines = None
 		for paragraph in text.split('\n\n'):
 			paragraph = textwrap.wrap(paragraph, width, **kwargs)
-			if first:
+			if lines is None:
 				lines = paragraph
-				first = False
 			else:
 				lines.append('')
 				lines += paragraph
