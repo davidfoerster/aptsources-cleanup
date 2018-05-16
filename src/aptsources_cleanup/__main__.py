@@ -36,22 +36,30 @@ def main(*args):
 		import_check('aptsources.sourceslist', 'apt', None, args.debug_import_fail)
 
 	sourceslist = aptsources.sourceslist.SourcesList(False)
-	if args.debug_sources_dir is not None:
-		if not os.path.isdir(args.debug_sources_dir):
-			termwrap.stderr().print('{:s}: {:s}: {:s}'.format(
-				_('Error'), _('No such directory'), args.debug_sources_dir))
-			return 1
-		import glob
-		sourceslist.list.clear()
-		foreach(sourceslist.load,
-			glob.iglob(os.path.join(args.debug_sources_dir, '*.list')))
 
-	rv = handle_duplicates(sourceslist, args.apply_changes)
+	rv = 0
+	if args.debug_sources_dir is not None:
+		rv = load_sources_dir(sourceslist, args.debug_sources_dir)
+
+	if rv == 0:
+		rv = handle_duplicates(sourceslist, args.apply_changes)
 
 	if rv == 0 and args.apply_changes is not False:
 		rv = handle_empty_files(sourceslist)
 
 	return rv
+
+
+def load_sources_dir(sourceslist, dirname):
+	if not os.path.isdir(dirname):
+		termwrap.stderr().print('{:s}: {:s}: {:s}'.format(
+			_('Error'), _('No such directory'), dirname))
+		return 1
+
+	import glob
+	del sourceslist.list[:]
+	foreach(sourceslist.load, glob.iglob(os.path.join(dirname, '*.list')))
+	return 0
 
 
 class MyArgumentParser(argparse.ArgumentParser):
