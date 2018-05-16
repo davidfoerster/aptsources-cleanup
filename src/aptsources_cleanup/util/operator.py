@@ -3,6 +3,8 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 
 __all__ = ('identity', 'rapply', 'methodcaller', 'starcall')
 
+import operator
+
 
 def identity(x):
 	"""Returns its attribute"""
@@ -17,14 +19,18 @@ def rapply(arg, func):
 class methodcaller(object):
 	"""Binds arguments for instance(-like) method calls.
 
-	Instance of this class are callable and pass their single positional argument
-	as the first position argument to the wrapped function followed by the other
-	arguments given during instantiation."""
+	Instances of this class are callable and pass their single positional
+	argument as the first positional argument to the wrapped function followed by
+	the other arguments given during instantiation."""
 
 	__slots__ = ('func', 'args')
 
 
 	def __init__(self, func, *args):
+		if not callable(func):
+			func = operator.methodcaller(func, *args)
+			args = ()
+
 		self.func = func
 		self.args = args
 
