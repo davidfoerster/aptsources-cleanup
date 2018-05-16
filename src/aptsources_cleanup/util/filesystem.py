@@ -6,6 +6,7 @@ __all__ = ('samefile', 'remove_sources_files')
 
 from ._3to2 import *
 from .gettext import _
+from .terminal import termwrap
 import sys
 import os, os.path
 import errno
@@ -36,9 +37,9 @@ def remove_sources_files(filename):
 		except EnvironmentError as ex:
 			if not (may_fail_missing and ex.errno == errno.ENOENT):
 				rv |= 1
-				print(_('Error'), ex, sep=': ', file=sys.stderr)
+				termwrap.stderr().print('{:s}: {!s}'.format(_('Error'), ex))
 		else:
 			removed_count += not may_fail_missing
-			print(_("'{path:s}' removed.").format(path=f))
+			termwrap.stderr().print(_("'{path:s}' removed.").format(path=f))
 
 	return rv, removed_count

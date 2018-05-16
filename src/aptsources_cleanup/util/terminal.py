@@ -13,6 +13,7 @@ import errno
 import weakref
 import textwrap
 import operator
+from functools import partial as fpartial
 
 
 TERMMODES = ('bold', 'underline smul', 'normal sgr0')
@@ -209,3 +210,14 @@ class termwrap(textwrap.TextWrapper):
 		if not file.isatty():
 			return 0
 		return get_terminal_size(file.fileno()).columns
+
+
+	def copy(self, **kwargs):
+		for n in (
+			'break_long_words', 'break_on_hyphens', 'drop_whitespace', 'expand_tabs',
+			'fix_sentence_endings', 'initial_indent', 'max_lines', 'placeholder',
+			'replace_whitespace', 'subsequent_indent', 'tabsize', 'width', 'file'
+		):
+			kwargs.setdefault(n, getattr(self, n))
+
+		return type(self)(**kwargs)

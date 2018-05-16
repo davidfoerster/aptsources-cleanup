@@ -5,6 +5,7 @@ __all__ = ('FileDescriptor', 'display_file', 'sendfile_all')
 
 from ._3to2 import *
 from .gettext import _
+from .terminal import termwrap
 import os
 import sys
 
@@ -62,7 +63,7 @@ def display_file(filename):
 			if sendfile_all(sys.stdout.fileno(), fd) == 0:
 				print('<{:s}>'.format(_('empty')))
 	except EnvironmentError as ex:
-		print(_('Error'), ex, sep=': ', file=sys.stderr)
+		termwrap.stderr().print('{:s}: {!s}'.format(_('Error'), ex))
 
 
 def sendfile_all(out, in_):

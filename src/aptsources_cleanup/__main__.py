@@ -38,8 +38,8 @@ def main(*args):
 	sourceslist = aptsources.sourceslist.SourcesList(False)
 	if args.debug_sources_dir is not None:
 		if not os.path.isdir(args.debug_sources_dir):
-			print(_('Error'), _('No such directory'), args.debug_sources_dir,
-				sep=': ', file=sys.stderr)
+			termwrap.stderr().print('{:s}: {:s}: {:s}'.format(
+				_('Error'), _('No such directory'), args.debug_sources_dir))
 			return 1
 		import glob
 		sourceslist.list.clear()
@@ -254,41 +254,45 @@ def parse_args(args):
 def handle_duplicates(sourceslist, apply_changes=None):
 	"""Interactive disablement of duplicate source entries"""
 
+	stdout = termwrap.stdout()
+	stdout_indent1 = stdout.copy(
+		subsequent_indent=stdout.subsequent_indent + ' ' * 4)
+	stdout_indent2 = stdout_indent1.copy(
+		initial_indent=stdout_indent1.subsequent_indent)
+
 	duplicates = tuple(get_duplicates(sourceslist))
 	if duplicates:
 		for dupe_set in duplicates:
 			orig = dupe_set.pop(0)
 			for dupe in dupe_set:
-				print(_(
-'''Overlapping source entries:
-  1. file {orig_file:s}:
-     {orig_line:s}
-  2. file {dupe_file:s}:
-     {dupe_line:s}
-I disabled the latter entry.''')
-						.format(orig_file=orig.file, orig_line=orig.line.strip(),
-							dupe_file=dupe.file, dupe_line=dupe.line.strip()),
-					end='\n\n')
+				stdout.print(_('Overlapping source entries:'))
+				for i, se in enumerate((orig, dupe), 1):
+					stdout_indent1.print(
+						_("{ordinal:2d}. file '{file:s}':")
+							.format(ordinal=i, file=se.file))
+					stdout_indent2.print(se.line)
+				stdout.print(_('I disabled the latter entry.'), end='\n\n')
 				dupe.disabled = True
 
-		print(
+		stdout.print(
 			_N('{nduplicates:d} source entry was disabled',
 				'{nduplicates:d} source entries were disabled',
-				len(duplicates)).format(nduplicates=len(duplicates)) + ':',
-			*itertools.chain(*duplicates), sep='\n  ')
+				len(duplicates)).format(nduplicates=len(duplicates)) + ':')
+		stdout_indent2.initial_indent = stdout_indent2.initial_indent[:-2]
+		stdout_indent2.print_all(map(str, itertools.chain(*duplicates)), sep='\n')
 
 		if apply_changes is None:
-			choices = Choices(_U('yes'), _U('no'), default='no')
-			print()
-			answer = choices.ask(_('Do you want to save these changes?'))
+			stdout.file.write('\n')
+			answer = (Choices(_U('yes'), _U('no'), default='no')
+				.ask(_('Do you want to save these changes?')))
 			if answer is None or answer.orig != 'yes':
-				print(_('Aborted.'), file=sys.stderr)
+				termwrap.stderr().print(_('Aborted.'))
 				return 2
 		if apply_changes is not False:
 			sourceslist.save()
 
 	else:
-		print(_('No duplicate entries were found.'))
+		stdout.print(_('No duplicate entries were found.'))
 
 	return 0
 
@@ -300,7 +304,7 @@ def handle_empty_files(sourceslist):
 	total_count = 0
 	removed_count = 0
 
-	question = _("'{file:s}' contains no valid and enabled repository lines.  Do you want to remove it?")
+	stdout = termwrap.stdout()
 	choices = Choices(
 		_U('yes'), _U('no'), _U('all'), _U('none'), _U('display'),
 		default='no')
@@ -311,8 +315,11 @@ def handle_empty_files(sourceslist):
 		total_count += 1
 
 		while answer is None:
-			print()
-			answer = choices.ask(question.format(file=file), on_eof=on_eof)
+			stdout.file.write('\n')
+			stdout.print(
+				_("'{file:s}' contains no valid and enabled repository lines.")
+					.format(file=file))
+			answer = choices.ask(_('Do you want to remove it?'), on_eof=on_eof)
 			if answer is not None and answer.orig == 'display':
 				display_file(file)
 				answer = None
@@ -328,10 +335,10 @@ def handle_empty_files(sourceslist):
 			answer = None
 
 	if total_count:
-		print('\n',
+		stdout.file.write('\n')
+		stdout.print(
 			_('{nremoved:d} of {ntotal:d} empty sourcelist files removed.')
-				.format(nremoved=removed_count, ntotal=total_count),
-			sep='')
+				.format(nremoved=removed_count, ntotal=total_count))
 
 	return rv
 
@@ -340,8 +347,8 @@ if __name__ == '__main__':
 	try:
 		locale.setlocale(locale.LC_ALL, '')
 	except locale.Error as ex:
-		print('Warning: Cannot set locale', ex,
-			sep=': ', end='\n\n', file=sys.stderr)
+		termwrap.stderr().print(
+			'Warning: Cannot set locale: ' + str(ex), end='\n\n')
 
 	try:
 		sys.exit(main())
