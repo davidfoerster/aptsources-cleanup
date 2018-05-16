@@ -113,11 +113,11 @@ class LazyInstance(object):
 			return getattr(self._li_instance, name)
 
 		if callable(method_or_name):
-			def bound_method(*args, **kwargs):
-				return method_or_name(self._instance)(*args, **kwargs)
+			def bound_method(*args):
+				return method_or_name(self._instance)(*args)
 
 		else:
-			def bound_method(*args, **kwargs):
-				return getattr(self._instance, method_or_name)(*args, **kwargs)
+			def bound_method(*args):
+				return getattr(self._instance, method_or_name)(*args)
 
 		return bound_method
