@@ -383,6 +383,12 @@ class Choices(collections.ChainMap):
 		return self.choices_string
 
 
+	def __repr__(self):
+		return '{:s}([{:s}], default={!r}, joiner={!r})'.format(
+			type(self).__name__, ', '.join(map(repr, self.orig.values())),
+			self.default and self.default.orig, self.joiner)
+
+
 	def get_question(self, question, sep='  '):
 		"""Construct a string combining a question and these choices"""
 		return '{:s}{:s}({:s})'.format(question, sep, self.choices_string)
