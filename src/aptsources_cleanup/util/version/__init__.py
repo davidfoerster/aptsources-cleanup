@@ -42,7 +42,7 @@ class version_info(object):
 
 	def __repr__(self):
 		return '{:s}.{:s}({:s})'.format(
-			self.__class__.__module__, self.__class__.__qualname__,
+			self.__class__.__module__, self.__class__.__name__,
 			', '.join(starmap('{:s}={!r}'.format, self.items())))
 
 
