@@ -17,7 +17,6 @@ from .itertools import unique, last, filterfalse
 from .functools import LazyInstance, comp, partial as fpartial
 from .zipfile import ZipFile
 import gettext as _gettext
-import re
 import operator
 import sys
 import os
@@ -27,6 +26,11 @@ import locale
 import unicodedata
 from itertools import islice, starmap
 from gettext import NullTranslations, GNUTranslations
+
+try:
+	import regex as re
+except ImportError:
+	import re
 
 
 def _get_archive():
@@ -366,20 +370,34 @@ class Choices(collections.ChainMap):
 		return x
 
 
-	@staticmethod
-	def _get_short_and_styled(s, shorthand_highlighter, existing):
-		itemgetter1 = operator.itemgetter(1)
-		try:
-			ishort, short = next(iter(
-				filterfalse(comp(itemgetter1, existing.__contains__),
-				filter(comp(itemgetter1, str.isalpha),
-					enumerate(s)))))
-		except StopIteration:
+	@classmethod
+	def _get_short_and_styled(cls, s, shorthand_highlighter, existing):
+		short = next(
+			iter(filterfalse(
+				comp(operator.methodcaller('group'), existing.__contains__),
+				cls.letter_pattern.finditer(s))),
+			None)
+		if not short:
 			raise ValueError(
 				"No unique shorthand available for choice '{:s}'".format(s))
 
-		styled = s[:ishort] + shorthand_highlighter(short) + s[ishort + 1:]
-		return normalize_casefold(short), styled
+		styled = (s[:short.start()] +
+			shorthand_highlighter(short.group()) + s[short.end():])
+		return normalize_casefold(short.group()), styled
+
+
+	# Try to detect grapheme clusters if supported
+	letter_pattern = re.compile(r'(?=\S)\X', re.UNICODE)
+	if not letter_pattern.fullmatch('A'):
+		# Fall back to simple letter detection
+		letter_pattern = re.compile(r'\S', re.UNICODE)
+		if __debug__:
+			terminal.termwrap.stderr().print(
+				"Warning: The regular expression module of your Python installation "
+				"lacks support for grapheme clusters.  If your language's script "
+				"includes composed graphemes the answer choice short-hands may behave "
+				"unexpectedly.  Please install the 'regex' module to enable support "
+				"for grapheme clusters.", '\n\n')
 
 
 	def __str__(self):
