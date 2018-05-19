@@ -368,9 +368,12 @@ class Choices(collections.ChainMap):
 
 	@staticmethod
 	def _get_short_and_styled(s, shorthand_highlighter, existing):
+		itemgetter1 = operator.itemgetter(1)
 		try:
-			ishort, short = next(iter(filterfalse(
-				comp(operator.itemgetter(1), existing.__contains__), enumerate(s))))
+			ishort, short = next(iter(
+				filterfalse(comp(itemgetter1, existing.__contains__),
+				filter(comp(itemgetter1, str.isalpha),
+					enumerate(s)))))
 		except StopIteration:
 			raise ValueError(
 				"No unique shorthand available for choice '{:s}'".format(s))
