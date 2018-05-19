@@ -135,7 +135,7 @@ class TerminalHelpFormatter(argparse.HelpFormatter):
 		rsep = ' '
 		lines = textwrap.wrap(def_ + lsep, self._width)
 		if len(lines[-1]) + len(rsep) + len(desc) <= self._width:
-			lines[-1] += rsep + desc
+			lines[-1] = rsep.join((lines[-1], desc))
 		else:
 			indent = ' ' * self._indent_increment
 			lines += textwrap.wrap(desc, self._width,
@@ -249,10 +249,10 @@ def parse_args(args):
 
 	args, unkown = ap.parse_known_args(args)
 	if unkown:
-		ap.error(
-			(_('unrecognized arguments: %s') % ' '.join(unkown)) + '\n' +
+		ap.error('\n'.join((
+			_('unrecognized arguments: %s') % ' '.join(unkown),
 			_("Use '{help_opt:s}' to display the program help.")
-				.format(help_opt='--help'))
+				.format(help_opt='--help'))))
 
 	Choices.debug = args.debug_choices_print
 

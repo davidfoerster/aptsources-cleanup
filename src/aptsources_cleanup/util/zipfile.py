@@ -84,7 +84,7 @@ class ZipFile(_zipfile.ZipFile):
 					repr(c_full), sep=': ')
 			return c_info
 		if len(c_full) + c_info.file_size > self._max_path:
-			raise strerror(errno.ENAMETOOLONG, self.filename + ':' + c_full)
+			raise strerror(errno.ENAMETOOLONG, ':'.join((self.filename, c_full)))
 
 		c_seen = resolved = c_full in seen_set
 		if c_info.file_size == 0:
@@ -103,7 +103,7 @@ class ZipFile(_zipfile.ZipFile):
 			raise OSError(errno.EINVAL, 'Empty symbolic link in archive',
 				self.filename + ':' + c_full)
 		if c_seen:
-			raise strerror(errno.ELOOP, self.filename + ':' + c_full)
+			raise strerror(errno.ELOOP, ':'.join((self.filename, c_full)))
 		if self.debug >= 2:
 			print('Found symbolic link: {!r} => {!r}'.format(c_full, resolved))
 

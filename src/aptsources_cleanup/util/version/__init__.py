@@ -58,7 +58,7 @@ class version_info(object):
 		if self.commit:
 			v.append(self.commit[:7])
 			if self.branch_name:
-				v[-1] += ':' + self.branch_name
+				v[-1] = ':'.join((v[-1], self.branch_name))
 
 		return ' '.join(v)
 

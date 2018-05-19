@@ -33,7 +33,7 @@ def import_check(module_name, apt_pkg_suffix, import_error=None, debug_fail=0):
 		python_name += str(sys.version_info.major)
 	python_exe = '/usr/bin/' + python_name
 	python_pkg = python_name + '-minimal'
-	apt_pkg = python_name + '-' + apt_pkg_suffix
+	apt_pkg = '-'.join((python_name, apt_pkg_suffix))
 
 	paragraphs = [
 		'{:s}: {!s}.  {:s}  {:s}'.format(
@@ -45,12 +45,13 @@ def import_check(module_name, apt_pkg_suffix, import_error=None, debug_fail=0):
 
 	if not samefile(python_exe, sys.executable) or debug_fail:
 		questional_interpreter_msg = len(paragraphs)
-		paragraphs.append(_('Warning') + ': ' +
+		paragraphs.append(': '.join((
+			_('Warning'),
 			_("The current Python interpreter is '{py_exe:s}'.  Please use the "
 					"default '{py_exe_default:s}' if you encounter issues with the "
 					"import of the '{module:s}' module.")
 				.format(py_exe=sys.executable, py_exe_default=python_exe,
-					module=module_name))
+					module=module_name))))
 	else:
 		questional_interpreter_msg = None
 
@@ -61,9 +62,10 @@ def import_check(module_name, apt_pkg_suffix, import_error=None, debug_fail=0):
 					"package.")
 				.format(package=python_pkg, py_exe=python_exe))
 		if questional_interpreter_msg is not None:
-			paragraphs[questional_interpreter_msg] += '  ' + msg
+			paragraphs[questional_interpreter_msg] = '  '.join((
+				paragraphs[questional_interpreter_msg], msg))
 		else:
-			paragraphs.append(_('Warning') + ': ' + msg)
+			paragraphs.append(': '.join((_('Warning'), msg)))
 
 	try:
 		termwrap.get(sys.stderr, ignore_errors=False)

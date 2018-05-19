@@ -91,7 +91,7 @@ def translation(domain, localedir=None, languages=None, _class=None,
 	translations = None
 	if languages:
 		localedir = localedir[len(archive) + len(os.sep):].strip(os.sep)
-		locale_suffix = os.path.join('LC_MESSAGES', domain + os.extsep + 'mo')
+		locale_suffix = os.path.join('LC_MESSAGES', os.extsep.join((domain, 'mo')))
 		with ZipFile(archive) as archive:
 			#archive.debug = 3
 			for lang in languages:
@@ -381,8 +381,8 @@ class Choices(collections.ChainMap):
 			raise ValueError(
 				"No unique shorthand available for choice '{:s}'".format(s))
 
-		styled = (s[:short.start()] +
-			shorthand_highlighter(short.group()) + s[short.end():])
+		styled = ''.join((s[:short.start()],
+			shorthand_highlighter(short.group()), s[short.end():]))
 		return normalize_casefold(short.group()), styled
 
 
