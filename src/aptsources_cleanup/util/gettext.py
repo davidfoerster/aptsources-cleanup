@@ -313,7 +313,7 @@ class Choices(collections.ChainMap):
 
 		for orig in choices:
 			is_default = orig == default
-			translation = _(orig)
+			translation = unicodedata.normalize('NFKC', _(orig))
 			if use_shorthands(orig):
 				short, styled = self._get_short_and_styled(translation,
 					shorthand_highlighter
