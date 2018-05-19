@@ -13,7 +13,7 @@ from . import functools
 from . import collections
 from .strings import startswith_token
 from .operator import identity, methodcaller, peek
-from .itertools import unique, last
+from .itertools import unique, last, filterfalse
 from .functools import LazyInstance, comp, partial as fpartial
 from .zipfile import ZipFile
 import gettext as _gettext
@@ -258,7 +258,7 @@ class ChoiceHighlighters(
 	def _verify_unprintable_patterns(cls, s):
 		m = last(cls.unprintable_pattern.finditer(s), None)
 		if m is not None and s.find('｛｛', m.end()) >= 0:
-			raise ValueError("'{:s}' contains an unmatched infix '｛｛'.".format(s))
+			raise ValueError("{!r} contains an unmatched infix '｛｛'.".format(s))
 
 
 class Choices(collections.ChainMap):
@@ -369,8 +369,8 @@ class Choices(collections.ChainMap):
 	@staticmethod
 	def _get_short_and_styled(s, shorthand_highlighter, existing):
 		try:
-			ishort, short = next(iter(
-				ic for ic in enumerate(s) if ic[1] not in existing))
+			ishort, short = next(iter(filterfalse(
+				comp(operator.itemgetter(1), existing.__contains__), enumerate(s))))
 		except StopIteration:
 			raise ValueError(
 				"No unique shorthand available for choice '{:s}'".format(s))
