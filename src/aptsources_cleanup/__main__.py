@@ -293,10 +293,12 @@ def handle_duplicates(sourceslist, apply_changes=None):
 			stdout.file.write('\n')
 			answer = (Choices(_U('yes'), _U('no'), default='no')
 				.ask(_('Do you want to save these changes?')))
-			if answer is None or answer.orig != 'yes':
+			apply_changes = answer is not None and answer.orig == 'yes'
+			if not apply_changes:
 				termwrap.stderr().print(_('Aborted.'))
 				return 2
-		if apply_changes is not False:
+
+		if apply_changes:
 			sourceslist.save()
 
 	else:

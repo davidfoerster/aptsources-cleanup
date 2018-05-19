@@ -50,10 +50,12 @@ class version_info(object):
 		v = [str(self.version)]
 
 		if self.date:
-			if isinstance(self.date, datetime.date):
-				v.append(self.date.strftime('%Y-%m-%d'))
-			else:
+			try:
+				date_strftime = self.date.strftime
+			except AttributeError:
 				v.append(self.date)
+			else:
+				v.append(date_strftime('%Y-%m-%d'))
 
 		if self.commit:
 			v.append(self.commit[:7])
