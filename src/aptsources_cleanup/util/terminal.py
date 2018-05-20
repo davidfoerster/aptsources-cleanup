@@ -21,8 +21,6 @@ TERMMODES = ('bold', 'underline smul', 'normal sgr0')
 
 TERMMODES = map(operator.methodcaller('partition', ' '), TERMMODES)
 
-termmodes_noctrl_pattern = '[\x00-\x1f]'
-
 if sys.stdout and sys.stdout.isatty():
 	try:
 		import curses
@@ -52,7 +50,7 @@ except ImportError:
 	terminal_size = collections.namedtuple(
 		'terminal_size', ('columns', 'lines'))
 
-	def get_terminal_size(cls, fd=1):
+	def get_terminal_size(fd=1):
 		"""A fall-back implementation of os.get_terminal_size()"""
 
 		lines, columns = struct.unpack(b'hh',
