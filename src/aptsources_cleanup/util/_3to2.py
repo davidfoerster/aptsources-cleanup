@@ -15,25 +15,11 @@ try:
 	from __builtin__ import \
 		unicode as str, str as bytes, basestring, raw_input, \
 		xrange as range
-
 except ImportError:
-	from builtins import input
 	basestring = (str, bytes)
-
 else:
+	from .impl.input import input
 	__all__.extend(('str', 'bytes', 'range', 'input'))
-
-	import sys, locale
-
-	def input(prompt=None):
-		"""Wraps 'raw_input' and encodes its return value
-
-		Using the encoding of sys.stdin if available, or the preferred encoding of
-		the current locale.
-		"""
-
-		answer = raw_input() if prompt is None else raw_input(prompt)
-		return str(answer, sys.stdin.encoding or locale.getpreferredencoding())
 
 
 try:

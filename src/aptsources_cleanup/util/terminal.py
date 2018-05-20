@@ -16,6 +16,11 @@ import operator
 import itertools
 from functools import partial as fpartial
 
+try:
+	from os import terminal_size, get_terminal_size
+except ImportError:
+	from .impl.terminal_size import terminal_size, get_terminal_size
+
 
 TERMMODES = ('bold', 'underline smul', 'normal sgr0')
 
@@ -39,23 +44,6 @@ else:
 		k: (curses.tigetstr(capname or k) or b'').decode('ascii')
 		for k, _, capname in TERMMODES
 	}
-
-
-try:
-	from os import terminal_size, get_terminal_size
-
-except ImportError:
-	import struct, fcntl, termios, collections
-
-	terminal_size = collections.namedtuple(
-		'terminal_size', ('columns', 'lines'))
-
-	def get_terminal_size(fd=1):
-		"""A fall-back implementation of os.get_terminal_size()"""
-
-		lines, columns = struct.unpack(b'hh',
-			fcntl.ioctl(fd, termios.TIOCGWINSZ, b'\x00\x00\x00\x00'))
-		return terminal_size(columns, lines)
 
 
 def try_input(prompt=None, on_eof='', end='\n? '):
