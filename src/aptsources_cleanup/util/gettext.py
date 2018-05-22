@@ -64,6 +64,7 @@ def get_languages():
 			langs.append(loc)
 
 	if not any(langs):
+		del langs[:]
 		langs.append('C')
 
 	return langs
