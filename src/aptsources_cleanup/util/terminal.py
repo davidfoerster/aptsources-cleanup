@@ -113,12 +113,12 @@ class termwrap(textwrap.TextWrapper):
 	@classmethod
 	def stdout(cls):
 		"""Convenience method for get(sys.stdout)"""
-		return cls.get()
+		return cls.get(sys.stdout, False)
 
 	@classmethod
 	def stderr(cls):
 		"""Convenience method for get(sys.stderr)"""
-		return cls.get(sys.stderr)
+		return cls.get(sys.stderr, False)
 
 
 	def __init__(self, file=None, width=0, **kwargs):
