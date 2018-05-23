@@ -58,15 +58,17 @@ def try_input(prompt=None, on_eof='', end='\n? '):
 
 	if prompt:
 		termwrap.stdout().print(prompt, end=end)
-		end = ''
+		end = None
 
-	try:
-		return input(end)
-	except (EOFError, KeyboardInterrupt):
-		pass
-	except EnvironmentError as ex:
-		if ex.errno != errno.EBADF:
-			raise
+	if sys.stdin:
+		try:
+			return input(end)
+		except (EOFError, KeyboardInterrupt):
+			pass
+		except EnvironmentError as ex:
+			if ex.errno != errno.EBADF:
+				raise
+
 	return on_eof
 
 
