@@ -9,7 +9,7 @@ __all__ = (
 
 from ._3to2 import *
 from functools import *
-from .operator import rapply, identity
+from .operator import rapply, identity, methodcaller
 
 
 def comp(*funcs):
@@ -17,6 +17,7 @@ def comp(*funcs):
 	to right.
 	"""
 
+	assert all(map(callable, funcs))
 	if len(funcs) <= 1:
 		return funcs[0] if funcs else identity
 	return partial(reduce, rapply, funcs)
@@ -107,17 +108,10 @@ class LazyInstance(object):
 
 
 	def _li_bind_method_impl(self, method_or_name):
+		if not callable(method_or_name):
+			method_or_name = methodcaller(getattr, method_or_name)
+
 		if self._li_factory is None:
-			if callable(method_or_name):
-				return method_or_name(self._li_instance)
-			return getattr(self._li_instance, name)
+			return method_or_name(self._li_instance)
 
-		if callable(method_or_name):
-			def bound_method(*args):
-				return method_or_name(self._instance)(*args)
-
-		else:
-			def bound_method(*args):
-				return getattr(self._instance, method_or_name)(*args)
-
-		return bound_method
+		return lambda *args: method_or_name(self._instance)(*args)

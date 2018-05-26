@@ -12,8 +12,9 @@ import sys
 import errno
 import weakref
 import textwrap
-import operator
 import itertools
+from operator import itemgetter
+from .operator import methodcaller
 from functools import partial as fpartial
 
 try:
@@ -22,9 +23,7 @@ except ImportError:
 	from .impl.terminal_size import terminal_size, get_terminal_size
 
 
-TERMMODES = ('bold', 'underline smul', 'normal sgr0')
-
-TERMMODES = map(operator.methodcaller('partition', ' '), TERMMODES)
+TERMMODES = (('bold', 'bold'), ('underline', 'smul'), ('normal', 'sgr0'))
 
 if sys.stdout and sys.stdout.isatty():
 	try:
@@ -38,11 +37,11 @@ else:
 	curses = None
 
 if curses is None:
-	TERMMODES = dict.fromkeys(map(operator.itemgetter(0), TERMMODES), '')
+	TERMMODES = dict.fromkeys(map(itemgetter(0), TERMMODES), '')
 else:
 	TERMMODES = {
-		k: (curses.tigetstr(capname or k) or b'').decode('ascii')
-		for k, _, capname in TERMMODES
+		k: (curses.tigetstr(capname) or b'').decode('ascii')
+		for k, capname in TERMMODES
 	}
 
 
@@ -168,17 +167,15 @@ class termwrap(textwrap.TextWrapper):
 
 
 	@staticmethod
-	def _get_last_line_len(s, end):
-		n = len(end)
-		p = end.rfind('\n') + 1
-		if p:
-			return n - p
-
-		n += len(s)
-		p = s.rfind('\n') + 1
-		if p:
-			return n - p
-
+	def _get_last_line_len(*parts):
+		assert parts
+		parts = reversed(parts)
+		for n, p in zip(
+			itertools.accumulate(map(len, parts)),
+			map(methodcaller(str.rfind, '\n'), parts)
+		):
+			if p >= 0:
+				return n - p - 1
 		return n
 
 

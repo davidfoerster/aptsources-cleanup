@@ -42,6 +42,7 @@ def count(iterable):
 
 def last(iterable, *default):
 	"""Return the last item of an iterable or 'default' if there's none."""
+	assert len(default) <= 1
 	iterable = iter(iterable)
 
 	try:

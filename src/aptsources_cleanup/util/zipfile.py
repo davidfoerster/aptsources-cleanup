@@ -83,7 +83,7 @@ class ZipFile(_zipfile.ZipFile):
 				print(('Not a symlink', 'Does not exist')[c_info is None],
 					repr(c_full), sep=': ')
 			return c_info
-		if len(c_full) + c_info.file_size > self._max_path:
+		if len(c_full) - len(c) + c_info.file_size > self._max_path:
 			raise strerror(errno.ENAMETOOLONG, ':'.join((self.filename, c_full)))
 
 		c_seen = resolved = c_full in seen_set
@@ -101,7 +101,7 @@ class ZipFile(_zipfile.ZipFile):
 
 		if not resolved:
 			raise OSError(errno.EINVAL, 'Empty symbolic link in archive',
-				self.filename + ':' + c_full)
+				':'.join((self.filename, c_full)))
 		if c_seen:
 			raise strerror(errno.ELOOP, ':'.join((self.filename, c_full)))
 		if self.debug >= 2:
@@ -136,8 +136,8 @@ class ZipFile(_zipfile.ZipFile):
 
 
 _globals = globals()
-_globals.update((k, getattr(_zipfile, k))
-	for k in filterfalse(_globals.__contains__, __all__))
+_globals.update({ k: getattr(_zipfile, k)
+	for k in filterfalse(_globals.__contains__, __all__) })
 _globals.setdefault('BadZipFile', getattr(_zipfile, 'BadZipfile', None))
 del _globals
 

@@ -40,7 +40,7 @@ def _get_archive():
 		return None
 
 
-def get_localedir(locales_subdir='share/locales'):
+def get_localedir(locales_subdir=os.path.join('share', 'locales')):
 	src_root = os.path.dirname(os.path.dirname(
 		sys.modules[(__package__ or __name__).partition('.')[0]].__file__))
 	src_root_locales = os.path.join(src_root, locales_subdir)
