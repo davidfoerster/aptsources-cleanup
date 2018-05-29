@@ -2,13 +2,13 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: aptsources-cleanup 0.1\n"
-"Report-Msgid-Bugs-To: https://github.com/davidfoerster/aptsources-cleanup/issues\n"
+"Report-Msgid-Bugs-To: https://github.com/davidfoerster/aptsources-cleanup/"
+"issues\n"
 "POT-Creation-Date: 2018-05-28 10:07+0200\n"
-"PO-Revision-Date: 2018-05-28 10:07+0200\n"
+"PO-Revision-Date: 2018-05-29 16:27+0200\n"
 "Last-Translator: David Foerster <david.foerster@informatik.hu-berlin.de>\n"
 "Language-Team: German https://github.com/davidfoerster/aptsources-cleanup\n"
 "Language: en_US\n"
@@ -187,8 +187,8 @@ msgstr "Show program’s version number and exit."
 msgid "ID_DESCRIPTION"
 msgstr ""
 "Detects and interactively deactivates duplicate Apt source entries and "
-"deletes sources list files without valid enabled source entries in "
-"“/etc/sources.list” and “/etc/sources.list.d/*.list”."
+"deletes sources list files without valid enabled source entries in “/etc/"
+"sources.list” and “/etc/sources.list.d/*.list”."
 
 #: src/aptsources_cleanup/__main__.py:211
 msgid "Author"
@@ -199,8 +199,8 @@ msgid "Source code and bug tracker location"
 msgstr "Source code and bug tracker location"
 
 #: src/aptsources_cleanup/__main__.py:217
-msgid "Apply all changes without question."
-msgstr "Apply all changes without question."
+msgid "Apply all non-destructive changes without question."
+msgstr "Apply all non-destructive changes without question."
 
 #: src/aptsources_cleanup/__main__.py:220
 msgid "Never apply changes; only print what would be done."

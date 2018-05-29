@@ -214,7 +214,7 @@ def parse_args(args):
 
 	ap.add_argument('-y', '--yes',
 		dest='apply_changes', action='store_const', const=True,
-		help=_('Apply all changes without question.'))
+		help=_('Apply all non-destructive changes without question.'))
 	ap.add_argument('-n', '--no-act', '--dry-run',
 		dest='apply_changes', action='store_const', const=False,
 		help=_('Never apply changes; only print what would be done.'))

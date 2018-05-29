@@ -8,7 +8,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: https://github.com/davidfoerster/aptsources-cleanup/"
 "issues\n"
 "POT-Creation-Date: 2018-05-15 01:03+0200\n"
-"PO-Revision-Date: 2018-05-03 17:00+0200E\n"
+"PO-Revision-Date: 2018-05-29 16:28+0200E\n"
 "Last-Translator: David Foerster <david.foerster@informatik.hu-berlin.de>\n"
 "Language-Team: German https://github.com/davidfoerster/aptsources-cleanup\n"
 "Language: de_DE\n"
@@ -200,8 +200,8 @@ msgid "Source code and bug tracker location"
 msgstr "Quelltext- und Bug-Tracker-Adresse"
 
 #: src/aptsources_cleanup/__main__.py:217
-msgid "Apply all changes without question."
-msgstr "Wende alle Änderungen ohne Nachfrage an."
+msgid "Apply all non-destructive changes without question."
+msgstr "Wende alle zerstörungsfreien Änderungen ohne Nachfrage an."
 
 #: src/aptsources_cleanup/__main__.py:220
 msgid "Never apply changes; only print what would be done."
@@ -272,12 +272,12 @@ msgstr[0] "{nduplicates:d} Quelleneintrag wurde deaktiviert"
 msgstr[1] "{nduplicates:d} Quelleneinträge wurden deaktiviert"
 
 #: src/aptsources_cleanup/__main__.py:294
-#: src/aptsources_cleanup/__main__.py:317
+#: src/aptsources_cleanup/__main__.py:319
 msgid "no"
 msgstr "nein"
 
 #: src/aptsources_cleanup/__main__.py:294
-#: src/aptsources_cleanup/__main__.py:317
+#: src/aptsources_cleanup/__main__.py:319
 msgid "yes"
 msgstr "ja"
 
@@ -285,36 +285,36 @@ msgstr "ja"
 msgid "Do you want to save these changes?"
 msgstr "Wollen Sie diese Änderungen sichern?"
 
-#: src/aptsources_cleanup/__main__.py:297
+#: src/aptsources_cleanup/__main__.py:298
 msgid "Aborted."
 msgstr "Abgebrochen."
 
-#: src/aptsources_cleanup/__main__.py:303
+#: src/aptsources_cleanup/__main__.py:305
 msgid "No duplicate entries were found."
 msgstr "Keine doppelten Einträge gefunden."
 
-#: src/aptsources_cleanup/__main__.py:317
+#: src/aptsources_cleanup/__main__.py:319
 msgid "all"
 msgstr "alle"
 
-#: src/aptsources_cleanup/__main__.py:317
+#: src/aptsources_cleanup/__main__.py:319
 msgid "display"
 msgstr "anzeigen"
 
-#: src/aptsources_cleanup/__main__.py:317
+#: src/aptsources_cleanup/__main__.py:319
 msgid "none"
 msgstr "keine"
 
-#: src/aptsources_cleanup/__main__.py:328
+#: src/aptsources_cleanup/__main__.py:330
 #, python-brace-format
 msgid "'{file:s}' contains no valid and enabled repository lines."
 msgstr "„{file:s}“ enthält keine gültigen aktiven Verzeichniszeilen."
 
-#: src/aptsources_cleanup/__main__.py:330
+#: src/aptsources_cleanup/__main__.py:332
 msgid "Do you want to remove it?"
 msgstr "Wollen Sie sie entfernen?"
 
-#: src/aptsources_cleanup/__main__.py:348
+#: src/aptsources_cleanup/__main__.py:350
 #, python-brace-format
 msgid "{nremoved:d} of {ntotal:d} empty sourcelist files removed."
 msgstr "{nremoved:d} von {ntotal:d} Quellenlistendateien entfernt."
@@ -330,14 +330,14 @@ msgid "Do you have the '{package:s}' package installed?  You can do so with:"
 msgstr ""
 "Haben Sie das Paket „{package:s}“ installiert? Sie können das nachholen mit:"
 
-#: src/aptsources_cleanup/util/import_check.py:48
-#: src/aptsources_cleanup/util/import_check.py:66
-#: src/aptsources_cleanup/util/import_check.py:71
+#: src/aptsources_cleanup/util/import_check.py:49
+#: src/aptsources_cleanup/util/import_check.py:68
+#: src/aptsources_cleanup/util/import_check.py:73
 #: src/aptsources_cleanup/util/pkg.py:33 src/aptsources_cleanup/util/pkg.py:38
 msgid "Warning"
 msgstr "Warnung"
 
-#: src/aptsources_cleanup/util/import_check.py:49
+#: src/aptsources_cleanup/util/import_check.py:50
 #, python-brace-format
 msgid ""
 "The current Python interpreter is '{py_exe:s}'.  Please use the default "
@@ -348,7 +348,7 @@ msgstr ""
 "Vorgabe „{py_exe_default:s}“, falls Sie Problemen beim Import des Moduls "
 "„{module:s}“ begegnen."
 
-#: src/aptsources_cleanup/util/import_check.py:59
+#: src/aptsources_cleanup/util/import_check.py:60
 #, python-brace-format
 msgid ""
 "Please make sure that the '{package:s}' package wasn't corrupted and that "
@@ -358,7 +358,7 @@ msgstr ""
 "wurde und dass „{py_exe:s}“ sich auf den Python-Interpreter aus dem selben "
 "Paket bezieht."
 
-#: src/aptsources_cleanup/util/import_check.py:72
+#: src/aptsources_cleanup/util/import_check.py:74
 msgid "Cannot wrap text output due a failure to get the terminal size"
 msgstr ""
 "Kann den Ausgabetext nicht umbrechen wegen eines Fehlers beim Bezug der "
