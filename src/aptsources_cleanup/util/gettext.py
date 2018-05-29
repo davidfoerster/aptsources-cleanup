@@ -422,7 +422,8 @@ class Choices(collections.ChainMap):
 		stdout = terminal.termwrap.stdout()
 		write = stdout.file.write
 		indent = stdout.subsequent_indent
-		n = stdout.print(question, sep, True) % stdout.width
+		modulo_width = stdout.width.__rmod__ if stdout.width > 0 else identity
+		n = modulo_width(stdout.print(question, sep, True))
 		i_last = len(self.orig) - 1
 		debug = [] if self.debug else None
 
@@ -445,7 +446,7 @@ class Choices(collections.ChainMap):
 			write(prefix)
 			stdout.file.writelines(unescaped)
 			write(suffix)
-			n = (n + printable_len) % stdout.width
+			n = modulo_width(n + printable_len)
 
 		if debug is not None:
 			print('\nWidth: {:d}'.format(stdout.width),
