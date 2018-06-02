@@ -15,6 +15,7 @@ import textwrap
 import itertools
 from operator import itemgetter
 from .operator import methodcaller
+from .itertools import accumulate
 from functools import partial as fpartial
 
 try:
@@ -171,7 +172,7 @@ class termwrap(textwrap.TextWrapper):
 		assert parts
 		parts = reversed(parts)
 		for n, p in zip(
-			itertools.accumulate(map(len, parts)),
+			accumulate(map(len, parts)),
 			map(methodcaller(str.rfind, '\n'), parts)
 		):
 			if p >= 0:

@@ -1,16 +1,17 @@
 # -*- coding: utf-8
 from __future__ import print_function, division, absolute_import, unicode_literals
 
-__all__ = ('filterfalse', 'foreach', 'unique', 'count')
+__all__ = ('filterfalse', 'accumulate', 'foreach', 'unique', 'count')
 
 from ._3to2 import *
 from .operator import identity
 
 
 try:
-	from itertools import filterfalse
+	from itertools import filterfalse, accumulate
 except ImportError:
 	from itertools import ifilterfalse as filterfalse
+	from .impl.itertools import *
 
 
 def foreach(func, iterable):
