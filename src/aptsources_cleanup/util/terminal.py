@@ -170,10 +170,9 @@ class termwrap(textwrap.TextWrapper):
 	@staticmethod
 	def _get_last_line_len(*parts):
 		assert parts
-		parts = reversed(parts)
 		for n, p in zip(
-			accumulate(map(len, parts)),
-			map(methodcaller(str.rfind, '\n'), parts)
+			accumulate(map(len, reversed(parts))),
+			map(methodcaller(str.rfind, '\n'), reversed(parts))
 		):
 			if p >= 0:
 				return n - p - 1
