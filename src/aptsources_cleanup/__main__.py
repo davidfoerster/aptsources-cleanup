@@ -103,21 +103,18 @@ class TerminalHelpFormatter(argparse.HelpFormatter):
 
 
 	def _fill_text(self, text, width, indent):
-		return '\n'.join(self._split_lines_gen(
-			text, width, initial_indent=indent, subsequent_indent=indent))
+		return '\n'.join(reduce(
+			self._accumulate_paragraph_lines, map(
+				textwrap.TextWrapper(
+					width=width, initial_indent=indent, subsequent_indent=indent).wrap,
+				text.split('\n\n'))))
 
 
-	def _split_lines_gen(self, text, width, **kwargs):
-		lines = None
-		for paragraph in text.split('\n\n'):
-			paragraph = textwrap.wrap(paragraph, width, **kwargs)
-			if lines is None:
-				lines = paragraph
-			else:
-				lines.append('')
-				lines += paragraph
-
-		return lines
+	@staticmethod
+	def _accumulate_paragraph_lines(accumulator_list, lines):
+		accumulator_list.append('')
+		accumulator_list += lines
+		return accumulator_list
 
 
 	def add_epilog(self, items):
@@ -291,8 +288,9 @@ def handle_duplicates(sourceslist, apply_changes=None):
 
 		if apply_changes is None:
 			stdout.file.write('\n')
-			answer = (Choices(_U('yes'), _U('no'), default='no')
-				.ask(_('Do you want to save these changes?')))
+			answer = (
+				Choices(_U('yes'), _U('no'), default='no')
+					.ask(_('Do you want to save these changes?')))
 			apply_changes = answer is not None and answer.orig == 'yes'
 			if not apply_changes:
 				termwrap.stderr().print(_('Aborted.'))

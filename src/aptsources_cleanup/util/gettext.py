@@ -120,7 +120,6 @@ def translation(domain, localedir=None, languages=None, _class=None,
 
 
 def _get_gettext_shorthands(translations):
-	last_error = None
 	base_names = ('gettext', 'ngettext')
 	for names_getter in starmap(operator.attrgetter,
 		(map('u'.__add__, base_names), base_names)
@@ -373,18 +372,19 @@ class Choices(collections.ChainMap):
 
 	@classmethod
 	def _get_short_and_styled(cls, s, shorthand_highlighter, existing):
-		short = next(
+		match = next(
 			iter(filterfalse(
 				comp(operator.methodcaller('group'), existing.__contains__),
 				cls.letter_pattern.finditer(s))),
 			None)
-		if not short:
+		if not match:
 			raise ValueError(
 				"No unique shorthand available for choice '{:s}'".format(s))
 
-		styled = ''.join((s[:short.start()],
-			shorthand_highlighter(short.group()), s[short.end():]))
-		return normalize_casefold(short.group()), styled
+		short = match.group()
+		styled = (
+			shorthand_highlighter(short).join((s[:match.start()], s[match.end():])))
+		return normalize_casefold(short), styled
 
 
 	# Try to detect grapheme clusters if supported
