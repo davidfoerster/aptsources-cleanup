@@ -388,8 +388,15 @@ class Choices(collections.ChainMap):
 
 
 	# Try to detect grapheme clusters if supported
-	letter_pattern = re.compile(r'(?=\S)\X', re.UNICODE)
-	if not letter_pattern.fullmatch('A'):
+	try:
+		letter_pattern = re.compile(r'(?=\S)\X', re.UNICODE)
+	except re.error as ex:
+		assert letter_pattern.pattern.index(r'\X') in range(ex.pos - 1, ex.pos + 1)
+		letter_pattern = None
+	else:
+		if not letter_pattern.fullmatch('A'):
+			letter_pattern = None
+	if letter_pattern is None:
 		# Fall back to simple letter detection
 		letter_pattern = re.compile(r'\S', re.UNICODE)
 		if __debug__:
