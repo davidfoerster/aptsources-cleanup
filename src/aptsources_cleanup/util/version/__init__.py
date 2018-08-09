@@ -105,10 +105,10 @@ class version_info(object):
 	def from_repo(cls, version=None, repo_dir=None):
 		"""Construct a version_info using the current state of a Git repository"""
 
-		import git
 		try:
+			import git
 			repo = git.Repo(repo_dir)
-		except git.exc.InvalidGitRepositoryError:
+		except (ImportError, git.exc.InvalidGitRepositoryError):
 			return cls(version)
 
 		commit = repo.commit()
