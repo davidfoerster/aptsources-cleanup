@@ -43,15 +43,22 @@ def count(iterable):
 def last(iterable, *default):
 	"""Return the last item of an iterable or 'default' if there's none."""
 	assert len(default) <= 1
-	iterable = iter(iterable)
 
 	try:
-		x = next(iterable)
-	except StopIteration:
-		if default:
-			return default[0]
-		raise
+		iterable = reversed(iterable)
+	except TypeError:
+		pass
+	else:
+		return next(iterable, *default)
 
 	for x in iterable:
 		pass
-	return x
+
+	try:
+		return x
+	except UnboundLocalError:
+		pass
+
+	if not default:
+		raise StopIteration
+	return default[0]
