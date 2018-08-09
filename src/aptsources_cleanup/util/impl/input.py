@@ -13,5 +13,6 @@ def input(prompt=None):
 	the current locale.
 	"""
 
-	answer = raw_input() if prompt is None else raw_input(prompt)
-	return str(answer, sys.stdin.encoding or locale.getpreferredencoding())
+	return str(
+		raw_input() if prompt is None else raw_input(prompt),
+		sys.stdin.encoding or locale.getpreferredencoding())

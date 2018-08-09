@@ -15,7 +15,7 @@ import textwrap
 import itertools
 from operator import itemgetter
 from .operator import methodcaller
-from .itertools import accumulate
+from .itertools import accumulate, foreach
 from functools import partial as fpartial
 
 try:
@@ -169,7 +169,7 @@ class termwrap(textwrap.TextWrapper):
 
 	@staticmethod
 	def _get_last_line_len(*parts):
-		assert parts
+		n = 0
 		for n, p in zip(
 			accumulate(map(len, reversed(parts))),
 			map(methodcaller(str.rfind, '\n'), reversed(parts))
@@ -199,12 +199,11 @@ class termwrap(textwrap.TextWrapper):
 
 
 	def copy(self, **kwargs):
-		for n in itertools.chain(
-			('break_long_words', 'break_on_hyphens', 'drop_whitespace', 'expand_tabs',
-				'fix_sentence_endings', 'initial_indent', 'replace_whitespace',
-				'subsequent_indent', 'width', 'file'),
-			filter(fpartial(hasattr, self), ('max_lines', 'placeholder', 'tabsize'))
-		):
-			kwargs.setdefault(n, getattr(self, n))
-
+		k, v = itertools.tee(itertools.chain(
+			('break_long_words', 'break_on_hyphens', 'drop_whitespace',
+				'expand_tabs', 'fix_sentence_endings', 'initial_indent',
+				'replace_whitespace', 'subsequent_indent', 'width', 'file'),
+			filter(fpartial(hasattr, self),
+				('max_lines', 'placeholder', 'tabsize'))))
+		foreach(kwargs.setdefault, k, map(fpartial(getattr, self), v))
 		return self.__class__(**kwargs)

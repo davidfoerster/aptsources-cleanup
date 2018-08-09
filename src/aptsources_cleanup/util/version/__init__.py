@@ -87,11 +87,11 @@ class version_info(object):
 				*map(fpartial(getattr, _data), cls.__slots__))
 
 		try:
-			f = open(os.path.join(
+			with open(os.path.join(
 				os.path.dirname(os.path.dirname(os.path.dirname(
 					sys.modules[(__package__ or __name__).partition('.')[0]].__file__))),
-				'VERSION'))
-			with f:
+				'VERSION')) \
+			as f:
 				version = f.readline(1<<10)
 		except FileNotFoundError:
 			version = None

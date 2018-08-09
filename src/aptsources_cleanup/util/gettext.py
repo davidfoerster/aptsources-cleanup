@@ -8,9 +8,7 @@ __all__ = (
 )
 
 from ._3to2 import *
-from . import terminal
-from . import functools
-from . import collections
+from . import terminal, collections
 from .strings import startswith_token
 from .operator import identity, methodcaller, peek
 from .itertools import unique, last, filterfalse
@@ -184,10 +182,8 @@ class DictTranslations(NullTranslations):
 
 
 	try:
-		if NullTranslations.ugettext is not None:
-			ugettext = gettext
-		if NullTranslations.ungettext is not None:
-			ungettext = ngettext
+		ugettext = NullTranslations.ugettext and gettext
+		ungettext = NullTranslations.ungettext and ngettext
 	except AttributeError:
 		ugettext = None
 		ungettext = None
@@ -291,7 +287,7 @@ class Choices(collections.ChainMap):
 		"""
 
 		default = kwargs.pop('default', None)
-		use_shorthands = kwargs.pop('use_shorthands', bool)
+		use_shorthands = kwargs.pop('use_shorthands', None)
 		joiner = kwargs.pop('joiner', '/')
 		highlighters = kwargs.pop('highlighters', None)
 		if kwargs:
@@ -372,12 +368,11 @@ class Choices(collections.ChainMap):
 
 	@classmethod
 	def _get_short_and_styled(cls, s, shorthand_highlighter, existing):
-		match = next(
-			iter(filterfalse(
+		try:
+			match = next(filterfalse(
 				comp(operator.methodcaller('group'), existing.__contains__),
-				cls.letter_pattern.finditer(s))),
-			None)
-		if not match:
+				cls.letter_pattern.finditer(s)))
+		except StopIteration:
 			raise ValueError(
 				"No unique shorthand available for choice '{:s}'".format(s))
 
@@ -388,10 +383,11 @@ class Choices(collections.ChainMap):
 
 
 	# Try to detect grapheme clusters if supported
+	letter_pattern = r'(?=\S)\X'
 	try:
-		letter_pattern = re.compile(r'(?=\S)\X', re.UNICODE)
+		letter_pattern = re.compile(letter_pattern, re.UNICODE)
 	except re.error as ex:
-		assert letter_pattern.pattern.index(r'\X') in range(ex.pos - 1, ex.pos + 1)
+		assert letter_pattern.index(r'\X') in range(ex.pos - 1, ex.pos + 1)
 		letter_pattern = None
 	else:
 		if not letter_pattern.fullmatch('A'):
@@ -403,7 +399,8 @@ class Choices(collections.ChainMap):
 			terminal.termwrap.stderr().print(
 				"Warning: The regular expression module of your Python installation "
 				"lacks support for grapheme clusters.  If your language's script "
-				"includes composed graphemes the answer choice short-hands may behave "
+				"includes composed graphemes that do not correspond to a single "
+				"Unicode codepoint the answer choice short-hands may behave "
 				"unexpectedly.  Please install the 'regex' module to enable support "
 				"for grapheme clusters.", '\n\n')
 
