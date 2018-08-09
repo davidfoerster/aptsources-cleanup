@@ -4,7 +4,8 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 __all__ = ('filterfalse', 'accumulate', 'foreach', 'unique', 'count')
 
 from ._3to2 import *
-from .operator import identity
+from .functools import comp
+from .collections import ExtSet
 
 
 try:
@@ -24,16 +25,10 @@ def foreach(func, iterable):
 def unique(iterable, key=None):
 	"""Removes/skips all duplicate entries after their first occurrence."""
 
-	if key is None:
-		key = identity
-
-	seen = set()
-	seen_add = seen.add
-	for v in iterable:
-		k = key(v)
-		if k not in seen:
-			yield v
-			seen_add(k)
+	not_seen = ExtSet().add
+	if key is not None:
+		not_seen = comp(key, not_seen)
+	return filter(not_seen, iterable)
 
 
 def count(iterable):

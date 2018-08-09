@@ -13,3 +13,11 @@ try:
 	ChainMap
 except NameError:
 	from .impl.chainmap import ChainMap
+
+
+class ExtSet(set):
+
+	def add(self, x):
+		l = len(self)
+		super(ExtSet, self).add(x)
+		return l != len(self)
