@@ -15,11 +15,15 @@ except ImportError:
 	from .impl.itertools import *
 
 
-def foreach(func, iterable):
+def foreach(func, *iterables):
 	"""Call 'func' on each item in 'iterable'."""
 
-	for x in iterable:
-		func(x)
+	if len(iterables) > 1:
+		for x in zip(*iterables):
+			func(*x)
+	else:
+		for x in iterables[0]:
+			func(x)
 
 
 def unique(iterable, key=None):
