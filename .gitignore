@@ -3,6 +3,7 @@
 
 # Application bundles
 *.zip
+dist/
 
 # Generated translation data
 *.pot
