@@ -6,8 +6,8 @@ import operator
 def accumulate(iterable, func=operator.add):
 	'''Return running totals'''
 	iterable = iter(iterable)
-	total = next(iterable)
-	yield total
+	accumulator = next(iterable)
+	yield accumulator
 	for element in iterable:
-		total = func(total, element)
-		yield total
+		accumulator = func(accumulator, element)
+		yield accumulator
