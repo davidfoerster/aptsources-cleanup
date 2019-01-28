@@ -134,6 +134,8 @@ from .. import datetime
 
 
 	def _print_data_module(self, file=None):
+		if file is None:
+			file = sys.stdout
 		print(
 			'# -*- coding: ' + file.encoding,
 			self._data_module_header,
