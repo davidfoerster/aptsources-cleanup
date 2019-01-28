@@ -56,7 +56,7 @@ $(ZIP_TARGET_PKG)/SHA256SUM: $(CHECKSUMMED_FILES)
 	cd $(@D) && exec sha256sum -t -- $(patsubst $(@D)/%,%,$^) > $(abspath $@)
 
 %.asc: %
-	$(GPG) --clearsign -o $@ -- $<
+	$(GPG) --clearsign --yes --batch -o $@ -- $<
 
 
 messages_template: $(MESSAGES_POT)
