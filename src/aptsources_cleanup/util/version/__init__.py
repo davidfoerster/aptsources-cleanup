@@ -104,8 +104,14 @@ class version_info(object):
 
 		try:
 			import git
-			repo = git.Repo(repo_dir)
-		except (ImportError, git.exc.InvalidGitRepositoryError):
+		except ImportError:
+			repo = None
+		else:
+			try:
+				repo = git.Repo(repo_dir)
+			except git.exc.InvalidGitRepositoryError:
+				repo = None
+		if repo is None:
 			return cls(version)
 
 		commit = repo.commit()
