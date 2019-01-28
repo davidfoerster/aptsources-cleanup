@@ -41,9 +41,8 @@ class version_info(object):
 
 
 	def __repr__(self):
-		return '{:s}.{:s}({:s})'.format(
-			self.__class__.__module__, self.__class__.__name__,
-			', '.join(starmap('{:s}={!r}'.format, self.items())))
+		return '{0.__module__:s}.{0.__name__:s}({1:s})'.format(
+			type(self), ', '.join(starmap('{:s}={!r}'.format, self.items())))
 
 
 	def __str__(self):
@@ -58,9 +57,7 @@ class version_info(object):
 				v.append(date_strftime('%Y-%m-%d'))
 
 		if self.commit:
-			v.append(self.commit[:7])
-			if self.branch_name:
-				v[-1] = ':'.join((v[-1], self.branch_name))
+			v.append(':'.join(filter(None, (self.commit[:7], self.branch_name))))
 
 		return ' '.join(v)
 
@@ -131,8 +128,6 @@ from .. import datetime
 
 
 	def _print_data_module(self, file=None):
-		if file is None:
-			file = sys.stdout
 		print(
 			'# -*- coding: ' + file.encoding,
 			self._data_module_header,
