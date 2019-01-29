@@ -390,7 +390,7 @@ class Choices(collections.ChainMap):
 		assert letter_pattern.index(r'\X') in range(ex.pos - 1, ex.pos + 1)
 		letter_pattern = None
 	else:
-		if not letter_pattern.fullmatch('A'):
+		if not letter_pattern.match('A'):
 			letter_pattern = None
 	if letter_pattern is None:
 		# Fall back to simple letter detection
