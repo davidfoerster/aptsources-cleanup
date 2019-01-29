@@ -1,13 +1,11 @@
 # -*- coding: utf-8
 """Utilities for and around functional programming"""
-from __future__ import print_function, division, absolute_import, unicode_literals
 
 __all__ = (
 	'comp', 'cmp_to_key', 'total_ordering', 'reduce', 'update_wrapper', 'wraps',
 	'partial', 'LazyInstance'
 )
 
-from ._3to2 import *
 from functools import *
 from .operator import rapply, identity, methodcaller
 
@@ -54,9 +52,9 @@ class LazyInstance(object):
 		self._li_strict = strict
 
 		if type_hint is None:
-			if isinstance(factory, TypesType):
+			if isinstance(factory, type):
 				type_hint = factory
-		elif not isinstance(type_hint, TypesType):
+		elif not isinstance(type_hint, type):
 			raise TypeError(
 				'type_hint must be None or a type, not ' + str(type(type_hint)))
 		self._li_type_hint = type_hint

@@ -1,6 +1,4 @@
 # -*- coding: utf-8
-from __future__ import print_function, division, absolute_import, unicode_literals
-from ._3to2 import *
 from .itertools import filterfalse
 import sys
 import os
@@ -8,9 +6,9 @@ import os.path
 import stat
 import errno
 import zipfile as _zipfile
+from zipfile import *
 
-__all__ = set(_zipfile.__all__)
-__all__.discard('BadZipfile')
+__all__ = _zipfile.__all__
 
 
 _filesystem_encoding = sys.getfilesystemencoding()
@@ -131,18 +129,8 @@ class ZipFile(_zipfile.ZipFile):
 			else:
 				fileno = os.curdir
 				pathconf = os.pathconf
-			self._max_path_value = val = pathconf(fileno, nativestr('PC_PATH_MAX'))
+			self._max_path_value = val = pathconf(fileno, 'PC_PATH_MAX')
 		return val
-
-
-_globals = globals()
-_globals.update({ k: getattr(_zipfile, k)
-	for k in filterfalse(_globals.__contains__, __all__) })
-_globals.setdefault('BadZipFile', getattr(_zipfile, 'BadZipfile', None))
-del _globals
-
-__all__.add('BadZipFile')
-#__all__ = tuple(__all__)
 
 
 if __name__ == '__main__':

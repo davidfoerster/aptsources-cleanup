@@ -1,10 +1,8 @@
 # -*- coding: utf-8
 """Filesystem-related utilities"""
-from __future__ import print_function, division, absolute_import, unicode_literals
 
 __all__ = ('samefile', 'remove_sources_files')
 
-from ._3to2 import *
 from .gettext import _
 from .terminal import termwrap
 import sys

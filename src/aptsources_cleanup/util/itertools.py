@@ -1,18 +1,10 @@
 # -*- coding: utf-8
-from __future__ import print_function, division, absolute_import, unicode_literals
 
 __all__ = ('filterfalse', 'accumulate', 'foreach', 'unique', 'count')
 
-from ._3to2 import *
 from .functools import comp
 from .collections import ExtSet
-
-
-try:
-	from itertools import filterfalse, accumulate
-except ImportError:
-	from itertools import ifilterfalse as filterfalse
-	from .impl.itertools import *
+from itertools import filterfalse, accumulate
 
 
 def foreach(func, *iterables):

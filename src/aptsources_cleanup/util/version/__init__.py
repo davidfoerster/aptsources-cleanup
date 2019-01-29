@@ -1,9 +1,7 @@
 # -*- coding: utf-8
-from __future__ import print_function, division, absolute_import, unicode_literals
-from .._3to2 import *
 import sys
 import os.path
-from .. import datetime
+import datetime
 from itertools import starmap
 from functools import partial as fpartial
 
@@ -49,12 +47,7 @@ class version_info(object):
 		v = [str(self.version)]
 
 		if self.date:
-			try:
-				date_strftime = self.date.strftime
-			except AttributeError:
-				v.append(self.date)
-			else:
-				v.append(date_strftime('%Y-%m-%d'))
+			v.append(self.date.strftime('%Y-%m-%d'))
 
 		if self.commit:
 			v.append(':'.join(filter(None, (self.commit[:7], self.branch_name))))
@@ -127,18 +120,12 @@ class version_info(object):
 		return cls(version, date, commit.hexsha, branch)
 
 
-	_data_module_header = (
-'''from __future__ import absolute_import, unicode_literals
-from .. import datetime
-''')
-
-
 	def _print_data_module(self, file=None):
 		if file is None:
 			file = sys.stdout
 		print(
 			'# -*- coding: ' + file.encoding,
-			self._data_module_header,
+			'from .. import datetime\n',
 			*starmap('{:s} = {!r}'.format, self.items()),
 			sep='\n', file=file)
 

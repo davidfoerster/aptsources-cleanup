@@ -1,9 +1,7 @@
 # -*- coding: utf-8
 """Various I/O-related utilities"""
-from __future__ import print_function, division, absolute_import, unicode_literals
 __all__ = ('FileDescriptor', 'display_file', 'sendfile_all')
 
-from ._3to2 import *
 from .gettext import _
 from .terminal import termwrap
 import os
@@ -73,22 +71,11 @@ def sendfile_all(out, in_):
 	otherwise.
 	"""
 
-	sendfile = getattr(os, 'sendfile', None)
 	count = 0
-	if sendfile:
-		# Main implementation
-		while True:
-			r = sendfile(out, in_, count, sys.maxsize - count)
-			if not r:
-				break
-			count += r
-	else:
-		# Alternative implementation
-		while True:
-			r = os.read(in_, 1 << 20)
-			if not r:
-				break
-			os.write(out, r)
-			count += len(r)
+	while True:
+		r = os.sendfile(out, in_, count, sys.maxsize - count)
+		if not r:
+			break
+		count += r
 
 	return count

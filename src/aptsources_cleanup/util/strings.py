@@ -1,6 +1,5 @@
 # -*- coding: utf-8
 """String utilities"""
-from __future__ import print_function, division, absolute_import, unicode_literals
 
 __all__ = ('startswith_token',)
 

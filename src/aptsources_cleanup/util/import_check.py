@@ -1,9 +1,7 @@
 # -*- coding: utf-8
-from __future__ import print_function, division, absolute_import, unicode_literals
 
 __all__ = ('import_check',)
 
-from ._3to2 import *
 from . import pkg
 from .gettext import _
 from .terminal import termwrap

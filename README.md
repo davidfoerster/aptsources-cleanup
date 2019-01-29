@@ -7,10 +7,10 @@ deletes sources list files without valid enabled source entries in
 
 ## Prerequisites
 
-  * Python 3.2+ (or Python 2.7+ if you really can't use Python 3)
+  * Python 3.4+
 
   * The `aptsources` module. In Debian-based distribution you can find it in
-    the `python3-apt` package (or `python-apt` if you only have Python 2).
+    the `python3-apt` package.
 
     If you don't have it yet you can install it with:
 

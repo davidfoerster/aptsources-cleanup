@@ -3,11 +3,10 @@
 
 namely terminal capablities via Curses and text wrapping.
 """
-from __future__ import print_function, division, absolute_import, unicode_literals
 
 __all__ = ('try_input', 'termwrap', 'TERMMODES')
 
-from ._3to2 import *
+import os
 import sys
 import errno
 import weakref
@@ -17,11 +16,6 @@ from operator import itemgetter
 from .operator import methodcaller
 from .itertools import accumulate, foreach
 from functools import partial as fpartial
-
-try:
-	from os import terminal_size, get_terminal_size
-except ImportError:
-	from .impl.terminal_size import terminal_size, get_terminal_size
 
 
 TERMMODES = (('bold', 'bold'), ('underline', 'smul'), ('normal', 'sgr0'))
@@ -195,7 +189,7 @@ class termwrap(textwrap.TextWrapper):
 	def _refresh_width_impl(file):
 		if not file.isatty():
 			return 0
-		return get_terminal_size(file.fileno()).columns
+		return os.get_terminal_size(file.fileno()).columns
 
 
 	def copy(self, **kwargs):

@@ -10,23 +10,16 @@ Source code and bug tracker location:
   https://github.com/davidfoerster/aptsources-cleanup
 """
 
-from __future__ import print_function, division, absolute_import
 
 __all__ = ('get_duplicates', 'get_empty_files')
 
 from . import util
-from .util._3to2 import *
 from .util.filesystem import samefile
 from .util.import_check import import_check
 import os.path
 import collections
+import urllib.parse
 aptsources = import_check('aptsources.sourceslist', 'apt')
-
-try:
-	import urllib.parse
-except ImportError:
-	class urllib:
-		import urlparse as parse
 
 
 from .util.version import get_version as __version__

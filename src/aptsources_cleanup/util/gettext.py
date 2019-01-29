@@ -1,5 +1,4 @@
 # -*- coding: utf-8
-from __future__ import print_function, division, absolute_import, unicode_literals
 
 __all__ = (
 	'translation', 'translations', '_', '_N', '_U',
@@ -7,7 +6,6 @@ __all__ = (
 	'ChoiceInfo', 'Choices'
 )
 
-from ._3to2 import *
 from . import terminal, collections
 from .strings import startswith_token
 from .operator import identity, methodcaller, peek
@@ -32,10 +30,7 @@ except ImportError:
 
 
 def _get_archive():
-	try:
-		return __loader__.archive
-	except (NameError, AttributeError):
-		return None
+	return getattr(__loader__, 'archive', None)
 
 
 def get_localedir(locales_subdir=os.path.join('share', 'locales')):
@@ -117,28 +112,18 @@ def translation(domain, localedir=None, languages=None, _class=None,
 	return translations
 
 
-def _get_gettext_shorthands(translations):
-	base_names = ('gettext', 'ngettext')
-	for names_getter in starmap(operator.attrgetter,
-		(map('u'.__add__, base_names), base_names)
-	):
-		try:
-			return names_getter(translations)
-		except AttributeError as ex:
-			last_error = ex
-	raise last_error
-
-
 def _make_translations():
 	global _, _N, translations
 	assert isinstance(translations, LazyInstance)
 	translations = translation('messages', get_localedir(), fallback=True)
-	_, _N = _get_gettext_shorthands(translations)
+	_ = translations.gettext
+	_N = translations.ngettext
 	return translations
 
 
 translations = LazyInstance(_make_translations, NullTranslations, True)
-_, _N = _get_gettext_shorthands(translations)
+_ = translations.gettext
+_N = translations.ngettext
 assert isinstance(translations, LazyInstance) and translations._li_instance is None
 
 
@@ -181,20 +166,6 @@ class DictTranslations(NullTranslations):
 	lngettext = lgettext
 
 
-	try:
-		ugettext = NullTranslations.ugettext and gettext
-		ungettext = NullTranslations.ungettext and ngettext
-	except AttributeError:
-		ugettext = None
-		ungettext = None
-
-
-try:
-	_str_casefold = str.casefold
-except AttributeError:
-	_str_casefold = str.lower
-
-
 def normalize_casefold(text):
 	"""Normalize text data for caseless comparison
 
@@ -203,10 +174,11 @@ def normalize_casefold(text):
 	"""
 	# Taken from https://stackoverflow.com/questions/319426/how-do-i-do-a-case-insensitive-string-comparison#comment60758553_29247821
 
+	casefold = str.casefold
 	normalize = unicodedata.normalize
 	return normalize('NFKD',
-		_str_casefold(normalize('NFKD',
-			_str_casefold(normalize('NFD', text)))))
+		casefold(normalize('NFKD',
+			casefold(normalize('NFD', text)))))
 
 
 ChoiceInfo = collections.namedtuple('ChoiceInfo',
