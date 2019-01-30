@@ -123,13 +123,8 @@ class ZipFile(_zipfile.ZipFile):
 		val = self._max_path_value
 		if val is None:
 			fileno = getattr(self.fp, 'fileno', None)
-			if fileno is not None:
-				fileno = fileno()
-				pathconf = os.fpathconf
-			else:
-				fileno = os.curdir
-				pathconf = os.pathconf
-			self._max_path_value = val = pathconf(fileno, 'PC_PATH_MAX')
+			fileno = os.curdir if fileno is None else fileno()
+			self._max_path_value = val = os.pathconf(fileno, 'PC_PATH_MAX')
 		return val
 
 

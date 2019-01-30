@@ -39,7 +39,7 @@ class version_info(object):
 
 
 	def __repr__(self):
-		return '{0.__module__:s}.{0.__name__:s}({1:s})'.format(
+		return '{0.__module__:s}.{0.__qualname__:s}({1:s})'.format(
 			type(self), ', '.join(starmap('{:s}={!r}'.format, self.items())))
 
 
@@ -109,14 +109,8 @@ class version_info(object):
 
 		commit = repo.commit()
 		branch = next((h.name for h in repo.heads if h.commit == commit), None)
-
-		try:
-			date = commit.committed_datetime
-		except AttributeError:
-			date = None
-		else:
-			date = date.astimezone(datetime.timezone(date.utcoffset()))
-
+		date = commit.committed_datetime
+		date = date.astimezone(datetime.timezone(date.utcoffset()))
 		return cls(version, date, commit.hexsha, branch)
 
 
@@ -125,7 +119,7 @@ class version_info(object):
 			file = sys.stdout
 		print(
 			'# -*- coding: ' + file.encoding,
-			'from .. import datetime\n',
+			'import datetime\n',
 			*starmap('{:s} = {!r}'.format, self.items()),
 			sep='\n', file=file)
 

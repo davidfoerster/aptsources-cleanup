@@ -382,8 +382,8 @@ class Choices(collections.ChainMap):
 
 
 	def __repr__(self):
-		return '{:s}([{:s}], default={!r}, joiner={!r})'.format(
-			type(self).__name__, ', '.join(map(repr, self.orig.values())),
+		return '{.__qualname__:s}([{:s}], default={!r}, joiner={!r})'.format(
+			type(self), ', '.join(map(repr, self.orig.values())),
 			self.default and self.default.orig, self.joiner)
 
 

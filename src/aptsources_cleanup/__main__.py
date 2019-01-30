@@ -152,7 +152,7 @@ if __debug__:
 	for name in ('_fill_text', '_format_actions_usage'):
 		assert callable(getattr(TerminalHelpFormatter.__base__, name, None)), (
 			'Looks like there was an incompatible change in the private API of '
-			'{0.__module__:s}.{0.__name__:s}.{1:s}().'
+			'{0.__module__:s}.{0.__qualname__:s}.{1:s}().'
 				.format(TerminalHelpFormatter.__base__, name))
 	del name
 
@@ -171,21 +171,14 @@ class VersionAction(argparse.Action):
 	def __call__(self, parser, namespace, values, option_string):
 		version = self.version
 		if version is None:
-			try:
-				version = parser.version
-			except AttributeError:
-				pass
+			version = getattr(parser, 'version', None)
 		if version is None:
-			try:
-				if __package__ and __name__ == '__main__':
-					version = sys.modules[__package__].__version__
-				else:
-					version = __version__
-			except (NameError, AttributeError):
-				pass
+			if __package__ and __name__ == '__main__':
+				version = getattr(sys.modules[__package__], '__version__', None)
 			else:
-				if version is not None:
-					version = '%(prog)s, version ' + version
+				version = globals().get('__version__')
+		if version is not None:
+			version = '%(prog)s, version ' + version
 
 		parser._print_message(
 			parser._get_formatter()._format_text(version).strip() + '\n',
