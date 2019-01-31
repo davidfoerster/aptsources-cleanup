@@ -21,7 +21,7 @@ def comp(*funcs):
 	return partial(reduce, rapply, funcs)
 
 
-class LazyInstance(object):
+class LazyInstance:
 	"""Instantiate objects lazily on first access
 
 	Instances of this class provide transparent attribute access to the wrapped

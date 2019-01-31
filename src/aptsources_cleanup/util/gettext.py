@@ -320,7 +320,7 @@ class Choices(collections.ChainMap):
 				"The default choice '{:s}' does not appear among the list of choices."
 					.format(default))
 
-		super(Choices, self).__init__(self.translations, self.short)
+		super().__init__(self.translations, self.short)
 
 		self.joiner = joiner
 		self.choices_string = joiner.join(

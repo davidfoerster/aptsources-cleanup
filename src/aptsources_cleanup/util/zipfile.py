@@ -24,7 +24,7 @@ class ZipFile(_zipfile.ZipFile):
 	"""Extends zipfile.ZipFile with in-archive resolution of symbolic links"""
 
 	def __init__(self, *args, **kwargs):
-		super(ZipFile, self).__init__(*args, **kwargs)
+		super().__init__(*args, **kwargs)
 		self._max_path_value = None
 
 
@@ -42,7 +42,7 @@ class ZipFile(_zipfile.ZipFile):
 		path = self.getinfo(path, resolve_symlinks, pwd, fail_missing)
 		if path is None:
 			return None
-		return super(ZipFile, self).open(path, mode, pwd)
+		return super().open(path, mode, pwd)
 
 
 	def _resolve_path(self, path, pwd, fail_missing):
@@ -90,7 +90,7 @@ class ZipFile(_zipfile.ZipFile):
 		elif not c_seen:
 			seen_set.add(c_full)
 			resolved = str(
-				super(ZipFile, self).read(c_info, pwd), _filesystem_encoding)
+				super().read(c_info, pwd), _filesystem_encoding)
 			null = resolved.find('\x00')
 			if null >= 0:
 				resolved = resolved[:null]

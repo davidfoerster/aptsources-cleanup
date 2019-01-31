@@ -8,7 +8,7 @@ from functools import partial as fpartial
 __all__ = ('get_version', 'version_info')
 
 
-class version_info(object):
+class version_info:
 	"""A version info object
 
 	Attributes:
@@ -26,7 +26,6 @@ class version_info(object):
 
 
 	def __init__(self, version, date=None, commit=None, branch_name=None):
-		super(version_info, self).__init__()
 		self.version = version
 		self.date = date
 		self.commit = commit

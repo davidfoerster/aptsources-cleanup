@@ -8,7 +8,7 @@ import os
 import sys
 
 
-class FileDescriptor(object):
+class FileDescriptor:
 	"""A context manager for operating system file descriptors"""
 
 	def __init__(self, path, mode=os.O_RDONLY, *args):

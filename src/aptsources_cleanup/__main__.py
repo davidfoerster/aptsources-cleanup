@@ -96,7 +96,7 @@ class TerminalHelpFormatter(argparse.HelpFormatter):
 		if width is not None:
 			max_help_position = min(max_help_position, width // 3)
 
-		super(TerminalHelpFormatter, self).__init__(
+		super().__init__(
 			prog, indent_increment, max_help_position, width)
 
 
@@ -141,7 +141,7 @@ class TerminalHelpFormatter(argparse.HelpFormatter):
 
 	def _format_actions_usage(self, actions, groups):
 		return (
-			super(TerminalHelpFormatter, self)._format_actions_usage(
+			super()._format_actions_usage(
 				tuple(filterfalse(
 					methodcaller(isinstance, (argparse._HelpAction, VersionAction)),
 					actions)),
@@ -164,7 +164,7 @@ class VersionAction(argparse.Action):
 	):
 		if help is None:
 			help = _("Show program's version number and exit.")
-		super(VersionAction, self).__init__(option_strings, dest, 0, help=help)
+		super().__init__(option_strings, dest, 0, help=help)
 		self.version = version
 
 

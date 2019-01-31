@@ -15,7 +15,7 @@ def rapply(arg, func):
 	return func(arg)
 
 
-class methodcaller(object):
+class methodcaller:
 	"""Binds arguments for instance(-like) method calls.
 
 	Instances of this class are callable and pass their single positional

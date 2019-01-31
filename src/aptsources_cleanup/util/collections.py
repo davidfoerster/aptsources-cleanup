@@ -9,5 +9,5 @@ class ExtSet(set):
 
 	def add(self, x):
 		l = len(self)
-		super(ExtSet, self).add(x)
+		super().add(x)
 		return l != len(self)
