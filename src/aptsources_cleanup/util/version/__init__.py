@@ -2,8 +2,8 @@
 import sys
 import os.path
 import datetime
-from itertools import starmap
 from functools import partial as fpartial
+from .. import strings
 
 __all__ = ('get_version', 'version_info')
 
@@ -34,12 +34,18 @@ class version_info:
 
 	def items(self):
 		"""Returns the attributes as a sequence of name-value tuples"""
-		return zip(self.__slots__, map(fpartial(getattr, self), self.__slots__))
+		return zip(*self._item_iters())
+
+
+	def _item_iters(self):
+		return (self.__slots__, map(fpartial(getattr, self), self.__slots__))
 
 
 	def __repr__(self):
 		return '{0.__module__:s}.{0.__qualname__:s}({1:s})'.format(
-			type(self), ', '.join(starmap('{:s}={!r}'.format, self.items())))
+			type(self),
+			', '.join(map('='.join, zip(self.__slots__,
+				map(repr, map(fpartial(getattr, self), self.__slots__))))))
 
 
 	def __str__(self):
@@ -67,6 +73,7 @@ class version_info:
 		    attribute only,
 		 3. from 'from_repo(version)'.
 		"""
+
 		try:
 			from . import _data
 		except ImportError:
@@ -75,17 +82,17 @@ class version_info:
 			return cls(
 				*map(fpartial(getattr, _data), cls.__slots__))
 
+		version_file = os.path.join(
+			os.path.dirname(os.path.dirname(os.path.dirname(
+				sys.modules[strings.prefix(__package__ or __name__, '.')].__file__))),
+			'VERSION')
 		try:
-			with open(os.path.join(
-				os.path.dirname(os.path.dirname(os.path.dirname(
-					sys.modules[(__package__ or __name__).partition('.')[0]].__file__))),
-				'VERSION')) \
-			as f:
-				version = f.readline(1<<10)
+			version_file = open(version_file)
 		except FileNotFoundError:
 			version = None
 		else:
-			version = str(version).strip()
+			with version_file:
+				version = version_file.readline(1024).strip()
 
 		return cls.from_repo(version)
 
@@ -103,13 +110,16 @@ class version_info:
 				repo = git.Repo(repo_dir)
 			except git.exc.InvalidGitRepositoryError:
 				repo = None
+
 		if repo is None:
+			if version is None:
+				raise RuntimeError('No version information available')
 			return cls(version)
 
 		commit = repo.commit()
 		branch = next((h.name for h in repo.heads if h.commit == commit), None)
-		date = commit.committed_datetime
-		date = date.astimezone(datetime.timezone(date.utcoffset()))
+		date = commit.committed_datetime.astimezone(
+			datetime.timezone(commit.committed_datetime.utcoffset()))
 		return cls(version, date, commit.hexsha, branch)
 
 
@@ -117,9 +127,9 @@ class version_info:
 		if file is None:
 			file = sys.stdout
 		print(
-			'# -*- coding: ' + file.encoding,
+			'# -*- coding: ' + file.encoding.lower(),
 			'import datetime\n',
-			*starmap('{:s} = {!r}'.format, self.items()),
+			*map('{:s} = {!r}'.format, *self._item_iters()),
 			sep='\n', file=file)
 
 
