@@ -14,7 +14,7 @@ def startswith_token(s, prefix, sep=None):
 
 	prefix_len = len(prefix)
 	return s.startswith(prefix) and (
-		not sep or len(s) == len(prefix) or
+		not sep or len(s) == prefix_len or
 		s.find(sep, prefix_len, prefix_len + len(sep)) == prefix_len)
 
 

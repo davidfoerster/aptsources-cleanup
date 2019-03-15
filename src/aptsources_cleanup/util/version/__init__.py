@@ -7,6 +7,8 @@ import datetime
 from functools import partial as fpartial
 from .. import strings
 
+if __debug__:
+	import inspect
 
 
 class version_info:
@@ -127,11 +129,16 @@ class version_info:
 	def _print_data_module(self, file=None):
 		if file is None:
 			file = sys.stdout
+
+		names, values = self._item_iters()
 		print(
 			'# -*- coding: ' + file.encoding.lower(),
 			'import datetime\n',
-			*map('{:s} = {!r}'.format, *self._item_iters()),
+			*map(' = '.join, zip(names, map(repr, values))),
 			sep='\n', file=file)
+
+
+	assert __slots__ == tuple(inspect.signature(__init__).parameters.keys())[1:]
 
 
 _version = None
