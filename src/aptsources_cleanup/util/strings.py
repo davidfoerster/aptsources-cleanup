@@ -1,7 +1,7 @@
 # -*- coding: utf-8
 """String utilities"""
 
-__all__ = ('startswith_token',)
+__all__ = ('startswith_token', 'prefix')
 
 
 def startswith_token(s, prefix, sep=None):

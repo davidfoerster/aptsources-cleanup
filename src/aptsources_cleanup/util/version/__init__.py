@@ -1,11 +1,12 @@
 # -*- coding: utf-8
+__all__ = ('get_version', 'version_info')
+
 import sys
 import os.path
 import datetime
 from functools import partial as fpartial
 from .. import strings
 
-__all__ = ('get_version', 'version_info')
 
 
 class version_info:
