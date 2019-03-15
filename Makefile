@@ -82,18 +82,19 @@ $(sort $(LOCALES_DIR)/ $(ZIP_TARGET_PKG)/ $(dir $(MESSAGES_MO) $(ZIP_TARGET) $(D
 
 .PHONY: zip clean dist messages messages_template messages_update
 
+
+DIST_CP_CMP = install -pDT -- $< $@
+
+$(ZIP_TARGET_PKG)/%.py: $(SRC_DIR)/%.py
+	$(DIST_CP_CMP)
+
+$(ZIP_TARGET_PKG)/%: %
+	$(DIST_CP_CMP)
+
+
 .SECONDEXPANSION:
 
-
-DIST_CP_CMP = cp -PT -- $< $@
-
-$(ZIP_TARGET_PKG)/%.py: $$(SRC_DIR)/%.py | $$(@D)
-	$(DIST_CP_CMP)
-
-$(ZIP_TARGET_PKG)/%: % | $$(@D)
-	$(DIST_CP_CMP)
-
-$(addprefix $(LOCALES_DIR)/,$(MESSAGES_SYMLINKS)): $$(patsubst $$(LOCALES_DIR)/%,$$(PO_DIR)/%,$$@) | $$(@D)
+$(addprefix $(LOCALES_DIR)/,$(MESSAGES_SYMLINKS)): $$(patsubst $$(LOCALES_DIR)/%,$$(PO_DIR)/%,$$@)
 	$(DIST_CP_CMP)
 
 
