@@ -241,8 +241,10 @@ class Choices(collections.ChainMap):
 	debug = False
 
 
-	def __init__(self, *choices, **kwargs):
-		"""Constructs a Choises object based on a set of options.
+	def __init__(self, *choices, default=None, use_shorthands=None, joiner='/',
+		highlighters=None
+	):
+		"""Constructs a Choices object based on a set of options.
 
 		The positional arguments must be (untranslated) strings yet their
 		translations are used for display and shorthand selection.
@@ -256,13 +258,6 @@ class Choices(collections.ChainMap):
 		        if stdout is a terminal defaults to bold and underling, otherwise
 		        uppercase and brackets respectively.
 		"""
-
-		default = kwargs.pop('default', None)
-		use_shorthands = kwargs.pop('use_shorthands', None)
-		joiner = kwargs.pop('joiner', '/')
-		highlighters = kwargs.pop('highlighters', None)
-		if kwargs:
-			raise TypeError('Unexpected keyword arguments: ' + ', '.join(kwargs))
 
 		if isinstance(default, int):
 			default = choices[default]
