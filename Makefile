@@ -33,7 +33,7 @@ MESSAGES_SYMLINKS = $(notdir $(call dirname,$(call dirname,$(filter-out $(MESSAG
 ZIP_TARGET = $(BUILD_DIR)/$(APPLICATION_NAME).zip
 ZIP_TARGET_PKG = $(basename $(ZIP_TARGET)).pkg
 CHECKSUMMED_FILES = $(addprefix $(ZIP_TARGET_PKG)/,$(patsubst $(SRC_DIR)/%,%,$(SOURCES)) $(MESSAGES_MO) $(VERSION_DATA) VERSION README.md)
-DIST_FILES = $(CHECKSUMMED_FILES) $(addprefix $(ZIP_TARGET_PKG)/,$(addprefix $(LOCALES_DIR)/,$(MESSAGES_SYMLINKS)) SHA256SUM SHA256SUM.sig.asc)
+DIST_FILES = $(CHECKSUMMED_FILES) $(addprefix $(ZIP_TARGET_PKG)/,$(addprefix $(LOCALES_DIR)/,$(MESSAGES_SYMLINKS)) SHA256SUM SHA256SUM.sig)
 
 
 zip: $(ZIP_TARGET)
@@ -55,8 +55,8 @@ clean:
 $(ZIP_TARGET_PKG)/SHA256SUM: $(CHECKSUMMED_FILES)
 	cd $(@D) && exec sha256sum -t -- $(patsubst $(@D)/%,%,$^) > $(abspath $@)
 
-%.sig.asc: %
-	$(GPG) --clearsign --yes --batch -o $@ -- $<
+%.sig: %
+	$(GPG) --batch --yes --detach-sign --output $@ -- $<
 
 
 messages_template: $(MESSAGES_POT)
