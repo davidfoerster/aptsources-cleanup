@@ -7,6 +7,8 @@ deletes sources list files without valid enabled source entries in
 
 ## Prerequisites
 
+### Mandatory
+
   * Python 3.4+
 
   * The `aptsources` module. In Debian-based distribution you can find it in
@@ -15,6 +17,11 @@ deletes sources list files without valid enabled source entries in
     If you don't have it yet you can install it with:
 
         sudo apt-get install python3-apt
+
+### Optional
+
+  * The `regex` module for improved (non-European) language support.
+    Package name: `python3-regex`.
 
 
 ## Download
