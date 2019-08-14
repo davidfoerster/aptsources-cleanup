@@ -36,6 +36,21 @@ class ZipFile(_zipfile.ZipFile):
 		return path and super().open(path, mode, pwd)
 
 
+	def read(self, path, pwd=None, follow_symlinks=True, fail_missing=True):
+		path = self.getinfo(path, follow_symlinks, pwd, fail_missing)
+		return path and super().read(path, pwd)
+
+
+	def extract(self, member, path=None, pwd=None, follow_symlinks=False,
+		fail_missing=True
+	):
+		member = self.getinfo(member, pwd, follow_symlinks, fail_missing)
+		success = member is not None
+		if success:
+			super().extract(member, path, pwd)
+		return success
+
+
 	def _resolve_path(self, path, pwd, fail_missing):
 		if isinstance(path, ZipInfo):
 			path = path.filename
