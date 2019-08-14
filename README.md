@@ -7,6 +7,14 @@ deletes sources list files without valid enabled source entries in
 
 ## Prerequisites
 
+**TL;DR:** Have a supported Ubuntu or other Debian-based system and install a
+couple of Python packages:
+
+    sudo apt install python3-apt python3-regex
+
+For details see below.
+
+
 ### Mandatory
 
   * Python 3.4+
@@ -14,17 +22,13 @@ deletes sources list files without valid enabled source entries in
   * The `aptsources` module. In Debian-based distribution you can find it in
     the `python3-apt` package.
 
-    If you don't have it yet you can install it with:
-
-        sudo apt-get install python3-apt
-
 ### Optional
 
   * The `regex` module for improved (non-European) language support.
     Package name: `python3-regex`.
 
 
-## Download
+## Download / Installation
 
 You can download a pre-bundled ZIP file executable by your Python interpreter:
 
