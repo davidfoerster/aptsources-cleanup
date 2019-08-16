@@ -7,7 +7,8 @@ __all__ = (
 )
 
 from functools import *
-from .operator import rapply, identity, methodcaller
+from  operator import attrgetter
+from .operator import rapply, identity
 
 
 def comp(*funcs):
@@ -107,7 +108,7 @@ class LazyInstance:
 
 	def _li_bind_method_impl(self, method_or_name):
 		if not callable(method_or_name):
-			method_or_name = methodcaller(getattr, method_or_name)
+			method_or_name = attrgetter(method_or_name)
 
 		if self._li_factory is None:
 			return method_or_name(self._li_instance)

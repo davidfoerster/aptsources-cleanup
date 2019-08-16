@@ -16,7 +16,6 @@ import gettext as _gettext
 import operator
 import sys
 import os
-import os.path
 import errno
 import locale
 import unicodedata
@@ -35,7 +34,7 @@ def _get_archive():
 
 def get_localedir(locales_subdir=os.path.join('share', 'locales')):
 	src_root = os.path.dirname(os.path.dirname(
-		sys.modules[(__package__ or __name__).partition('.')[0]].__file__))
+		sys.modules[ (__package__ or __name__).partition('.')[0] ].__file__))
 	src_root_locales = os.path.join(src_root, locales_subdir)
 
 	if _get_archive() is None and not os.path.isdir(src_root_locales):
@@ -57,8 +56,7 @@ def get_languages():
 			langs.append(loc)
 
 	if not any(langs):
-		del langs[:]
-		langs.append('C')
+		langs[:] = ('C',)
 
 	return langs
 
@@ -84,7 +82,8 @@ def translation(domain, localedir=None, languages=None, _class=None,
 
 	translations = None
 	if languages:
-		localedir = localedir[len(archive) + len(os.sep):].strip(os.sep)
+		assert len(os.sep) == 1
+		localedir = localedir[ len(archive) + len(os.sep): ].strip(os.sep)
 		locale_suffix = os.path.join('LC_MESSAGES', os.extsep.join((domain, 'mo')))
 		with ZipFile(archive) as archive:
 			#archive.debug = 3
@@ -135,12 +134,11 @@ class DictTranslations(NullTranslations):
 	"""A simple Translations class based on a simple mapping object"""
 
 	def __init__(self, data=None, **kwargs):
-		NullTranslations.__init__(self)
+		super().__init__()
 
-		if not data:
+		if data is None:
 			data = kwargs
 		elif kwargs:
-			data = data.copy()
 			data.update(kwargs)
 		self.data = data
 
@@ -317,8 +315,8 @@ class Choices(collections.ChainMap):
 		super().__init__(self.translations, self.short)
 
 		self.joiner = joiner
-		self.choices_string = joiner.join(
-			map(operator.attrgetter('styled'), self.orig.values()))
+		self.choices_string = joiner.join(tuple(
+			map(operator.attrgetter('styled'), self.orig.values())))
 
 
 	@staticmethod
@@ -345,7 +343,7 @@ class Choices(collections.ChainMap):
 		short = match.group()
 		styled = (
 			shorthand_highlighter(short).join((s[:match.start()], s[match.end():])))
-		return normalize_casefold(short), styled
+		return (normalize_casefold(short), styled)
 
 
 	# Try to detect grapheme clusters if supported
@@ -353,7 +351,7 @@ class Choices(collections.ChainMap):
 	try:
 		letter_pattern = re.compile(letter_pattern, re.UNICODE)
 	except re.error as ex:
-		assert letter_pattern.index(r'\X') in range(ex.pos - 1, ex.pos + 1)
+		assert ex.pos - 1 <= letter_pattern.index(r'\X') <= ex.pos
 		letter_pattern = None
 	else:
 		if not letter_pattern.match('A'):
@@ -419,7 +417,8 @@ class Choices(collections.ChainMap):
 			n = modulo_width(n + printable_len)
 
 		if debug is not None:
-			print('\nWidth: {:d}'.format(stdout.width),
+			print(
+				'\nWidth: {:d}'.format(stdout.width),
 				*starmap(
 					'Choice{:3d}: col={:3d}, len={:3d}, {!s:5s}, {!r}'.format, debug),
 				sep='\n')

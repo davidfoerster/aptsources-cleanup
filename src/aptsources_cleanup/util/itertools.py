@@ -7,14 +7,18 @@ from .collections import ExtSet
 from itertools import filterfalse, accumulate
 
 
-def foreach(func, *iterables):
+def foreach(func, iterable0, *iterables, star_call=False):
 	"""Call 'func' on each item in 'iterable'."""
 
-	if len(iterables) > 1:
-		for x in zip(*iterables):
+	if iterables:
+		iterable0 = zip(iterable0, *iterables)
+		star_call = True
+
+	if star_call:
+		for x in iterable0:
 			func(*x)
 	else:
-		for x in iterables[0]:
+		for x in iterable0:
 			func(x)
 
 

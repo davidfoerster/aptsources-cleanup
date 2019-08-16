@@ -11,7 +11,7 @@ import sys
 import errno
 import weakref
 import textwrap
-import itertools
+import collections.abc
 from operator import itemgetter
 from .operator import methodcaller
 from .itertools import accumulate, foreach
@@ -40,7 +40,7 @@ else:
 	}
 
 
-def try_input(prompt=None, on_eof='', end='\n? '):
+def try_input(prompt=None, on_eof='', end=None):
 	"""Similar to input() but return a default response on EOF or EBADF.
 
 	If input() fails with EOFError or due to a bad (e. g. closed) standard output
@@ -49,6 +49,9 @@ def try_input(prompt=None, on_eof='', end='\n? '):
 	Additionally wrap the prompt string using termwrap (see below). 'end' is
 	always appended to the prompt and defaults to '\n? '.
 	"""
+
+	if end is None:
+		end = '\n? '
 
 	if prompt:
 		termwrap.stdout().print(prompt, end=end)
@@ -86,6 +89,8 @@ class termwrap(textwrap.TextWrapper):
 
 		if file is None:
 			file = sys.stdout
+			if file is None:
+				return None
 
 		tw = cls._instances.get(id(file))
 		if isinstance(tw, weakref.ref):
@@ -124,7 +129,7 @@ class termwrap(textwrap.TextWrapper):
 
 		if file is not None and width <= 0:
 			width = self._refresh_width_impl(file)
-		textwrap.TextWrapper.__init__(self, width=width, **kwargs)
+		super().__init__(width=width, **kwargs)
 		self.file = file
 
 
@@ -179,7 +184,9 @@ class termwrap(textwrap.TextWrapper):
 		If the associated file descriptor does not report a terminal width the
 		current width value is retained.
 		"""
-		width = self._refresh_width_impl(self.file if file is None else file)
+		if file is None:
+			file = self.file
+		width = self._refresh_width_impl(file)
 		if width > 0:
 			self.width = width
 		return width > 0
@@ -187,17 +194,28 @@ class termwrap(textwrap.TextWrapper):
 
 	@staticmethod
 	def _refresh_width_impl(file):
-		if not file.isatty():
-			return 0
-		return os.get_terminal_size(file.fileno()).columns
+		return file.isatty() and os.get_terminal_size(file.fileno()).columns
 
 
 	def copy(self, **kwargs):
-		k, v = itertools.tee(itertools.chain(
-			('break_long_words', 'break_on_hyphens', 'drop_whitespace',
-				'expand_tabs', 'fix_sentence_endings', 'initial_indent',
-				'replace_whitespace', 'subsequent_indent', 'width', 'file'),
-			filter(fpartial(hasattr, self),
-				('max_lines', 'placeholder', 'tabsize'))))
-		foreach(kwargs.setdefault, k, map(fpartial(getattr, self), v))
-		return self.__class__(**kwargs)
+		foreach(kwargs.setdefault, self._attribute_items(), star_call=True)
+		return type(self)(**kwargs)
+
+
+	def _attribute_items(self,
+		mandatory_attrs=(
+			'break_long_words', 'break_on_hyphens', 'drop_whitespace',
+			'expand_tabs', 'fix_sentence_endings', 'initial_indent',
+			'replace_whitespace', 'subsequent_indent', 'width', 'file'),
+		optional_attrs=(
+			'max_lines', 'placeholder', 'tabsize')
+	):
+		assert isinstance(mandatory_attrs, collections.abc.Sized)
+		yield from zip(
+			mandatory_attrs, map(fpartial(getattr, self), mandatory_attrs))
+
+		for k in optional_attrs:
+			try:
+				yield (k, getattr(self, k))
+			except AttributeError:
+				pass
