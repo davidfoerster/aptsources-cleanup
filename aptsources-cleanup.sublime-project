@@ -3,7 +3,26 @@
 	[
 		{
 			"path": ".",
-			"file_exclude_patterns": ["*.mo"],
+
+			"file_exclude_patterns": [
+				"*.pyo", "*.pyc",
+				"*.mo",
+			],
+
+			"folder_exclude_patterns": [
+				"__pycache__",
+				".git",
+				"*.pkg",
+			],
+
+			"index_exclude_patterns": [
+				"LICENSE*", "README*", "VERSION",
+				"Makefile",
+				".git*",
+				"*.list",
+				"*.sh",
+				"*.po",
+			],
 		}
 	],
 }
