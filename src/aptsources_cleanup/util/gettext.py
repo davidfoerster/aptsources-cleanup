@@ -201,13 +201,13 @@ class ChoiceHighlighters(
 		if prefix:
 			suffix = terminal.TERMMODES['normal']
 			if not suffix:
-				raise RuntimeError(
+				raise AssertionError(
 					"Terminal supports '{:s}' but no way to revert to normal???"
 						.format(capname))
 			if '｝｝' in prefix or '｝｝' in suffix:
 				raise ValueError("prefix or suffix contains illegal infix '｝｝'")
 			highlighter = comp(
-				fpartial(peek, cls._verify_unprintable_patterns),
+				cls._verify_unprintable_patterns,
 				methodcaller(str.replace, suffix, suffix + prefix),
 				fpartial('｛｛{0:s}｝｝{2:s}｛｛{1:s}｝｝'.format, prefix, suffix))
 
@@ -215,7 +215,12 @@ class ChoiceHighlighters(
 			highlighter = default
 
 		else:
-			highlighter = default.format
+			try:
+				highlighter = default.format
+			except AttributeError:
+				raise ValueError(
+					'Unknown term mode {!r} and no valid default ({:s} instead of str '
+						'or byte)'.format(capname, type(default).__qualname__))
 
 		if flags_func is not None:
 			highlighter = (highlighter, flags_func(prefix))
@@ -228,6 +233,7 @@ class ChoiceHighlighters(
 		m = last(cls.unprintable_pattern.finditer(s), None)
 		if m is not None and s.find('｛｛', m.end()) >= 0:
 			raise ValueError("{!r} contains an unmatched infix '｛｛'.".format(s))
+		return s
 
 
 class Choices(collections.ChainMap):
@@ -260,7 +266,9 @@ class Choices(collections.ChainMap):
 		if isinstance(default, int):
 			default = choices[default]
 
-		if not callable(use_shorthands):
+		if use_shorthands is None:
+			use_shorthands = bool
+		elif not callable(use_shorthands):
 			use_shorthands = getattr(use_shorthands, '__contains__', None) or bool
 
 		if highlighters is None:

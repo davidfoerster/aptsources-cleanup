@@ -125,10 +125,13 @@ class LazyInstance:
 
 
 	def _li_bind_method_impl(self, method_or_name):
-		if not callable(method_or_name):
-			method_or_name = attrgetter(method_or_name)
+		if callable(method_or_name):
+			getter = method_or_name
+			if self._li_factory is None:
+				return getter(self._li_instance)
+		else:
+			if self._li_factory is None:
+				return getattr(self._li_instance, method_or_name)
+			getter = attrgetter(method_or_name)
 
-		if self._li_factory is None:
-			return method_or_name(self._li_instance)
-
-		return lambda *args: method_or_name(self._instance)(*args)
+		return lambda *args: getter(self._instance)(*args)
