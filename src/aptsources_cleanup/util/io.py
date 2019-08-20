@@ -1,9 +1,7 @@
 # -*- coding: utf-8
 """Various I/O-related utilities"""
-__all__ = ('FileDescriptor', 'display_file', 'sendfile_all')
+__all__ = ('FileDescriptor', 'sendfile_all')
 
-from .gettext import _
-from .terminal import termwrap
 import os
 import sys
 
@@ -50,18 +48,6 @@ class FileDescriptor:
 
 	def __exit__(self, exc_type, exc_val, exc_tb):
 		self.close()
-
-
-def display_file(filename):
-	"""Copy the content of the file at a path to standard output."""
-
-	try:
-		with FileDescriptor(filename) as fd:
-			sys.stdout.flush()
-			if sendfile_all(sys.stdout.fileno(), fd) == 0:
-				print('<{:s}>'.format(_('empty')))
-	except EnvironmentError as ex:
-		termwrap.stderr().print('{:s}: {!s}'.format(_('Error'), ex))
 
 
 def sendfile_all(out, in_):

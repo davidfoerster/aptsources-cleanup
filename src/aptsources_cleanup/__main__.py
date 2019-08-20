@@ -1,8 +1,8 @@
 # -*- coding: utf-8
-from .util.io import *
 from .util.terminal import *
 from .util.operator import methodcaller, peek
 from .util.itertools import *
+from .util.fileutils import *
 from .util.filesystem import *
 from .util.gettext import *
 from . import *
