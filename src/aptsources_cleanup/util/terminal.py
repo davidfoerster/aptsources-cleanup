@@ -12,6 +12,7 @@ import errno
 import weakref
 import textwrap
 import collections.abc
+from . import io
 from operator import itemgetter
 from .operator import methodcaller
 from .itertools import accumulate, foreach
@@ -20,7 +21,7 @@ from functools import partial as fpartial
 
 TERMMODES = (('bold', 'bold'), ('underline', 'smul'), ('normal', 'sgr0'))
 
-if sys.stdout and sys.stdout.isatty():
+if io.isatty(sys.stdout):
 	try:
 		import curses
 		curses.setupterm()
@@ -57,7 +58,7 @@ def try_input(prompt=None, on_eof='', end=None):
 		termwrap.stdout().print(prompt, end=end)
 		end = None
 
-	if sys.stdin:
+	if sys.stdin and not sys.stdin.closed:
 		try:
 			return input(end)
 		except (EOFError, KeyboardInterrupt):

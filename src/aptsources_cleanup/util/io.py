@@ -1,6 +1,6 @@
 # -*- coding: utf-8
 """Various I/O-related utilities"""
-__all__ = ('FileDescriptor', 'sendfile_all')
+__all__ = ('FileDescriptor', 'sendfile_all', 'isatty')
 
 import os
 import sys
@@ -65,3 +65,11 @@ def sendfile_all(out, in_):
 		count += r
 
 	return count
+
+
+def isatty(file):
+	"""Convenience method to check if a file object exists, is open, and refers
+	to a TTY.
+	"""
+
+	return file is not None and not file.closed and file.isatty()
