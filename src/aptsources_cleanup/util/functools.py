@@ -1,12 +1,12 @@
 # -*- coding: utf-8
 """Utilities for and around functional programming"""
 
-__all__ = (
-	'comp', 'cmp_to_key', 'total_ordering', 'reduce', 'update_wrapper', 'wraps',
-	'partial', 'LazyInstance'
-)
+__all__ = ['comp', 'LazyInstance']
 
 from functools import *
+import functools as _functools
+__all__ += _functools.__all__
+
 from  operator import attrgetter
 from .operator import rapply, identity
 
