@@ -8,18 +8,36 @@ import functools as _functools
 __all__ += _functools.__all__
 
 from  operator import attrgetter
-from .operator import rapply, identity
+from .operator import identity
 
 
-def comp(*funcs):
-	"""Returns a function object that concatenates the passed functions from left
-	to right.
+class comp:
+	"""A function object that concatenates the passed functions from left to
+	right.
 	"""
 
-	assert all(map(callable, funcs))
-	if len(funcs) <= 1:
-		return funcs[0] if funcs else identity
-	return partial(reduce, rapply, funcs)
+	__slots__ = ('funcs',)
+
+
+	@classmethod
+	def make(cls, *funcs):
+		if len(funcs) <= 1:
+			return funcs[0] if funcs else identity
+		return cls(*funcs)
+
+
+	def __init__(self, *funcs):
+		assert all(map(callable, funcs))
+		self.funcs = funcs
+
+
+	def __call__(self, *args):
+		funcs = iter(self.funcs)
+		x = next(funcs, identity)(*args)
+		del args, kwargs
+		for f in funcs:
+			x = f(x)
+		return x
 
 
 class LazyInstance:
