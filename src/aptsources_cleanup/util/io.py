@@ -9,8 +9,11 @@ import sys
 class FileDescriptor:
 	"""A context manager for operating system file descriptors"""
 
-	def __init__(self, path, mode=os.O_RDONLY, *args):
-		self._fd = os.open(path, mode, *args)
+	__slots__ = ('_fd',)
+
+
+	def __init__(self, path, flags=os.O_RDONLY, mode=0o777):
+		self._fd = os.open(path, flags, mode)
 
 
 	@property
