@@ -4,7 +4,6 @@ from . import collections
 from .itertools import filterfalse
 import sys
 import os
-import os.path
 import stat
 import errno
 import functools
@@ -101,8 +100,7 @@ class ZipFile(_zipfile.ZipFile):
 		if c_info.file_size == 0:
 			resolved = ''
 		elif not c_seen:
-			resolved = strings.prefix(
-				super().read(c_info, pwd).decode(sys.getfilesystemencoding()), '\0')
+			resolved = strings.prefix(os.fsdecode(super().read(c_info, pwd)), '\0')
 
 		if not resolved:
 			raise self._OSError(
