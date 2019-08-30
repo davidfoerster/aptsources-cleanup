@@ -1,10 +1,8 @@
 # -*- coding: utf-8
 """Various I/O-related utilities"""
-__all__ = ('FileDescriptor', 'sendfile_all', 'isatty')
+__all__ = ('FileDescriptor', 'isatty')
 
 import os
-import sys
-import errno
 
 
 class FileDescriptor:
@@ -52,35 +50,6 @@ class FileDescriptor:
 
 	def __exit__(self, exc_type, exc_val, exc_tb):
 		self.close()
-
-
-def sendfile_all(fd_out, fd_in, offset=None, length=None):
-	"""Copies the entire content of one file descriptor to another.
-
-	The implementation uses os.sendfile() if available or os.read()/os.write()
-	otherwise.
-	"""
-
-	start_offset = offset
-	if offset is None and not sys.platform.startswith('linux'):
-		offset = os.lseek(fd_in, 0, os.SEEK_CUR)
-
-	if length is None:
-		length = sys.maxsize
-	remainder = length
-
-	while remainder > 0:
-		r = os.sendfile(fd_out, fd_in, offset, remainder)
-		if not r:
-			break
-		if offset is not None:
-			offset += r
-		remainder -= r
-
-	if start_offset is None and offset is not None:
-		os.lseek(fd_in, offset, os.SEEK_SET)
-
-	return length - remainder
 
 
 def isatty(file):

@@ -3,8 +3,7 @@ __all__ = ('display_file',)
 
 import os
 import sys
-import fcntl
-import contextlib
+import mmap
 from . import io, terminal
 from .gettext import _, _N, _U
 
@@ -13,17 +12,15 @@ def display_file(filename):
 	"""Copy the content of the file at a path to standard output."""
 
 	try:
-		with contextlib.ExitStack() as es:
-			fd_in = es.enter_context(io.FileDescriptor(filename))
-
-			sys.stdout.flush()
-			fd_out = sys.stdout.fileno()
-			fd_out_flags = fcntl.fcntl(fd_out, fcntl.F_GETFL)
-			if fd_out_flags & os.O_APPEND:
-				fcntl.fcntl(fd_out, fcntl.F_SETFL, fd_out_flags & ~os.O_APPEND)
-				ex.callback(fcntl.fcntl, fd_out, fcntl.F_SETFL, fd_out_flags)
-
-			if io.sendfile_all(fd_out, fd_in) == 0:
+		with io.FileDescriptor(filename) as fd_in:
+			size_in = os.stat(fd_in).st_size
+			if size_in:
+				sys.stdout.flush()
+				with mmap.mmap(fd_in, size_in, prot=mmap.PROT_READ) as buf_in:
+					sys.stdout.buffer.write(buf_in)
+					if buf_in[-1] != ord(b'\n'):
+						sys.stdout.buffer.write(b'\n')
+			else:
 				print('<<<{:s}>>>'.format(_('empty')))
 
 	except EnvironmentError as ex:
