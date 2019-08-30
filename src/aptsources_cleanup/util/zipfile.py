@@ -26,6 +26,7 @@ class ZipFile(_zipfile.ZipFile):
 			return self._resolve_path(name, pwd, fail_missing)
 		if isinstance(name, ZipInfo):
 			return name
+		name = os.fspath(name)
 		return self._check_missing(self.NameToInfo.get(name), name, fail_missing)
 
 
@@ -54,6 +55,9 @@ class ZipFile(_zipfile.ZipFile):
 	def _resolve_path(self, path, pwd, fail_missing):
 		if isinstance(path, ZipInfo):
 			path = path.filename
+		else:
+			path = os.fspath(path)
+
 		inspected = []
 		uninspected = path.split(os.sep)
 		uninspected.reverse()
