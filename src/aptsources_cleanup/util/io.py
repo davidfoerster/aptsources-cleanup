@@ -54,7 +54,7 @@ class FileDescriptor:
 		self.close()
 
 
-def sendfile_all(out, in_, offset=None, length=None):
+def sendfile_all(fd_out, fd_in, offset=None, length=None):
 	"""Copies the entire content of one file descriptor to another.
 
 	The implementation uses os.sendfile() if available or os.read()/os.write()
@@ -63,14 +63,14 @@ def sendfile_all(out, in_, offset=None, length=None):
 
 	start_offset = offset
 	if offset is None and not sys.platform.startswith('linux'):
-		offset = os.lseek(in_, 0, os.SEEK_CUR)
+		offset = os.lseek(fd_in, 0, os.SEEK_CUR)
 
 	if length is None:
 		length = sys.maxsize
 	remainder = length
 
 	while remainder > 0:
-		r = os.sendfile(out, in_, offset, remainder)
+		r = os.sendfile(fd_out, fd_in, offset, remainder)
 		if not r:
 			break
 		if offset is not None:
@@ -78,7 +78,7 @@ def sendfile_all(out, in_, offset=None, length=None):
 		remainder -= r
 
 	if start_offset is None and offset is not None:
-		os.lseek(in_, offset, os.SEEK_SET)
+		os.lseek(fd_in, offset, os.SEEK_SET)
 
 	return length - remainder
 
