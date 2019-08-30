@@ -34,7 +34,7 @@ class comp:
 	def __call__(self, *args):
 		funcs = iter(self.funcs)
 		x = next(funcs, identity)(*args)
-		del args, kwargs
+		del args
 		for f in funcs:
 			x = f(x)
 		return x
