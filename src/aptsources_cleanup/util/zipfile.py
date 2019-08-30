@@ -31,7 +31,7 @@ class ZipFile(_zipfile.ZipFile):
 		return self._check_missing(self.NameToInfo.get(name), name, fail_missing)
 
 
-	def open(self, path, mode='r', pwd=None, *, follow_symlinks=True,
+	def open(self, path, mode='r', pwd=None, *, follow_symlinks=False,
 		fail_missing=True, **kwargs
 	):
 		path = self.getinfo(
@@ -74,6 +74,7 @@ class ZipFile(_zipfile.ZipFile):
 
 	def _resolve_path_component(self, inspected, uninspected, pwd, seen_set):
 		c = uninspected.pop()
+		#_eprintf('_resolve_path_component(): {!r}, {!r}, {!r}', inspected, c, uninspected)
 
 		if not c or c == os.curdir:
 			return None

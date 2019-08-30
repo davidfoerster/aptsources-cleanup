@@ -89,8 +89,9 @@ def translation(domain, localedir=None, languages=None, _class=None,
 			#archive.debug = 3
 			for lang in languages:
 				lang_path = os.path.join(localedir, lang, locale_suffix)
-				#print('Trying', lang_path, '...')
-				translation_file = archive.open(lang_path, fail_missing=False)
+				#print('Trying', lang_path, '...', file=sys.stderr)
+				translation_file = archive.open(
+					lang_path, follow_symlinks=True, fail_missing=False)
 				if translation_file is not None:
 					with translation_file:
 						#print("Found language '{:s}' at '{:s}'.".format(lang, lang_path))
