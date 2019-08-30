@@ -20,7 +20,9 @@ class ZipFile(_zipfile.ZipFile):
 		self._max_path_value = None
 
 
-	def getinfo(self, name, follow_symlinks=False, pwd=None, fail_missing=True):
+	def getinfo(self, name, pwd=None, *, follow_symlinks=False,
+		fail_missing=True
+	):
 		if follow_symlinks:
 			return self._resolve_path(name, pwd, fail_missing)
 		if isinstance(name, ZipInfo):
@@ -29,19 +31,21 @@ class ZipFile(_zipfile.ZipFile):
 		return self._check_missing(self.NameToInfo.get(name), name, fail_missing)
 
 
-	def open(self, path, mode='r', pwd=None, follow_symlinks=True,
-		fail_missing=True
+	def open(self, path, mode='r', pwd=None, *, follow_symlinks=True,
+		fail_missing=True, **kwargs
 	):
-		path = self.getinfo(path, follow_symlinks, pwd, fail_missing)
-		return path and super().open(path, mode, pwd)
+		path = self.getinfo(
+			path, pwd, follow_symlinks=follow_symlinks, fail_missing=fail_missing)
+		return path and super().open(path, mode, pwd, **kwargs)
 
 
-	def read(self, path, pwd=None, follow_symlinks=True, fail_missing=True):
-		path = self.getinfo(path, follow_symlinks, pwd, fail_missing)
+	def read(self, path, pwd=None, *, follow_symlinks=True, fail_missing=True):
+		path = self.getinfo(
+			path, pwd, follow_symlinks=follow_symlinks, fail_missing=fail_missing)
 		return path and super().read(path, pwd)
 
 
-	def extract(self, member, path=None, pwd=None, follow_symlinks=False,
+	def extract(self, member, path=None, pwd=None, *, follow_symlinks=False,
 		fail_missing=True
 	):
 		member = self.getinfo(member, pwd, follow_symlinks, fail_missing)
