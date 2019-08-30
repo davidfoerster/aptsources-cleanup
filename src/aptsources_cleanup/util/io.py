@@ -4,6 +4,7 @@ __all__ = ('FileDescriptor', 'sendfile_all', 'isatty')
 
 import os
 import sys
+import errno
 
 
 class FileDescriptor:
@@ -53,21 +54,33 @@ class FileDescriptor:
 		self.close()
 
 
-def sendfile_all(out, in_):
+def sendfile_all(out, in_, offset=None, length=None):
 	"""Copies the entire content of one file descriptor to another.
 
 	The implementation uses os.sendfile() if available or os.read()/os.write()
 	otherwise.
 	"""
 
-	count = 0
-	while True:
-		r = os.sendfile(out, in_, count, sys.maxsize - count)
+	start_offset = offset
+	if offset is None and not sys.platform.startswith('linux'):
+		offset = os.lseek(in_, 0, os.SEEK_CUR)
+
+	if length is None:
+		length = sys.maxsize
+	remainder = length
+
+	while remainder > 0:
+		r = os.sendfile(out, in_, offset, remainder)
 		if not r:
 			break
-		count += r
+		if offset is not None:
+			offset += r
+		remainder -= r
 
-	return count
+	if start_offset is None and offset is not None:
+		os.lseek(in_, offset, os.SEEK_SET)
+
+	return length - remainder
 
 
 def isatty(file):
