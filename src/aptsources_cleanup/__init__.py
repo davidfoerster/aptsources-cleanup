@@ -16,6 +16,7 @@ __all__ = ('get_duplicates', 'get_empty_files')
 from . import util
 from .util.filesystem import samefile
 from .util.import_check import import_check
+from .util.relations import EquivalenceRelation
 from collections import defaultdict
 from os.path import normpath
 from urllib.parse import urlparse, urlunparse
@@ -26,18 +27,21 @@ from .util.version import get_version as __version__
 __version__ = str(__version__())
 
 
-def get_duplicates(sourceslist):
+def get_duplicates(sourceslist, equivalent_schemes=None):
 	"""Detects and returns duplicate Apt source entries."""
 
+	if equivalent_schemes is None:
+		equivalent_schemes = EquivalenceRelation.EMPTY
 
 	sentry_map = defaultdict(list)
 	for se in sourceslist.list:
 		if not se.invalid and not se.disabled:
 			uri = urlparse(se.uri)
-			uri = urlunparse(uri._replace(path=normpath(uri.path)))
+			scheme = equivalent_schemes.get_class(uri.scheme, uri.scheme)
+			uri = urlunparse(uri._replace(scheme='', path=normpath(uri.path)))
 			dist = normpath(se.dist)
 			for c in (se.comps or (None,)):
-				sentry_map[(se.type, uri, dist, c and normpath(c))].append(se)
+				sentry_map[(se.type, scheme, uri, dist, c and normpath(c))].append(se)
 
 	return filter(lambda dupe_set: len(dupe_set) > 1, sentry_map.values())
 
