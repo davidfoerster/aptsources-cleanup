@@ -5,6 +5,7 @@ from .util.itertools import *
 from .util.fileutils import *
 from .util.filesystem import *
 from .util.gettext import *
+from .util.relations import *
 from . import *
 import sys
 import os.path
@@ -40,7 +41,8 @@ def main(*args):
 		rv = load_sources_dir(sourceslist, args.debug_sources_dir)
 
 	if rv == 0:
-		rv = handle_duplicates(sourceslist, args.apply_changes)
+		rv = handle_duplicates(sourceslist,
+			args.apply_changes, args.equivalent_schemes)
 
 	if rv == 0 and args.apply_changes is not False:
 		rv = handle_empty_files(sourceslist)
@@ -206,6 +208,13 @@ def parse_args(args):
 	ap.add_argument('-n', '--no-act', '--dry-run',
 		dest='apply_changes', action='store_const', const=False,
 		help=_('Never apply changes; only print what would be done.'))
+	noarg_equivalent_schemes = EquivalenceRelation((('ftp', 'http', 'https'),))
+	ap.add_argument('--equivalent-schemes', metavar='SCHEMES',
+		nargs='?', type=EquivalenceRelation.parse, const=noarg_equivalent_schemes,
+		help=_('Specify URI schemes that you consider equivalent using a list of '
+			'equivalence classes delimited by semicolons (";") and elements '
+			'delimited by commas (","). Without argument, specify "{:|,|;|a}".')
+				.format(noarg_equivalent_schemes))
 	ap.add_argument('-h', '--help',
 		action='help', default=argparse.SUPPRESS,
 		help=_('show this help message and exit'))
@@ -213,7 +222,7 @@ def parse_args(args):
 
 	dg = ap.add_argument_group(_('Debugging Options'),
 		_('For wizards only! Use these if you know and want to test the '
-				'application source code.'))
+			'application source code.'))
 	dg.add_argument('--debug-import-fail', '--d-i-f', metavar='LEVEL',
 		nargs='?', type=int, const=1, default=0,
 		help=suppress_debug or
@@ -247,7 +256,9 @@ def parse_args(args):
 	return args
 
 
-def handle_duplicates(sourceslist, apply_changes=None):
+def handle_duplicates(sourceslist, apply_changes=None,
+	equivalent_schemes=None
+):
 	"""Interactive disablement of duplicate source entries"""
 
 	stdout = termwrap.stdout()
@@ -256,7 +267,8 @@ def handle_duplicates(sourceslist, apply_changes=None):
 	stdout_indent2 = stdout_indent1.copy(
 		initial_indent=stdout_indent1.subsequent_indent)
 
-	duplicates = tuple(get_duplicates(sourceslist))
+	duplicates = tuple(get_duplicates(
+		sourceslist, equivalent_schemes=equivalent_schemes))
 	if duplicates:
 		for dupe_set in duplicates:
 			orig = dupe_set.pop(0)

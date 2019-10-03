@@ -87,7 +87,7 @@ msgstr "positional arguments"
 msgid "optional arguments"
 msgstr "optional arguments"
 
-#: /usr/lib/python3.6/argparse.py:1662 src/aptsources_cleanup/__main__.py:211
+#: /usr/lib/python3.6/argparse.py:1662 src/aptsources_cleanup/__main__.py:220
 msgid "show this help message and exit"
 msgstr "show this help message and exit"
 
@@ -95,7 +95,7 @@ msgstr "show this help message and exit"
 msgid "cannot have multiple subparser arguments"
 msgstr "cannot have multiple subparser arguments"
 
-#: /usr/lib/python3.6/argparse.py:1745 src/aptsources_cleanup/__main__.py:241
+#: /usr/lib/python3.6/argparse.py:1745 src/aptsources_cleanup/__main__.py:250
 #, python-format
 msgid "unrecognized arguments: %s"
 msgstr "unrecognized arguments: %s"
@@ -169,48 +169,58 @@ msgstr "invalid choice: %(value)r (choose from %(choices)s)"
 msgid "%(prog)s: error: %(message)s\n"
 msgstr "%(prog)s: error: %(message)s\n"
 
-#: src/aptsources_cleanup/__main__.py:54
+#: src/aptsources_cleanup/__main__.py:56
 #: src/aptsources_cleanup/util/filesystem.py:38
-#: src/aptsources_cleanup/util/fileutils.py:18
+#: src/aptsources_cleanup/util/fileutils.py:27
 msgid "Error"
 msgstr "Error"
 
-#: src/aptsources_cleanup/__main__.py:54
+#: src/aptsources_cleanup/__main__.py:56
 msgid "No such directory"
 msgstr "No such directory"
 
-#: src/aptsources_cleanup/__main__.py:166
+#: src/aptsources_cleanup/__main__.py:168
 msgid "Show program's version number and exit."
 msgstr "Show program’s version number and exit."
 
-#: src/aptsources_cleanup/__main__.py:197
+#: src/aptsources_cleanup/__main__.py:199
 msgid "ID_DESCRIPTION"
 msgstr ""
 "Detects and interactively deactivates duplicate Apt source entries and "
 "deletes sources list files without valid enabled source entries in “/etc/"
 "sources.list” and “/etc/sources.list.d/*.list”."
 
-#: src/aptsources_cleanup/__main__.py:199
+#: src/aptsources_cleanup/__main__.py:201
 msgid "Author"
 msgstr "Author"
 
-#: src/aptsources_cleanup/__main__.py:200
+#: src/aptsources_cleanup/__main__.py:202
 msgid "Source code and bug tracker location"
 msgstr "Source code and bug tracker location"
 
-#: src/aptsources_cleanup/__main__.py:205
+#: src/aptsources_cleanup/__main__.py:207
 msgid "Apply all non-destructive changes without question."
 msgstr "Apply all non-destructive changes without question."
 
-#: src/aptsources_cleanup/__main__.py:208
+#: src/aptsources_cleanup/__main__.py:210
 msgid "Never apply changes; only print what would be done."
 msgstr "Never apply changes; only print what would be done."
 
 #: src/aptsources_cleanup/__main__.py:214
+msgid ""
+"Specify URI schemes that you consider equivalent using a list of equivalence "
+"classes delimited by semicolons (\";\") and elements delimited by commas (\",\"). "
+"Without argument, specify \"{:|,|;|a}\"."
+msgstr ""
+"Specify URI schemes that you consider equivalent using a list of equivalence "
+"classes delimited by semicolons (“;”) and elements delimited by commas (“,”). "
+"Without argument, specify “{:|,|;|a}”."
+
+#: src/aptsources_cleanup/__main__.py:223
 msgid "Debugging Options"
 msgstr "Debugging Options"
 
-#: src/aptsources_cleanup/__main__.py:215
+#: src/aptsources_cleanup/__main__.py:224
 msgid ""
 "For wizards only! Use these if you know and want to test the application "
 "source code."
@@ -218,7 +228,7 @@ msgstr ""
 "For wizards only! Use these if you know and want to test the application "
 "source code."
 
-#: src/aptsources_cleanup/__main__.py:220
+#: src/aptsources_cleanup/__main__.py:229
 msgid ""
 "Force an ImportError for the '{module:s}' module and fail on all subsequent "
 "diagnoses."
@@ -226,7 +236,7 @@ msgstr ""
 "Force an ImportError for the “{module:s}” module and fail on all subsequent "
 "diagnoses."
 
-#: src/aptsources_cleanup/__main__.py:227
+#: src/aptsources_cleanup/__main__.py:236
 msgid ""
 "Load sources list files from this directory instead of the default root-"
 "owned '{default:s}'. If omitted DIR defaults to '{const:s}'."
@@ -234,80 +244,80 @@ msgstr ""
 "Load sources list files from this directory instead of the default root-"
 "owned “{default:s}”. If omitted DIR defaults to “{const:s}”."
 
-#: src/aptsources_cleanup/__main__.py:233
+#: src/aptsources_cleanup/__main__.py:242
 msgid "Debug the display of translated and formatted choices options."
 msgstr "Debug the display of translated and formatted choices options."
 
-#: src/aptsources_cleanup/__main__.py:236
+#: src/aptsources_cleanup/__main__.py:245
 msgid "Show help for debugging options."
 msgstr "Show help for debugging options."
 
-#: src/aptsources_cleanup/__main__.py:242
+#: src/aptsources_cleanup/__main__.py:251
 msgid "Use '{help_opt:s}' to display the program help."
 msgstr "Use “{help_opt:s}” to display the program help."
 
-#: src/aptsources_cleanup/__main__.py:264
+#: src/aptsources_cleanup/__main__.py:276
 msgid "Overlapping source entries:"
 msgstr "Overlapping source entries:"
 
-#: src/aptsources_cleanup/__main__.py:267
+#: src/aptsources_cleanup/__main__.py:279
 msgid "{ordinal:2d}. file '{file:s}':"
 msgstr "{ordinal:2d}. file “{file:s}”:"
 
-#: src/aptsources_cleanup/__main__.py:270
+#: src/aptsources_cleanup/__main__.py:282
 msgid "I disabled the latter entry."
 msgstr "I disabled the latter entry."
 
-#: src/aptsources_cleanup/__main__.py:274
+#: src/aptsources_cleanup/__main__.py:286
 #, python-brace-format
 msgid "{nduplicates:d} source entry was disabled"
 msgid_plural "{nduplicates:d} source entries were disabled"
 msgstr[0] "{nduplicates:d} source entry was disabled"
 msgstr[1] "{nduplicates:d} source entries were disabled"
 
-#: src/aptsources_cleanup/__main__.py:283
-#: src/aptsources_cleanup/__main__.py:308
+#: src/aptsources_cleanup/__main__.py:295
+#: src/aptsources_cleanup/__main__.py:320
 msgid "no"
 msgstr "no"
 
-#: src/aptsources_cleanup/__main__.py:283
-#: src/aptsources_cleanup/__main__.py:308
+#: src/aptsources_cleanup/__main__.py:295
+#: src/aptsources_cleanup/__main__.py:320
 msgid "yes"
 msgstr "yes"
 
-#: src/aptsources_cleanup/__main__.py:284
+#: src/aptsources_cleanup/__main__.py:296
 msgid "Do you want to save these changes?"
 msgstr "Do you want to save these changes?"
 
-#: src/aptsources_cleanup/__main__.py:287
+#: src/aptsources_cleanup/__main__.py:299
 msgid "Aborted."
 msgstr "Aborted."
 
-#: src/aptsources_cleanup/__main__.py:294
+#: src/aptsources_cleanup/__main__.py:306
 msgid "No duplicate entries were found."
 msgstr "No duplicate entries were found."
 
-#: src/aptsources_cleanup/__main__.py:308
+#: src/aptsources_cleanup/__main__.py:320
 msgid "all"
 msgstr "all"
 
-#: src/aptsources_cleanup/__main__.py:308
+#: src/aptsources_cleanup/__main__.py:320
 msgid "display"
 msgstr "display"
 
-#: src/aptsources_cleanup/__main__.py:308
+#: src/aptsources_cleanup/__main__.py:320
 msgid "none"
 msgstr "none"
 
-#: src/aptsources_cleanup/__main__.py:319
+#: src/aptsources_cleanup/__main__.py:331
 msgid "'{file:s}' contains no valid and enabled repository lines."
 msgstr "“{file:s}” contains no valid and enabled repository lines."
 
-#: src/aptsources_cleanup/__main__.py:321
+#: src/aptsources_cleanup/__main__.py:333
 msgid "Do you want to remove it?"
 msgstr "Do you want to remove it?"
 
-#: src/aptsources_cleanup/__main__.py:339
+#: src/aptsources_cleanup/__main__.py:351
 #, python-brace-format
 msgid "{nremoved:d} of {ntotal:d} empty sourcelist files removed."
 msgstr "{nremoved:d} of {ntotal:d} empty sourcelist files removed."
@@ -316,7 +326,7 @@ msgstr "{nremoved:d} of {ntotal:d} empty sourcelist files removed."
 msgid "'{path:s}' removed."
 msgstr "“{path:s}” removed."
 
-#: src/aptsources_cleanup/util/fileutils.py:16
+#: src/aptsources_cleanup/util/fileutils.py:24
 msgid "empty"
 msgstr "empty"
 

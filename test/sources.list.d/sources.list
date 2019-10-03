@@ -37,7 +37,9 @@ deb http://de2.archive.ubuntu.com/ubuntu/ trusty-security multiverse
 ## This software is not part of Ubuntu, but is offered by Canonical and the
 ## respective vendors as a service to Ubuntu users.
 deb http://archive.canonical.com/ubuntu trusty partner
+deb https://archive.canonical.com/ubuntu trusty partner
 deb-src http://archive.canonical.com/ubuntu trusty partner
+deb-src https://archive.canonical.com/ubuntu trusty partner
 
 ## This software is not part of Ubuntu, but is offered by third-party
 ## developers who want to ship their latest software.
