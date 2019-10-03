@@ -16,9 +16,9 @@ __all__ = ('get_duplicates', 'get_empty_files')
 from . import util
 from .util.filesystem import samefile
 from .util.import_check import import_check
-import os.path
-import collections
-import urllib.parse
+from collections import defaultdict
+from os.path import normpath
+from urllib.parse import urlparse, urlunparse
 aptsources = import_check('aptsources.sourceslist', 'apt')
 
 
@@ -29,11 +29,8 @@ __version__ = str(__version__())
 def get_duplicates(sourceslist):
 	"""Detects and returns duplicate Apt source entries."""
 
-	normpath = os.path.normpath
-	urlparse = urllib.parse.urlparse
-	urlunparse = urllib.parse.urlunparse
 
-	sentry_map = collections.defaultdict(list)
+	sentry_map = defaultdict(list)
 	for se in sourceslist.list:
 		if not se.invalid and not se.disabled:
 			uri = urlparse(se.uri)
@@ -51,7 +48,7 @@ def get_empty_files(sourceslist):
 	Returns pairs of file names and lists of their respective source entries.
 	"""
 
-	sentry_map = collections.defaultdict(list)
+	sentry_map = defaultdict(list)
 	for se in sourceslist.list:
 		sentry_map[se.file].append(se)
 
