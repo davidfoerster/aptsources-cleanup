@@ -120,7 +120,7 @@ class LazyInstance:
 		"""
 
 		if len(methods_or_names) == 1:
-			return self._li_bind_method_impl(methods_or_names)
+			return self._li_bind_method_impl(*methods_or_names)
 		return map(self._li_bind_method_impl, methods_or_names)
 
 

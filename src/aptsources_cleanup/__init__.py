@@ -37,11 +37,11 @@ def get_duplicates(sourceslist, equivalent_schemes=None):
 	for se in sourceslist.list:
 		if not se.invalid and not se.disabled:
 			uri = urlparse(se.uri)
-			scheme = equivalent_schemes.get_class(uri.scheme, uri.scheme)
+			scheme = equivalent_schemes.get_class(uri.scheme) or uri.scheme
 			uri = urlunparse(uri._replace(scheme='', path=normpath(uri.path)))
 			dist = normpath(se.dist)
-			for c in (se.comps or (None,)):
-				sentry_map[(se.type, scheme, uri, dist, c and normpath(c))].append(se)
+			for c in (map(normpath, se.comps) if se.comps else (None,)):
+				sentry_map[(se.type, scheme, uri, dist, c)].append(se)
 
 	return filter(lambda dupe_set: len(dupe_set) > 1, sentry_map.values())
 

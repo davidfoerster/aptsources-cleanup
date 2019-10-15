@@ -15,6 +15,9 @@ __all__ += _collections.__all__
 class ExtSet(set):
 	"""Some extensions to the built-in set class"""
 
+	__slots__ = ()
+
+
 	def add(self, x):
 		"""Same as set.add(). Returns True if the set was changed."""
 

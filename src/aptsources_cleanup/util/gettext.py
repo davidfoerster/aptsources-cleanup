@@ -148,14 +148,14 @@ class DictTranslations(NullTranslations):
 		translation = self.data.get(msg)
 		if translation is not None:
 			return translation
-		return NullTranslations.gettext(self, msg)
+		return super().gettext(msg)
 
 
 	def ngettext(self, singular, plural, n):
 		translation = self.data.get(singular if n == 1 else plural)
 		if translation is not None:
 			return translation
-		return NullTranslations.ngettext(self, singular, plural, n)
+		return super().ngettext(singular, plural, n)
 
 
 	def lgettext(self, msg, *args):
@@ -341,11 +341,10 @@ class Choices(collections.ChainMap):
 
 	@classmethod
 	def _get_short_and_styled(cls, s, shorthand_highlighter, existing):
-		try:
-			match = next(filterfalse(
-				comp(operator.methodcaller('group'), existing.__contains__),
-				cls.letter_pattern.finditer(s)))
-		except StopIteration:
+		match = next(filterfalse(
+			comp(operator.methodcaller('group'), existing.__contains__),
+			cls.letter_pattern.finditer(s)), None)
+		if match is None:
 			raise ValueError(
 				"No unique shorthand available for choice '{:s}'".format(s))
 
