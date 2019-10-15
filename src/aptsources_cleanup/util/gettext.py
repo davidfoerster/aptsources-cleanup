@@ -51,9 +51,7 @@ def get_languages():
 
 	loc = locale.getlocale(locale.LC_MESSAGES)[0]
 	if loc:
-		loc = loc.partition('.')[0]
-		if loc:
-			langs.append(loc)
+		langs.insert(0, loc)
 
 	if not any(langs):
 		langs[:] = ('C',)
@@ -69,6 +67,9 @@ def translation(domain, localedir=None, languages=None, _class=None,
 	if this module is loaded from one.
 	"""
 
+	if languages is None:
+		languages = get_languages()
+
 	archive = _get_archive()
 	if (localedir is None or archive is None or
 		not startswith_token(localedir, archive, os.sep)
@@ -76,10 +77,7 @@ def translation(domain, localedir=None, languages=None, _class=None,
 		return _gettext.translation(
 			domain, localedir, languages, _class, fallback, codeset)
 
-	if languages is None:
-		languages = get_languages()
-	languages = tuple(unique(filter(None, languages)))
-
+	languages = tuple(unique(get_fallback_languages(languages)))
 	translations = None
 	if languages:
 		assert len(os.sep) == 1
