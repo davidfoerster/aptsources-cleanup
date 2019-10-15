@@ -59,6 +59,27 @@ def get_languages():
 	return langs
 
 
+def get_fallback_languages(languages):
+	"""Yields all supplied languages, each followed by their countryless fallback.
+
+	Sometimes it is desirable to fall back to a language in its "global" form if
+	a country-specific version is unavailable. This function takes an iterable of
+	language code strings and returns a new iterable in which each supplied
+	language, if it includes a country code, is immediately followed by a
+	language code for the same language but _without_ country code.
+
+	Examples:
+		['en_US'] => ['en_US', 'en']
+		['de_DE', 'fr_FR', 'en'] => ['de_DE', 'de', 'fr_FR', 'fr', 'en']
+	"""
+
+	for lang in filter(None, languages):
+		yield lang
+		lang, sep, country = lang.partition('_')
+		if sep and lang:
+			yield lang
+
+
 def translation(domain, localedir=None, languages=None, _class=None,
 	fallback=False, codeset=None
 ):
