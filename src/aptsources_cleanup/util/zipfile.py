@@ -12,6 +12,20 @@ import zipfile as _zipfile
 __all__ = _zipfile.__all__
 
 
+try:
+	from os import fspath
+
+except ImportError:
+	def fspath(path, *, _str_types=(str, bytes)):
+		if isinstance(path, _str_types):
+			return path
+
+		path = path.__fspath__()
+		if not isinstance(path, _str_types):
+			raise TypeError(str(type(path)))
+		return path
+
+
 class ZipFile(_zipfile.ZipFile):
 	"""Extends zipfile.ZipFile with in-archive resolution of symbolic links"""
 
@@ -27,7 +41,7 @@ class ZipFile(_zipfile.ZipFile):
 			return self._resolve_path(name, pwd, fail_missing)
 		if isinstance(name, ZipInfo):
 			return name
-		name = os.fspath(name)
+		name = fspath(name)
 		return self._check_missing(self.NameToInfo.get(name), name, fail_missing)
 
 
@@ -59,7 +73,7 @@ class ZipFile(_zipfile.ZipFile):
 		if isinstance(path, ZipInfo):
 			path = path.filename
 		else:
-			path = os.fspath(path)
+			path = fspath(path)
 
 		inspected = []
 		uninspected = path.split(os.sep)
