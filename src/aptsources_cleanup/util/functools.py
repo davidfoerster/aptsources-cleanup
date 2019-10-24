@@ -84,8 +84,7 @@ class LazyInstance:
 	__hash__ = None
 
 
-	@property
-	def _instance(self):
+	def _get_instance(self):
 		"""Accesses the wrapped instance
 
 		and create it using the factory method provided earlier if necessary.
@@ -110,7 +109,7 @@ class LazyInstance:
 			if callable(value):
 				return self._li_bind_method_impl(name)
 
-		return getattr(self._instance, name)
+		return getattr(self._get_instance(), name)
 
 
 	def _bind_method(self, *methods_or_names):
@@ -139,4 +138,4 @@ class LazyInstance:
 				return getattr(self._li_instance, method_or_name)
 			getter = attrgetter(method_or_name)
 
-		return lambda *args: getter(self._instance)(*args)
+		return lambda *args: getter(self._get_instance())(*args)
