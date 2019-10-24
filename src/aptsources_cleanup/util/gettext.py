@@ -7,7 +7,7 @@ __all__ = (
 )
 
 from . import terminal, collections
-from .strings import startswith_token
+from .strings import startswith_token, prefix
 from .operator import identity, methodcaller, peek
 from .itertools import unique, last, filterfalse
 from .functools import LazyInstance, comp, partial as fpartial
@@ -34,7 +34,7 @@ def _get_archive():
 
 def get_localedir(locales_subdir=os.path.join('share', 'locales')):
 	src_root = os.path.dirname(os.path.dirname(
-		sys.modules[ (__package__ or __name__).partition('.')[0] ].__file__))
+		__import__(prefix(__package__ or __name__, '.')).__file__))
 	src_root_locales = os.path.join(src_root, locales_subdir)
 
 	if _get_archive() is None and not os.path.isdir(src_root_locales):

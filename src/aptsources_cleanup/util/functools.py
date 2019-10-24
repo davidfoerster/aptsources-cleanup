@@ -19,11 +19,10 @@ class comp:
 	__slots__ = ('funcs',)
 
 
-	@classmethod
-	def make(cls, *funcs):
+	def __new__(cls, *funcs):
 		if len(funcs) <= 1:
 			return funcs[0] if funcs else identity
-		return cls(*funcs)
+		return super().__new__(cls)
 
 
 	def __init__(self, *funcs):
@@ -32,12 +31,15 @@ class comp:
 
 
 	def __call__(self, *args):
-		funcs = iter(self.funcs)
-		x = next(funcs, identity)(*args)
-		del args
-		for f in funcs:
-			x = f(x)
-		return x
+		funcs = self.funcs
+		if funcs:
+			funcs = iter(funcs)
+			args = next(funcs)(*args)
+			for f in funcs:
+				args = f(args)
+		else:
+			args, = args
+		return args
 
 
 class LazyInstance:
@@ -77,6 +79,9 @@ class LazyInstance:
 			raise TypeError(
 				'type_hint must be None or a type, not ' + str(type(type_hint)))
 		self._li_type_hint = type_hint
+
+
+	__hash__ = None
 
 
 	@property

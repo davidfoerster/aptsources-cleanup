@@ -34,7 +34,7 @@ def import_check(module_name, apt_pkg_suffix, import_error=None, debug_fail=0):
 	apt_pkg = '-'.join((python_name, apt_pkg_suffix))
 
 	paragraphs = [
-		'{:s}: {!s}.  {:s}  {:s}'.format(
+		'{:s}: {!s}.  {:s}  sudo apt-get install {:s}'.format(
 			type(import_error).__name__, import_error,
 			_("Do you have the '{package:s}' package installed?  You can do so with:")
 				.format(package=apt_pkg),
@@ -42,7 +42,7 @@ def import_check(module_name, apt_pkg_suffix, import_error=None, debug_fail=0):
 	]
 
 	if not samefile(python_exe, sys.executable) or debug_fail:
-		questional_interpreter_msg = len(paragraphs)
+		questionable_interpreter_msg = len(paragraphs)
 		paragraphs.append(': '.join((
 			_('Warning'),
 			_("The current Python interpreter is '{py_exe:s}'.  Please use the "
@@ -51,7 +51,7 @@ def import_check(module_name, apt_pkg_suffix, import_error=None, debug_fail=0):
 				.format(py_exe=sys.executable, py_exe_default=python_exe,
 					module=module_name))))
 	else:
-		questional_interpreter_msg = None
+		questionable_interpreter_msg = None
 
 	if not pkg.check_integrity(python_pkg, paragraphs, debug_fail):
 		msg = (
@@ -59,18 +59,18 @@ def import_check(module_name, apt_pkg_suffix, import_error=None, debug_fail=0):
 					"that '{py_exe:s}' refers to the Python interpreter from the same "
 					"package.")
 				.format(package=python_pkg, py_exe=python_exe))
-		if questional_interpreter_msg is not None:
-			paragraphs[questional_interpreter_msg] = '  '.join((
-				paragraphs[questional_interpreter_msg], msg))
+		if questionable_interpreter_msg is not None:
+			paragraphs[questionable_interpreter_msg] = '  '.join((
+				paragraphs[questionable_interpreter_msg], msg))
 		else:
 			paragraphs.append(': '.join((_('Warning'), msg)))
 
 	try:
-		termwrap.get(sys.stderr, ignore_errors=False)
+		stderr = termwrap.get(sys.stderr, ignore_errors=False)
 	except EnvironmentError as ex:
 		print(_('Warning'),
 			_('Cannot wrap text output due a failure to get the terminal size'),
 			ex, sep=': ', end='\n\n', file=sys.stderr)
 
-	termwrap.stderr().print_all(paragraphs)
+	stderr.print_all(paragraphs)
 	sys.exit(127)

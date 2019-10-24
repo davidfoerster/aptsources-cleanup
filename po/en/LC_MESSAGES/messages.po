@@ -260,9 +260,9 @@ msgstr "Use “{help_opt:s}” to display the program help."
 msgid "Overlapping source entries:"
 msgstr "Overlapping source entries:"
 
-#: src/aptsources_cleanup/__main__.py:279
-msgid "{ordinal:2d}. file '{file:s}':"
-msgstr "{ordinal:2d}. file “{file:s}”:"
+#: src/aptsources_cleanup/__main__.py:284
+msgid "{ordinal:2d}. file {file!r}:"
+msgstr "{ordinal:2d}. file {file!r}:"
 
 #: src/aptsources_cleanup/__main__.py:282
 msgid "I disabled the latter entry."

@@ -87,7 +87,7 @@ class version_info:
 
 		version_file = os.path.join(
 			os.path.dirname(os.path.dirname(os.path.dirname(
-				sys.modules[strings.prefix(__package__ or __name__, '.')].__file__))),
+				__import__(strings.prefix(__package__ or __name__, '.')).__file__))),
 			'VERSION')
 		try:
 			version_file = open(version_file)

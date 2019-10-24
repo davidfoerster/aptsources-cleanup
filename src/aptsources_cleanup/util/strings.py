@@ -18,6 +18,9 @@ def startswith_token(s, prefix, sep=None):
 		s.find(sep, prefix_len, prefix_len + len(sep)) == prefix_len)
 
 
-def prefix(s, sep):
-	pos = s.find(sep)
+def prefix(s, *args, reverse=False):
+	if reverse:
+		pos = s.rfind(*args)
+	else:
+		pos = s.find(*args)
 	return s[:pos] if pos >= 0 else s

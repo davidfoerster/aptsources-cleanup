@@ -6,7 +6,8 @@ from .util.fileutils import *
 from .util.filesystem import *
 from .util.gettext import *
 from .util.relations import *
-from .util.io import replace_TextIOWrapper
+from .util.strings import *
+from .util.io import *
 from . import *
 import sys
 import os.path
@@ -17,20 +18,22 @@ import textwrap
 from itertools import starmap
 from functools import reduce, partial as fpartial
 import aptsources.sourceslist
-aptsources_cleanup = sys.modules[__package__]
+import aptsources_cleanup
 
 
 argparse._ = _
 argparse.ngettext = _N
 
 
-def main(*args):
+def main(args=None):
 	"""Main program entry point
 
 	See the output of the '--help' option for usage.
 	"""
 
-	args = parse_args(args or sys.argv[1:])
+	if args is None:
+		args = sys.argv[1:]
+	args = parse_args(args)
 	if args.debug_import_fail:
 		from .util.import_check import import_check
 		import_check('aptsources.sourceslist', 'apt', None, args.debug_import_fail)
@@ -53,12 +56,12 @@ def main(*args):
 
 def load_sources_dir(sourceslist, dirname):
 	if not os.path.isdir(dirname):
-		termwrap.stderr().print('{:s}: {:s}: {:s}'.format(
-			_('Error'), _('No such directory'), dirname))
+		termwrap.stderr().print(': '.join(
+			(_('Error'), _('No such directory'), dirname)))
 		return 1
 
 	import glob
-	del sourceslist.list[:]
+	sourceslist.list.clear()
 	foreach(sourceslist.load, glob.iglob(os.path.join(dirname, '*.list')))
 	return 0
 
@@ -181,7 +184,7 @@ class VersionAction(argparse.Action):
 			else:
 				version = globals().get('__version__')
 		if version is not None:
-			version = '%(prog)s, version ' + version
+			version = '%(prog)s, version ' + version.replace('%', '%%')
 
 		parser._print_message(
 			parser._get_formatter()._format_text(version).strip() + '\n',
@@ -193,8 +196,9 @@ def parse_args(args):
 	suppress_debug = (
 		None if args and '--help-debug' in args else argparse.SUPPRESS)
 
-	translations.add_fallback(DictTranslations(
-		ID_DESCRIPTION=aptsources_cleanup.__doc__.rpartition('\n\n\n')[0].strip()))
+	translations.add_fallback(
+		DictTranslations(ID_DESCRIPTION=
+			prefix(aptsources_cleanup.__doc__, '\n\n\n', reverse=True).strip()))
 
 	ap = MyArgumentParser(formatter_class=TerminalHelpFormatter,
 		add_help=False, description=_('ID_DESCRIPTION'),
@@ -271,13 +275,13 @@ def handle_duplicates(sourceslist, apply_changes=None,
 	duplicates = tuple(get_duplicates(
 		sourceslist, equivalent_schemes=equivalent_schemes))
 	if duplicates:
-		for dupe_set in duplicates:
-			orig = dupe_set.pop(0)
+		for dupe_set in map(iter, duplicates):
+			orig = next(dupe_set)
 			for dupe in dupe_set:
 				stdout.print(_('Overlapping source entries:'))
 				for i, se in enumerate((orig, dupe), 1):
 					stdout_indent1.print(
-						_("{ordinal:2d}. file '{file:s}':")
+						_("{ordinal:2d}. file {file!r}:")
 							.format(ordinal=i, file=se.file))
 					stdout_indent2.print(se.line)
 				stdout.print(_('I disabled the latter entry.'), end='\n\n')
@@ -366,6 +370,7 @@ if __name__ == '__main__':
 	sys.stderr = replace_TextIOWrapper(sys.stderr, errors='namereplace')
 
 	try:
-		sys.exit(main())
+		rv = main()
 	except KeyboardInterrupt:
-		sys.exit(2)
+		rv = 2
+	sys.exit(rv)

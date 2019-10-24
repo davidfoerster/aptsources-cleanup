@@ -25,11 +25,13 @@ class methodcaller:
 	__slots__ = ('func', 'args')
 
 
-	def __init__(self, func, *args):
+	def __new__(cls, func, *args):
 		if not callable(func):
-			func = operator.methodcaller(func, *args)
-			args = ()
+			return operator.methodcaller(func, *args)
+		return super().__new__(cls)
 
+
+	def __init__(self, func, *args):
 		self.func = func
 		self.args = args
 
@@ -47,7 +49,10 @@ def starcall(func, args):
 	return func(*args)
 
 
-def peek(func, arg0, *args):
+def peek(func, *args):
 	"""Calls func with the given arguments and returns _the first argument_."""
-	func(arg0, *args)
-	return arg0
+
+	if not args:
+		raise TypeError('Need at least 2 arguments; got 1')
+	func(*args)
+	return args[0]
