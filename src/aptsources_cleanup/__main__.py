@@ -6,6 +6,7 @@ from .util.fileutils import *
 from .util.filesystem import *
 from .util.gettext import *
 from .util.relations import *
+from .util.io import replace_TextIOWrapper
 from . import *
 import sys
 import os.path
@@ -360,6 +361,9 @@ if __name__ == '__main__':
 	except locale.Error as ex:
 		termwrap.stderr().print(
 			'Warning: Cannot set locale: ' + str(ex), end='\n\n')
+
+	sys.stdout = replace_TextIOWrapper(sys.stdout, errors='namereplace')
+	sys.stderr = replace_TextIOWrapper(sys.stderr, errors='namereplace')
 
 	try:
 		sys.exit(main())

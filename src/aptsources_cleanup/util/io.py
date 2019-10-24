@@ -1,8 +1,9 @@
 # -*- coding: utf-8
 """Various I/O-related utilities"""
-__all__ = ('FileDescriptor', 'isatty')
+__all__ = ('FileDescriptor', 'isatty', 'replace_TextIOWrapper')
 
 import os
+import io
 
 
 class FileDescriptor:
@@ -58,3 +59,17 @@ def isatty(file):
 	"""
 
 	return file is not None and not file.closed and file.isatty()
+
+
+def replace_TextIOWrapper(buffer, **kwargs):
+	assert isinstance(buffer, io.TextIOWrapper)
+	if not kwargs:
+		return buffer
+
+	kwargs.setdefault('newline', buffer.newlines)
+	for k in ('encoding', 'errors', 'line_buffering'):
+		kwargs.setdefault(k, getattr(buffer, k))
+
+	newbuffer = io.TextIOWrapper(buffer.buffer, **kwargs)
+	buffer.detach()
+	return newbuffer
