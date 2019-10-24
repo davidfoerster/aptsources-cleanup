@@ -13,7 +13,7 @@ GETTEXT = xgettext -F -L Python -k_ -k_U -k_N:1,2 \
 	--copyright-holder='David P. W. Forster' \
 	--msgid-bugs-address=https://github.com/davidfoerster/aptsources-cleanup/issues
 MSGFMT = msgfmt
-MSGMERGE = msgmerge -F
+MSGMERGE = msgmerge -F --backup=none
 PYTHON = python3 -s
 GPG = $(shell command -v gpg2 || { gpg --version | grep -qe '^gpg.*[ v]2\.[0-9]' && echo gpg; })
 
