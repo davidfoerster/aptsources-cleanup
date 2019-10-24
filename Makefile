@@ -94,6 +94,9 @@ $(ZIP_TARGET_PKG)/%: %
 
 .SECONDEXPANSION:
 
+$(addprefix $(ZIP_TARGET_PKG)/$(LOCALES_DIR)/,$(MESSAGES_SYMLINKS)): $$(patsubst $(ZIP_TARGET_PKG)/%,%,$$@) | $$(@D)
+	cp -dT -- $< $@
+
 $(addprefix $(LOCALES_DIR)/,$(MESSAGES_SYMLINKS)): $$(patsubst $$(LOCALES_DIR)/%,$$(PO_DIR)/%,$$@)
 	$(DIST_CP_CMP)
 
