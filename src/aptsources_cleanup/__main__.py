@@ -49,7 +49,7 @@ def main(args=None):
 			args.apply_changes, args.equivalent_schemes)
 
 	if rv == 0 and args.apply_changes is not False:
-		rv = handle_empty_files(sourceslist)
+		rv = handle_empty_files(sourceslist, args.apply_changes)
 
 	return rv
 
@@ -313,7 +313,7 @@ def handle_duplicates(sourceslist, apply_changes=None,
 	return 0
 
 
-def handle_empty_files(sourceslist):
+def handle_empty_files(sourceslist, apply_changes=None):
 	"""Interactive removal of sources list files without valid enabled entries"""
 
 	rv = 0
@@ -330,7 +330,7 @@ def handle_empty_files(sourceslist):
 	for file, source_entries in get_empty_files(sourceslist):
 		total_count += 1
 
-		while answer is None:
+		while apply_changes is None and answer is None:
 			stdout.file.write('\n')
 			stdout.print(
 				_("'{file:s}' contains no valid and enabled repository lines.")
@@ -340,14 +340,14 @@ def handle_empty_files(sourceslist):
 				display_file(file)
 				answer = None
 
-		if answer.orig in ('yes', 'all'):
+		if apply_changes or answer.orig in ('yes', 'all'):
 			rv2, rc2 = remove_sources_files(file)
 			rv |= rv2
 			if rc2:
 				removed_count += rc2
 				foreach(sourceslist.remove, source_entries)
 
-		if answer.orig not in ('all', 'none'):
+		if not apply_changes and answer.orig not in ('all', 'none'):
 			answer = None
 
 	if total_count:
