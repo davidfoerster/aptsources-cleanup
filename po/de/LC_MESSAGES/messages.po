@@ -350,8 +350,8 @@ msgid ""
 "'{py_exe_default:s}' if you encounter issues with the import of the '{module:"
 "s}' module."
 msgstr ""
-"Der derzeitige Python-Interpreter ist „{py_exe:s}“.  Bitte benutzen sie "
-"die Vorgabe „{py_exe_default:s}“, falls Sie Problemen beim Import des Moduls "
+"Der derzeitige Python-Interpreter ist „{py_exe:s}“.  Bitte benutzen Sie "
+"die Vorgabe „{py_exe_default:s}“, falls Ihnen Probleme beim Import des Moduls "
 "„{module:s}“ begegnen."
 
 #: src/aptsources_cleanup/util/import_check.py:58
