@@ -62,7 +62,8 @@ def load_sources_dir(sourceslist, dirname):
 
 	import glob
 	sourceslist.list.clear()
-	foreach(sourceslist.load, glob.iglob(os.path.join(dirname, '*.list')))
+	foreach(sourceslist.load,
+		glob.iglob(os.path.join(dirname, "**/*.list"), recursive=True))
 	return 0
 
 
