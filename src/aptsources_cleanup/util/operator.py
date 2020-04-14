@@ -1,8 +1,14 @@
 # -*- coding: utf-8
 
-__all__ = ('identity', 'rapply', 'methodcaller', 'starcall')
+__all__ = (
+	"identity", "rapply", "methodcaller", "starcall"
+	"itemgetter0", "itemgetter1",
+)
 
 import operator
+
+
+itemgetter0, itemgetter1 = map(operator.itemgetter, range(2))
 
 
 def identity(x):

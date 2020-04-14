@@ -8,7 +8,7 @@ __all__ = (
 
 from . import terminal, collections
 from .strings import startswith_token, prefix
-from .operator import identity, methodcaller, peek
+from .operator import identity, methodcaller, peek, itemgetter0
 from .itertools import unique, last, filterfalse
 from .functools import LazyInstance, comp, partial as fpartial
 from .zipfile import ZipFile
@@ -34,7 +34,7 @@ except AttributeError:
 	__archive__ = None
 
 
-def get_localedir(locales_subdir=os.path.join('share', 'locales')):
+def get_localedir(locales_subdir='share/locales'):
 	src_root = os.path.dirname(os.path.dirname(
 		__import__(prefix(__package__ or __name__, '.')).__file__))
 	src_root_locales = os.path.join(src_root, locales_subdir)
@@ -73,9 +73,9 @@ def get_fallback_languages(languages):
 
 	for lang in filter(None, languages):
 		yield lang
-		lang, sep, country = lang.partition('_')
-		if sep and lang:
-			yield lang
+		p = lang.find('_')
+		if p > 0:
+			yield lang[:p]
 
 
 def translation(domain, localedir=None, languages=None, _class=None,
@@ -151,6 +151,9 @@ def _U(s):
 class DictTranslations(NullTranslations):
 	"""A simple Translations class based on a simple mapping object"""
 
+	__slots__ = ('data',)
+
+
 	def __init__(self, data=None, **kwargs):
 		super().__init__()
 
@@ -169,7 +172,7 @@ class DictTranslations(NullTranslations):
 
 
 	def ngettext(self, singular, plural, n):
-		translation = self.data.get(singular if n == 1 else plural)
+		translation = self.data.get(singular if abs(n) == 1 else plural)
 		if translation is not None:
 			return translation
 		return super().ngettext(singular, plural, n)
@@ -181,7 +184,9 @@ class DictTranslations(NullTranslations):
 	lngettext = lgettext
 
 
-def normalize_casefold(text):
+def normalize_casefold(text, *,
+	_casefold=str.casefold, _normalize=unicodedata.normalize
+):
 	"""Normalize text data for caseless comparison
 
 	Use the "canonical caseless match" algorithm defined in the Unicode Standard,
@@ -189,11 +194,9 @@ def normalize_casefold(text):
 	"""
 	# Taken from https://stackoverflow.com/questions/319426/how-do-i-do-a-case-insensitive-string-comparison#comment60758553_29247821
 
-	casefold = str.casefold
-	normalize = unicodedata.normalize
-	return normalize('NFKD',
-		casefold(normalize('NFKD',
-			casefold(normalize('NFD', text)))))
+	return _normalize('NFKD',
+		_casefold(_normalize('NFKD',
+			_casefold(_normalize('NFD', text)))))
 
 
 ChoiceInfo = collections.namedtuple('ChoiceInfo',
@@ -220,7 +223,7 @@ class ChoiceHighlighters(
 			suffix = terminal.TERMMODES['normal']
 			if not suffix:
 				raise AssertionError(
-					"Terminal supports '{:s}' but no way to revert to normal???"
+					"Terminal supports {!r} but no way to revert to normal???"
 						.format(capname))
 			if '｝｝' in prefix or '｝｝' in suffix:
 				raise ValueError("prefix or suffix contains illegal infix '｝｝'")
@@ -237,8 +240,9 @@ class ChoiceHighlighters(
 				highlighter = default.format
 			except AttributeError:
 				raise ValueError(
-					'Unknown term mode {!r} and no valid default ({:s} instead of str '
-						'or byte)'.format(capname, type(default).__qualname__))
+					"Unknown term mode {!r} and no valid default "
+						"(got a {:s} instead of a str or bytes)"
+						.format(capname, type(default).__qualname__))
 
 		if flags_func is not None:
 			highlighter = (highlighter, flags_func(prefix))
@@ -359,13 +363,13 @@ class Choices(collections.ChainMap):
 	@classmethod
 	def _get_short_and_styled(cls, s, shorthand_highlighter, existing):
 		match = next(filterfalse(
-			comp(operator.methodcaller('group'), existing.__contains__),
+			comp(itemgetter0, existing.__contains__),
 			cls.letter_pattern.finditer(s)), None)
 		if match is None:
 			raise ValueError(
 				"No unique shorthand available for choice '{:s}'".format(s))
 
-		short = match.group()
+		short = match[0]
 		styled = (
 			shorthand_highlighter(short).join((s[:match.start()], s[match.end():])))
 		return (normalize_casefold(short), styled)
@@ -386,12 +390,12 @@ class Choices(collections.ChainMap):
 		letter_pattern = re.compile(r'\S', re.UNICODE)
 		if __debug__:
 			terminal.termwrap.stderr().print(
-				"Warning: The regular expression module of your Python installation "
-				"lacks support for grapheme clusters.  If your language's script "
-				"includes composed graphemes that do not correspond to a single "
+				"Warning: The regular expression module '{:s}' of your Python "
+				"installation lacks support for grapheme clusters.  If your language's "
+				"script includes composed graphemes that do not correspond to a single "
 				"Unicode codepoint the answer choice short-hands may behave "
 				"unexpectedly.  Please install the 'regex' module to enable support "
-				"for grapheme clusters.", '\n\n')
+				"for grapheme clusters.".format(re.__name__), '\n\n')
 
 
 	def __str__(self):
@@ -400,7 +404,7 @@ class Choices(collections.ChainMap):
 
 	def __repr__(self):
 		return '{.__qualname__:s}([{:s}], default={!r}, joiner={!r})'.format(
-			type(self), ', '.join(map(repr, self.orig.values())),
+			type(self), ', '.join(tuple(map(repr, self.orig.values()))),
 			self.default and self.default.orig, self.joiner)
 
 
@@ -415,7 +419,7 @@ class Choices(collections.ChainMap):
 		stdout = terminal.termwrap.stdout()
 		write = stdout.file.write
 		indent = stdout.subsequent_indent
-		modulo_width = stdout.width.__rmod__ if stdout.width > 0 else identity
+		modulo_width = stdout.width.__rmod__ if stdout.width > 1 else identity
 		n = modulo_width(stdout.print(question, sep, True))
 		i_last = len(self.orig) - 1
 		debug = [] if self.debug else None

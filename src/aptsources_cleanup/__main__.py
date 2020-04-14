@@ -373,4 +373,6 @@ if __name__ == '__main__':
 		rv = main()
 	except KeyboardInterrupt:
 		rv = 2
-	sys.exit(rv)
+
+	if rv:
+		sys.exit(rv)
