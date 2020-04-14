@@ -3,6 +3,7 @@
 
 __all__ = (
 	"startswith_token", "prefix", "strip", "lstrip", "rstrip",
+	"contains_ordered"
 )
 
 
@@ -79,3 +80,13 @@ def _rstrip_stop(s, start, stop, suffixes):
 			stop = step
 			step -= suffixlen
 	return stop
+
+
+def contains_ordered(s, infixes):
+	offset = 0
+	for infix in infixes:
+		offset = s.find(infix, offset)
+		if offset < 0:
+			return False
+		offset += len(infix)
+	return True

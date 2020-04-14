@@ -7,7 +7,7 @@ __all__ = (
 )
 
 from . import terminal, collections
-from .strings import startswith_token, prefix, strip
+from .strings import startswith_token, prefix, strip, contains_ordered
 from .operator import identity, methodcaller, peek, itemgetter0
 from .itertools import unique, last, filterfalse
 from .functools import LazyInstance, comp, partial as fpartial
@@ -206,13 +206,27 @@ class ChoiceHighlighters(
 	collections.namedtuple('ChoiceHighlightersBase', ('shorthand', 'default'))
 ):
 
-	unprintable_pattern = re.compile(r'｛｛(.*?)｝｝')
+	unprintable_delimiters = ("｛｛", "｝｝")
+
+	assert all(map(operator.eq,
+		unprintable_delimiters, map(re.escape, unprintable_delimiters))), \
+		'"unprintable_delimiters" contains regex meta-characters.'
+
+	unprintable_pattern = re.compile(r"(.*?)".join(unprintable_delimiters))
 
 
 	@classmethod
 	def from_termcaps(cls, shorthand_args, default_args):
-		return cls(
-			cls.from_termcap(*shorthand_args), cls.from_termcap(*default_args))
+		return cls(*map(
+			fpartial(cls._call_with_positional_or_keyword_args, cls.from_termcap),
+			(shorthand_args, default_args)))
+
+
+	@staticmethod
+	def _call_with_positional_or_keyword_args(func, args):
+		if isinstance(args, collections.abc.Mapping):
+			return func(**args)
+		return func(*args)
 
 
 	@classmethod
@@ -224,12 +238,18 @@ class ChoiceHighlighters(
 				raise AssertionError(
 					"Terminal supports {!r} but no way to revert to normal???"
 						.format(capname))
-			if '｝｝' in prefix or '｝｝' in suffix:
-				raise ValueError("prefix or suffix contains illegal infix '｝｝'")
+			if any(map(
+				methodcaller(contains_ordered, cls.unprintable_delimiters),
+				(prefix, suffix)
+			)):
+				raise ValueError(
+					"Prefix ({!r}) or suffix ({!r}) contain illegal infix pair {!r}..{!r}"
+						.format(prefix, suffix, *cls.unprintable_delimiters))
 			highlighter = comp(
 				cls._verify_unprintable_patterns,
 				methodcaller(str.replace, suffix, suffix + prefix),
-				fpartial('｛｛{0:s}｝｝{2:s}｛｛{1:s}｝｝'.format, prefix, suffix))
+				fpartial("{d[0]}{prefix}{d[1]}{:s}{d[0]}{suffix}{d[1]}".format,
+					prefix=prefix, suffix=suffix, d=cls.unprintable_delimiters))
 
 		elif callable(default):
 			highlighter = default
@@ -252,8 +272,10 @@ class ChoiceHighlighters(
 	@classmethod
 	def _verify_unprintable_patterns(cls, s):
 		m = last(cls.unprintable_pattern.finditer(s), None)
-		if m is not None and s.find('｛｛', m.end()) >= 0:
-			raise ValueError("{!r} contains an unmatched infix '｛｛'.".format(s))
+		if m is not None and s.find(cls.unprintable_delimiters[0], m.end()) >= 0:
+			raise ValueError(
+				"{!r} contains an unmatched infix {!r}."
+					.format(s, cls.unprintable_delimiters[0]))
 		return s
 
 
