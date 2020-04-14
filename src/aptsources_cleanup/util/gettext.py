@@ -19,7 +19,7 @@ import os
 import errno
 import locale
 import unicodedata
-from itertools import islice, starmap
+from itertools import islice, starmap, chain as ichain
 from gettext import NullTranslations, GNUTranslations
 
 try:
@@ -49,15 +49,11 @@ def get_localedir(locales_subdir=os.path.join('share', 'locales')):
 
 
 def get_languages():
-	langs = os.environ.get('LANGUAGE', '').split(':')
-
-	loc = locale.getlocale(locale.LC_MESSAGES)[0]
-	if loc:
-		langs.insert(0, loc)
-
-	if not any(langs):
-		langs[:] = ('C',)
-
+	langs = list(filter(None, ichain(
+		(locale.getlocale(locale.LC_MESSAGES)[0],),
+		os.environ.get('LANGUAGE', '').split(':'))))
+	if not langs:
+		langs.append('C')
 	return langs
 
 
