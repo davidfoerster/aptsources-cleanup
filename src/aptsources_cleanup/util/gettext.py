@@ -7,7 +7,7 @@ __all__ = (
 )
 
 from . import terminal, collections
-from .strings import startswith_token, prefix
+from .strings import startswith_token, prefix, strip
 from .operator import identity, methodcaller, peek, itemgetter0
 from .itertools import unique, last, filterfalse
 from .functools import LazyInstance, comp, partial as fpartial
@@ -99,8 +99,7 @@ def translation(domain, localedir=None, languages=None, _class=None,
 	languages = tuple(unique(get_fallback_languages(languages)))
 	translations = None
 	if languages:
-		assert len(os.sep) == 1
-		localedir = localedir[ len(archive) + len(os.sep): ].strip(os.sep)
+		localedir = strip(localedir[ len(archive) + len(os.sep): ], os.sep)
 		locale_suffix = os.path.join('LC_MESSAGES', os.extsep.join((domain, 'mo')))
 		with ZipFile(archive) as archive:
 			#archive.debug = 3
