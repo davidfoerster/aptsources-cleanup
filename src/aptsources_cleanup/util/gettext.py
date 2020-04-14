@@ -28,8 +28,10 @@ except ImportError:
 	import re
 
 
-def _get_archive():
-	return getattr(__loader__, 'archive', None)
+try:
+	__archive__ = __loader__.archive
+except AttributeError:
+	__archive__ = None
 
 
 def get_localedir(locales_subdir=os.path.join('share', 'locales')):
@@ -37,7 +39,7 @@ def get_localedir(locales_subdir=os.path.join('share', 'locales')):
 		__import__(prefix(__package__ or __name__, '.')).__file__))
 	src_root_locales = os.path.join(src_root, locales_subdir)
 
-	if _get_archive() is None and not os.path.isdir(src_root_locales):
+	if __archive__ is None and not os.path.isdir(src_root_locales):
 		src_root_parent_locales = os.path.join(
 			os.path.dirname(src_root), locales_subdir)
 		if os.path.isdir(src_root_parent_locales):
@@ -91,7 +93,7 @@ def translation(domain, localedir=None, languages=None, _class=None,
 	if languages is None:
 		languages = get_languages()
 
-	archive = _get_archive()
+	archive = __archive__
 	if (localedir is None or archive is None or
 		not startswith_token(localedir, archive, os.sep)
 	):
