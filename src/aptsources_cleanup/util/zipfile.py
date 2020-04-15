@@ -115,17 +115,14 @@ class ZipFile(_zipfile.ZipFile):
 		if len(c_full) - len(c) + c_info.file_size > self._max_path:
 			raise self._OSError(errno.ENAMETOOLONG, None, c_full)
 
-		c_seen = resolved = not seen_set.add(c_full)
-		if c_info.file_size == 0:
-			resolved = ''
-		elif not c_seen:
-			resolved = strings.prefix(os.fsdecode(super().read(c_info, pwd)), '\0')
-
+		if seen_set.add(c_full):
+			raise self._OSError(errno.ELOOP, None, c_full)
+		resolved = os.fsdecode(super().read(c_info, pwd))
 		if not resolved:
 			raise self._OSError(
 				errno.EINVAL, 'Empty symbolic link in archive', c_full)
-		if c_seen:
-			raise self._OSError(errno.ELOOP, None, c_full)
+		if "\0" in resolved:
+			raise self._OSError(errno.EINVAL, "NUL char in symbolic link", c_full)
 		if self.debug >= 2:
 			_eprintf('Found symbolic link: {!r} => {!r}',
 				':'.join((self.filename, c_full)), resolved)
@@ -159,9 +156,7 @@ class ZipFile(_zipfile.ZipFile):
 		else:
 			filename = ':'.join((self.filename, filename))
 
-		err = OSError(err, msg or os.strerror(err), filename)
-		err.filename2 = filename2
-		return err
+		return OSError(err, msg or os.strerror(err), filename, None, filename2)
 
 
 def _eprintf(fmt, *args):
@@ -170,14 +165,6 @@ def _eprintf(fmt, *args):
 
 def _parse_args(args):
 	import argparse
-
-	class ProxyFunction:
-		def __init__(self, fun, name=None):
-			self._fun = fun
-			self.__name__ = name or fun.__name__
-
-		def __call__(self, *args):
-			return self._fun(*args)
 
 	class ArgumentParser(argparse.ArgumentParser):
 		def error(self, message):
@@ -195,8 +182,8 @@ def _parse_args(args):
 	ap.add_argument('paths', nargs='+',
 		help='Archive member paths to inspect')
 	ap.add_argument('-L', '--follow-symlinks', metavar='N',
-		type=ProxyFunction(lambda s: int(s) > 0, int.__name__), default=1,
-		help='Follow symbolic links during archive member inspection if N > 0.')
+		type=int, default=1,
+		help='Follow symbolic links during archive member inspection if N != 0.')
 	ap.add_argument('-h', '--help', dest=argparse.SUPPRESS,
 		action='help', help=argparse.SUPPRESS)
 

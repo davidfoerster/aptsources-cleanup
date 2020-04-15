@@ -8,18 +8,18 @@ from .io import FileDescriptor
 import subprocess
 
 
-def check_integrity(pkg, paragraphs, debug_fail=0):
+def check_integrity(pkg, paragraphs, debug_fail=0, *,
+	md5sum_cmd = ('md5sum', '--check', '--strict', '--warn', '--quiet')
+):
 	"""Check the integrity of an installed Apt package
 
 	...based on its checksum file and warn about possible issues.
 	"""
 
-	md5sum_cmd = ('md5sum', '--check', '--strict', '--warn', '--quiet')
 	md5sums_file = '/var/lib/dpkg/info/{:s}.md5sums'.format(pkg)
 
 	try:
-		md5sums_fd = FileDescriptor(md5sums_file)
-		with md5sums_fd:
+		with FileDescriptor(md5sums_file) as md5sums_fd:
 			md5sum_proc = subprocess.Popen(
 				md5sum_cmd, cwd='/', stdin=md5sums_fd.fd, close_fds=True)
 			try:

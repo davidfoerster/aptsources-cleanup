@@ -341,8 +341,8 @@ def handle_empty_files(sourceslist):
 	on_eof = choices.orig['none']
 	answer = None
 
-	for file, source_entries in get_empty_files(sourceslist):
-		total_count += 1
+	for total_count, source_entries in enumerate(get_empty_files(sourceslist), 1):
+		file = source_entries[0].file
 
 		while answer is None:
 			stdout.file.write('\n')

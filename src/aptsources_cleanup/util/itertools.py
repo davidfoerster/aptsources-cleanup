@@ -11,6 +11,8 @@ def foreach(func, iterable0, *iterables, star_call=False):
 	"""Call 'func' on each item in 'iterable'."""
 
 	if iterables:
+		if star_call:
+			raise TypeError("Cannot use star_call with multiple iterables")
 		iterable0 = zip(iterable0, *iterables)
 		star_call = True
 
@@ -33,12 +35,16 @@ def unique(iterable, key=None):
 
 def count(iterable):
 	"""Simply returns the number of entries (left) in the given iterable."""
+
+	try:
+		return len(iterable)
+	except TypeError:
+		pass
 	return sum(1 for _ in iterable)
 
 
 def last(iterable, *default):
 	"""Return the last item of an iterable or 'default' if there's none."""
-	assert len(default) <= 1
 
 	try:
 		iterable = reversed(iterable)
@@ -47,14 +53,8 @@ def last(iterable, *default):
 	else:
 		return next(iterable, *default)
 
+	iterable = iter(iterable)
+	x = next(iterable, *default)
 	for x in iterable:
 		pass
-
-	try:
-		return x
-	except UnboundLocalError:
-		pass
-
-	if not default:
-		raise StopIteration
-	return default[0]
+	return x

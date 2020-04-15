@@ -14,7 +14,6 @@ Source code and bug tracker location:
 __all__ = ('get_duplicates', 'get_empty_files')
 
 from . import util
-from .util.filesystem import samefile
 from .util.import_check import import_check
 from .util.relations import EquivalenceRelation
 from collections import defaultdict
@@ -27,25 +26,24 @@ from .util.version import get_version as __version__
 __version__ = str(__version__())
 
 
-def get_duplicates(sourceslist, equivalent_schemes=None):
+def get_duplicates(sourceslist, equivalent_schemes=EquivalenceRelation.EMPTY):
 	"""Detects and returns duplicate Apt source entries."""
 
 	if equivalent_schemes is None:
 		equivalent_schemes = EquivalenceRelation.EMPTY
 
 	sentry_map = defaultdict(list)
-	for se in sourceslist.list:
-		if not se.invalid and not se.disabled:
-			uri = se.parsed_uri = urlparse(se.uri, "file")
-			uri = uri._replace(
-				# Abuse the scheme attribute to store its equivalence class (if any)
-				# which is fine as long as the result doesn't leak outside of this
-				# function.
-				scheme=equivalent_schemes.get_class(uri.scheme) or uri.scheme,
-				path=normpath(uri.path))
-			dist = normpath(se.dist)
-			for c in (map(normpath, se.comps) if se.comps else (None,)):
-				sentry_map[(se.type, uri, dist, c)].append(se)
+	for se in filter(is_valid, sourceslist.list):
+		uri = se.parsed_uri = urlparse(se.uri, "file")
+		uri = uri._replace(
+			# Abuse the scheme attribute to store its equivalence class (if any)
+			# which is fine as long as the result doesn't leak outside of this
+			# function.
+			scheme=equivalent_schemes.get_class(uri.scheme) or uri.scheme,
+			path=normpath(uri.path))
+		dist = normpath(se.dist)
+		for component in (map(normpath, se.comps) if se.comps else (None,)):
+			sentry_map[(se.type, uri, dist, component)].append(se)
 
 	return filter(lambda dupe_set: len(dupe_set) > 1, sentry_map.values())
 
@@ -61,5 +59,9 @@ def get_empty_files(sourceslist):
 		sentry_map[se.file].append(se)
 
 	return filter(
-		lambda item: all(se.disabled | se.invalid for se in item[1]),
-		sentry_map.items())
+		lambda source_entries: not any(map(is_valid, source_entries)),
+		sentry_map.values())
+
+
+def is_valid(source_entry):
+	return not (source_entry.invalid | source_entry.disabled)

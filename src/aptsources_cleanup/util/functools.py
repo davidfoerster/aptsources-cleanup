@@ -94,8 +94,7 @@ class LazyInstance:
 			self._li_instance = self._li_factory()
 			assert (self._li_type_hint is None or
 				isinstance(self._li_instance, self._li_type_hint))
-			self._li_factory = None
-			self._li_type_hint = None
+			self._li_factory = self._li_type_hint = None
 
 		return self._li_instance
 

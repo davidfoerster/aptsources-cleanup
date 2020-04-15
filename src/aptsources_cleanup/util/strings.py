@@ -6,6 +6,8 @@ __all__ = (
 	"contains_ordered"
 )
 
+import operator
+
 
 def startswith_token(s, prefix, sep=None):
 	"""Tests if a string is either equal to a given prefix or prefixed by it
@@ -59,7 +61,7 @@ def _strip_prepare_xfixes(xfixes):
 
 
 def _lstrip_start(s, start, stop, prefixes):
-	prefixlen = len(next(iter(prefixes), ()))
+	prefixlen = len(next(iter(prefixes), ""))
 	if prefixlen:
 		step = start + prefixlen
 		while step <= stop:
@@ -71,7 +73,7 @@ def _lstrip_start(s, start, stop, prefixes):
 
 
 def _rstrip_stop(s, start, stop, suffixes):
-	suffixlen = len(next(iter(suffixes), ()))
+	suffixlen = len(next(iter(suffixes), ""))
 	if suffixlen:
 		step = stop - suffixlen
 		while start <= step:
@@ -82,11 +84,23 @@ def _rstrip_stop(s, start, stop, suffixes):
 	return stop
 
 
-def contains_ordered(s, infixes):
-	offset = 0
+def contains_ordered(s, infixes, *, reverse=False):
+	if reverse:
+		offset = len(s)
+		find = _contains_ordered_rfind
+		advance = operator.sub
+	else:
+		offset = 0
+		find = str.find
+		advance = operator.add
+
 	for infix in infixes:
-		offset = s.find(infix, offset)
+		offset = find(s, infix, offset)
 		if offset < 0:
 			return False
-		offset += len(infix)
+		offset = advance(offset, len(infix))
 	return True
+
+
+def _contains_ordered_rfind(s, infix, offset):
+	return s.rfind(infix, 0, max(offset, 0))

@@ -7,6 +7,7 @@ from .gettext import _
 from .terminal import termwrap
 from .filesystem import samefile
 import sys
+import os.path
 
 
 def import_check(module_name, apt_pkg_suffix, import_error=None, debug_fail=0):
@@ -29,7 +30,7 @@ def import_check(module_name, apt_pkg_suffix, import_error=None, debug_fail=0):
 	python_name = 'python'
 	if sys.version_info.major >= 3:
 		python_name += str(sys.version_info.major)
-	python_exe = '/usr/bin/' + python_name
+	python_exe = os.path.join("/usr/bin", python_name)
 	python_pkg = python_name + '-minimal'
 	apt_pkg = '-'.join((python_name, apt_pkg_suffix))
 

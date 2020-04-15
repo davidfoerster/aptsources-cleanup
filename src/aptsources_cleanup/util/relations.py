@@ -65,7 +65,8 @@ class EquivalenceRelation(frozenset):
 
 		if __debug__:
 			overlapping = [
-				'{} & {} = {}'.format(a, b, settype.__str__(a & b))
+				"{:s} & {:s} = {:s}".format(
+					*map(FrozensetAltRepr._str_impl, (a, b, a & b)))
 				for a, b in itertools.combinations(self, 2) if not a.isdisjoint(b)
 			]
 			assert not overlapping, \
@@ -75,15 +76,26 @@ class EquivalenceRelation(frozenset):
 
 
 	def get_class(self, element):
-		return next(filter(methodcaller('__contains__', element), self), None)
+		containing_classes = filter(methodcaller('__contains__', element), self)
+		clazz = next(containing_classes, None)
+		if __debug__:
+			if clazz is not None:
+				try:
+					next(containing_classes)
+				except StopIteration:
+					pass
+				else:
+					raise AssertionError(
+						repr(element) + " appears in at least two classes")
+		return clazz
 
 
 	@classmethod
 	def parse(cls, s, item_delimiter=',', class_delimiter=';', **kwargs):
-		if item_delimiter == class_delimiter:
+		if class_delimiter in item_delimiter:
 			raise ValueError(
-				'Item and class delimiters must not be equal ({!r})'
-					.format(item_delimiter))
+				"Item delimiters must not contain class delimiters; but got {!r} in {!r}"
+					.format(class_delimiter, item_delimiter))
 		return cls(
 			map(methodcaller('split', item_delimiter), s.split(class_delimiter)),
 			**kwargs)
@@ -93,14 +105,13 @@ class EquivalenceRelation(frozenset):
 		return format(self)
 
 
-	def __format__(self, fmt):
+	def __format__(self, sfmt):
 		classes = self
 
-		if fmt != '':
-			fmt_orig = fmt
-			fmt = fmt[1:].split(fmt[0], 6)
+		if sfmt:
+			fmt = sfmt[1:].split(sfmt[0], 6)
 			if len(fmt) < 2:
-				raise ValueError('Illegal format: ' + repr(fmt_orig))
+				raise ValueError("Illegal format: " + repr(sfmt))
 
 			if len(fmt) % 2:
 				classes, item_transform = (
@@ -146,8 +157,8 @@ class EquivalenceRelation(frozenset):
 		else:
 			item_transform = None
 
-		item_transform = cls._item_transformers.get(item_transform, '')
-		if item_transform == '':
+		item_transform = cls._item_transformers.get(item_transform, False)
+		if item_transform is False:
 			raise ValueError('Invalid format option string: ' + repr(s))
 
 		return (classes, item_transform)
