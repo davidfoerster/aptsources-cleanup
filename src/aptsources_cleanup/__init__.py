@@ -36,7 +36,7 @@ def get_duplicates(sourceslist, equivalent_schemes=None):
 	sentry_map = defaultdict(list)
 	for se in sourceslist.list:
 		if not se.invalid and not se.disabled:
-			uri = urlparse(se.uri)
+			uri = urlparse(se.uri, "file")
 			scheme = equivalent_schemes.get_class(uri.scheme) or uri.scheme
 			uri = urlunparse(uri._replace(scheme='', path=normpath(uri.path)))
 			dist = normpath(se.dist)
