@@ -11,8 +11,35 @@ class FrozensetAltRepr(frozenset):
 
 	__slots__ = ()
 
+
 	def __str__(self):
-		return ', '.join(tuple(map(repr, self))).join(('{', '}'))
+		return self._str_impl(self)
+
+
+	@staticmethod
+	def _str_impl(items):
+		return ', '.join(tuple(map(repr, items))).join(('{', '}'))
+
+
+class OrderedFrozenset(FrozensetAltRepr):
+
+	__slots__ = ('order',)
+
+
+	def __new__(cls, items=()):
+		items = dict(zip(items, itertools.count()))
+		self = super().__new__(cls, items.keys())
+		self.order = items
+		return self
+
+
+	def index(self, item):
+		return self.order[item]
+
+
+	def __str__(self):
+		assert self == self.order.keys()
+		return self._str_impl(self.order)
 
 
 class EquivalenceRelation(frozenset):
@@ -20,11 +47,16 @@ class EquivalenceRelation(frozenset):
 	__slots__ = ()
 
 
-	def __new__(cls, *classes):
+	def __new__(cls, *classes, settype=FrozensetAltRepr):
 		if len(classes) == 1:
 			classes, = classes
 
-		self = super().__new__(cls, map(FrozensetAltRepr, classes))
+		if settype is None:
+			settype = FrozensetAltRepr
+		elif settype == "ordered":
+			settype = OrderedFrozenset
+
+		self = super().__new__(cls, map(settype, classes))
 		if not self:
 			try:
 				return cls.EMPTY
@@ -33,7 +65,7 @@ class EquivalenceRelation(frozenset):
 
 		if __debug__:
 			overlapping = [
-				'{} & {} = {}'.format(a, b, FrozensetAltRepr.__str__(a & b))
+				'{} & {} = {}'.format(a, b, settype.__str__(a & b))
 				for a, b in itertools.combinations(self, 2) if not a.isdisjoint(b)
 			]
 			assert not overlapping, \
@@ -47,13 +79,14 @@ class EquivalenceRelation(frozenset):
 
 
 	@classmethod
-	def parse(cls, s, item_delimiter=',', class_delimiter=';'):
+	def parse(cls, s, item_delimiter=',', class_delimiter=';', **kwargs):
 		if item_delimiter == class_delimiter:
 			raise ValueError(
 				'Item and class delimiters must not be equal ({!r})'
 					.format(item_delimiter))
-		return cls(map(
-			methodcaller('split', item_delimiter), s.split(class_delimiter)))
+		return cls(
+			map(methodcaller('split', item_delimiter), s.split(class_delimiter)),
+			**kwargs)
 
 
 	def __str__(self):

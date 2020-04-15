@@ -214,7 +214,8 @@ def parse_args(args):
 	ap.add_argument('-n', '--no-act', '--dry-run',
 		dest='apply_changes', action='store_const', const=False,
 		help=_('Never apply changes; only print what would be done.'))
-	noarg_equivalent_schemes = EquivalenceRelation((('ftp', 'http', 'https'),))
+	noarg_equivalent_schemes = EquivalenceRelation(
+		(('http', 'https', 'ftp'),), settype="ordered")
 	ap.add_argument('--equivalent-schemes', metavar='SCHEMES',
 		nargs='?', type=EquivalenceRelation.parse, const=noarg_equivalent_schemes,
 		help=_('Specify URI schemes that you consider equivalent using a list of '
