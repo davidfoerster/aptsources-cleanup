@@ -17,6 +17,7 @@ import locale
 import textwrap
 from itertools import starmap
 from functools import reduce, partial as fpartial
+from urllib.parse import urlparse
 import aptsources.sourceslist
 import aptsources_cleanup
 
@@ -277,7 +278,9 @@ def handle_duplicates(sourceslist, apply_changes=None,
 	duplicates = tuple(get_duplicates(
 		sourceslist, equivalent_schemes=equivalent_schemes))
 	if duplicates:
-		for dupe_set in map(iter, duplicates):
+		for dupe_set in duplicates:
+			dupe_set = iter(
+				sort_dupe_set_by_scheme_class(equivalent_schemes, dupe_set))
 			orig = next(dupe_set)
 			for dupe in dupe_set:
 				stdout.print(_('Overlapping source entries:'))
@@ -286,7 +289,7 @@ def handle_duplicates(sourceslist, apply_changes=None,
 						_("{ordinal:2d}. file {file!r}:")
 							.format(ordinal=i, file=se.file))
 					stdout_indent2.print(se.line)
-				stdout.print(_('I disabled the latter entry.'), end='\n\n')
+				stdout.print(_("I disabled all but the first entry."), end="\n\n")
 				dupe.disabled = True
 
 		stdout.print(
@@ -313,6 +316,14 @@ def handle_duplicates(sourceslist, apply_changes=None,
 		stdout.print(_('No duplicate entries were found.'))
 
 	return 0
+
+
+def sort_dupe_set_by_scheme_class(eqclasses, dupe_set):
+	if eqclasses and dupe_set:
+		schemes_class = eqclasses.get_class(urlparse(dupe_set[0].uri).scheme)
+		if schemes_class and getattr(schemes_class, "index", None) is not None:
+			dupe_set.sort(key=lambda se: schemes_class.index(urlparse(se.uri).scheme))
+	return dupe_set
 
 
 def handle_empty_files(sourceslist):
