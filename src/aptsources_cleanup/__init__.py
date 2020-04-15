@@ -36,7 +36,7 @@ def get_duplicates(sourceslist, equivalent_schemes=None):
 	sentry_map = defaultdict(list)
 	for se in sourceslist.list:
 		if not se.invalid and not se.disabled:
-			uri = urlparse(se.uri, "file")
+			uri = se.parsed_uri = urlparse(se.uri, "file")
 			uri = uri._replace(
 				# Abuse the scheme attribute to store its equivalence class (if any)
 				# which is fine as long as the result doesn't leak outside of this

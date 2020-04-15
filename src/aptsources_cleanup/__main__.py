@@ -17,7 +17,6 @@ import locale
 import textwrap
 from itertools import starmap
 from functools import reduce, partial as fpartial
-from urllib.parse import urlparse
 import aptsources.sourceslist
 import aptsources_cleanup
 
@@ -321,9 +320,9 @@ def handle_duplicates(sourceslist, apply_changes=None,
 
 def sort_dupe_set_by_scheme_class(eqclasses, dupe_set):
 	if eqclasses and dupe_set:
-		schemes_class = eqclasses.get_class(urlparse(dupe_set[0].uri).scheme)
+		schemes_class = eqclasses.get_class(dupe_set[0].parsed_uri.scheme)
 		if schemes_class and getattr(schemes_class, "index", None) is not None:
-			dupe_set.sort(key=lambda se: schemes_class.index(urlparse(se.uri).scheme))
+			dupe_set.sort(key=lambda se: schemes_class.index(se.parsed_uri.scheme))
 	return dupe_set
 
 
