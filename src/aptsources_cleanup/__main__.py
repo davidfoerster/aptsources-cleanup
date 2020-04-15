@@ -217,7 +217,8 @@ def parse_args(args):
 	noarg_equivalent_schemes = EquivalenceRelation(
 		(('http', 'https', 'ftp'),), settype="ordered")
 	ap.add_argument('--equivalent-schemes', metavar='SCHEMES',
-		type=EquivalenceRelation.parse, default=noarg_equivalent_schemes,
+		type=fpartial(EquivalenceRelation.parse, settype="ordered"),
+		default=noarg_equivalent_schemes,
 		help=_('Specify URI schemes that you consider equivalent using a list of '
 			'equivalence classes delimited by semicolons (";") and elements '
 			'delimited by commas (","). Defaults to "{:|,|;|a}". The empty argument '
