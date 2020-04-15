@@ -19,7 +19,7 @@ from .util.import_check import import_check
 from .util.relations import EquivalenceRelation
 from collections import defaultdict
 from os.path import normpath
-from urllib.parse import urlparse, urlunparse
+from urllib.parse import urlparse
 aptsources = import_check('aptsources.sourceslist', 'apt')
 
 
@@ -37,11 +37,15 @@ def get_duplicates(sourceslist, equivalent_schemes=None):
 	for se in sourceslist.list:
 		if not se.invalid and not se.disabled:
 			uri = urlparse(se.uri, "file")
-			scheme = equivalent_schemes.get_class(uri.scheme) or uri.scheme
-			uri = urlunparse(uri._replace(scheme='', path=normpath(uri.path)))
+			uri = uri._replace(
+				# Abuse the scheme attribute to store its equivalence class (if any)
+				# which is fine as long as the result doesn't leak outside of this
+				# function.
+				scheme=equivalent_schemes.get_class(uri.scheme) or uri.scheme,
+				path=normpath(uri.path))
 			dist = normpath(se.dist)
 			for c in (map(normpath, se.comps) if se.comps else (None,)):
-				sentry_map[(se.type, scheme, uri, dist, c)].append(se)
+				sentry_map[(se.type, uri, dist, c)].append(se)
 
 	return filter(lambda dupe_set: len(dupe_set) > 1, sentry_map.values())
 
