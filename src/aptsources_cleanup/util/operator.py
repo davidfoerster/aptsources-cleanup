@@ -1,7 +1,7 @@
 # -*- coding: utf-8
 
 __all__ = (
-	"identity", "rapply", "methodcaller", "starcall"
+	"identity", "methodcaller", "starcall"
 	"itemgetter0", "itemgetter1",
 )
 
@@ -14,11 +14,6 @@ itemgetter0, itemgetter1 = map(operator.itemgetter, range(2))
 def identity(x):
 	"""Returns its attribute"""
 	return x
-
-
-def rapply(arg, func):
-	"""Calls 'func(arg)' and returns its return value."""
-	return func(arg)
 
 
 class methodcaller:
