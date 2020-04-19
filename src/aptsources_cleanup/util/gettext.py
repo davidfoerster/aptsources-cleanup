@@ -384,13 +384,13 @@ class Choices(collections.ChainMap):
 	@classmethod
 	def _get_short_and_styled(cls, s, shorthand_highlighter, existing):
 		match = next(filterfalse(
-			comp(itemgetter0, existing.__contains__),
+			comp(operator.methodcaller('group'), existing.__contains__),
 			cls.letter_pattern.finditer(s)), None)
 		if match is None:
 			raise ValueError(
 				"No unique shorthand available for choice '{:s}'".format(s))
 
-		short = match[0]
+		short = match.group()
 		styled = (
 			shorthand_highlighter(short).join((s[:match.start()], s[match.end():])))
 		return (normalize_casefold(short), styled)
