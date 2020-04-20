@@ -101,7 +101,7 @@ class ZipFile(_zipfile.ZipFile):
 		if len(c_full) - len(c) + c_info.file_size > self._max_path:
 			raise self._OSError(errno.ENAMETOOLONG, None, c_full)
 
-		if seen_set.add(c_full):
+		if not seen_set.add(c_full):
 			raise self._OSError(errno.ELOOP, None, c_full)
 		resolved = os.fsdecode(super().read(c_info, pwd))
 		if not resolved:
@@ -192,7 +192,7 @@ def _main(args=None):
 		getinfo = functools.partial(ZipFile.getinfo, archive,
 			follow_symlinks=args.follow_symlinks, fail_missing=False)
 
-		for path in args.path:
+		for path in args.paths:
 			resolved_info = getinfo(path)
 			if resolved_info is not None:
 				print('{:s}: {!r} => {!r}'.format(
