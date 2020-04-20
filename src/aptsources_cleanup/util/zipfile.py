@@ -105,10 +105,9 @@ class ZipFile(_zipfile.ZipFile):
 			raise self._OSError(errno.ELOOP, None, c_full)
 		resolved = os.fsdecode(super().read(c_info, pwd))
 		if not resolved:
-			raise self._OSError(
-				errno.EINVAL, 'Empty symbolic link in archive', c_full)
+			raise self._OSError(errno.ENOENT, "Empty symbolic link", c_full)
 		if "\0" in resolved:
-			raise self._OSError(errno.EINVAL, "NUL char in symbolic link", c_full)
+			raise self._OSError(errno.ENOENT, "NUL char in symbolic link", c_full)
 		if self.debug >= 2:
 			_eprintf('Found symbolic link: {!r} => {!r}',
 				':'.join((self.filename, c_full)), resolved)
