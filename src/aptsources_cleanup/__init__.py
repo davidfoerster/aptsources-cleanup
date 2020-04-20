@@ -13,7 +13,6 @@ Source code and bug tracker location:
 
 __all__ = ('get_duplicates', 'get_empty_files')
 
-from . import util
 from .util.import_check import import_check
 from .util.relations import EquivalenceRelation
 from collections import defaultdict

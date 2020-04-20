@@ -48,7 +48,8 @@ class ZipFile(_zipfile.ZipFile):
 	def extract(self, member, path=None, pwd=None, *, follow_symlinks=False,
 		fail_missing=True
 	):
-		member = self.getinfo(member, pwd, follow_symlinks, fail_missing)
+		member = self.getinfo(
+			member, pwd, follow_symlinks=follow_symlinks, fail_missing=fail_missing)
 		success = member is not None
 		if success:
 			super().extract(member, path, pwd)

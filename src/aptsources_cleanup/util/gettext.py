@@ -392,7 +392,8 @@ class Choices(collections.ChainMap):
 
 		short = match.group()
 		styled = (
-			shorthand_highlighter(short).join((s[:match.start()], s[match.end():])))
+			shorthand_highlighter(short).join(
+				(s[:match.start()], s[match.end():])))
 		return (normalize_casefold(short), styled)
 
 
