@@ -36,10 +36,12 @@ if __name__ == '__main__':
     setup(
         name=NAME,
         version=VERSION,
-        author='David Foerster',
+        author='David P. W. Forster',
+        url='https://github.com/davidfoerster/aptsources-cleanup',
         long_description=parse_description(),
         long_description_content_type='text/markdown',
         install_requires=[],
+        license='MIT',
         extras_require={
             'optional': [
                 'gitpython',
@@ -57,5 +59,6 @@ if __name__ == '__main__':
         classifiers=[
             # List of classifiers available at:
             # https://pypi.python.org/pypi?%3Aaction=list_classifiers
+            'License :: OSI Approved :: MIT License',
         ],
     )
