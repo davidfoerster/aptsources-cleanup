@@ -21,10 +21,6 @@ if os.sep != "/":
 class ZipFile(_zipfile.ZipFile):
 	"""Extends zipfile.ZipFile with in-archive resolution of symbolic links"""
 
-	def __init__(self, *args, **kwargs):
-		super().__init__(*args, **kwargs)
-		self._max_path_value = None
-
 
 	def getinfo(self, name, pwd=None, *, follow_symlinks=False,
 		fail_missing=True
@@ -173,12 +169,14 @@ class ZipFile(_zipfile.ZipFile):
 
 	@property
 	def _max_path(self):
-		val = self._max_path_value
-		if val is None:
-			fileno = getattr(self.fp, 'fileno', None)
-			fileno = os.curdir if fileno is None else fileno()
-			self._max_path_value = val = os.pathconf(fileno, 'PC_PATH_MAX')
-		return val
+		try:
+			return self._max_path_value
+		except AttributeError:
+			pass
+		fileno = getattr(self.fp, "fileno", None)
+		fileno = os.curdir if fileno is None else fileno()
+		max_path = self._max_path_value = os.pathconf(fileno, "PC_PATH_MAX")
+		return max_path
 
 
 	def _OSError(self, err, msg=None, filename=None, filename2=None):
