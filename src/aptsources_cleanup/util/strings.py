@@ -8,19 +8,35 @@ __all__ = (
 
 import operator
 
+if __debug__:
+	import collections
+	from warnings import warn
+	from .itertools import map_pairs
 
-def startswith_token(s, prefix, sep=None):
+
+def startswith_token(s, prefix, separators=None):
 	"""Tests if a string is either equal to a given prefix or prefixed by it
 	followed by a separator.
 	"""
 
-	if sep is None:
+	if separators is None:
 		return s == prefix
 
 	prefix_len = len(prefix)
-	return s.startswith(prefix) and (
-		not sep or len(s) == prefix_len or
-		s.find(sep, prefix_len, prefix_len + len(sep)) == prefix_len)
+
+	if s.startswith(prefix):
+		if len(s) == prefix_len:
+			return True
+
+		if isinstance(separators, str):
+			sep = separators
+			return s.find(sep, prefix_len) >= 0
+
+		for sep in separators:
+			if s.find(sep, prefix_len) >= 0:
+				return True
+
+	return False
 
 
 def prefix(s, *prefixes, reverse=False):
@@ -31,56 +47,86 @@ def prefix(s, *prefixes, reverse=False):
 	return s[:pos] if pos >= 0 else s
 
 
-def strip(s, xfixes):
-	xfixes = _strip_prepare_xfixes(xfixes)
-	stop = len(s)
-	start = _lstrip_start(s, 0, stop, xfixes)
-	stop = _rstrip_stop(s, start, stop, xfixes)
-	return s[start:stop]
+def strip(s, xfixes, *, start=None, stop=None):
+	return _strip_impl("lr", s, xfixes, start, stop)
+
+def lstrip(s, prefixes, *, start=None, stop=None):
+	return _strip_impl("l", s, xfixes, start, stop)
+
+def rstrip(s, suffixes, *, start=None, stop=None):
+	return _strip_impl("r", s, xfixes, start, stop)
 
 
-def lstrip(s, prefixes):
-	return s[_lstrip_start(s, 0, len(s), _strip_prepare_xfixes(prefixes)):]
+def _strip_impl(mode, s, xfixes, start, stop):
+	assert mode and not mode.strip("lr")
+	len_s = len(s)
+	start = _normalize_index(start, 0, len_s)
+	stop  = _normalize_index(stop, len_s, len_s)
+	xfixes = _strip_prepare_xfixes(xfixes, mode)
+
+	if "l" in mode:
+		start = _lstrip_start(s, start, stop, xfixes)
+	if "r" in mode:
+		stop = _rstrip_stop(s, start, stop, xfixes)
+
+	return s[ start : stop ]
 
 
-def rstrip(s, suffixes):
-	return s[:_rstrip_stop(s, 0, len(s), _strip_prepare_xfixes(suffixes))]
+def _normalize_index(idx, default, sequence_len):
+	if idx is None:
+		idx = default
+	elif idx < 0:
+		idx += sequence_len
+		if idx < 0:
+			raise IndexError(format(idx - sequence_len, "d"))
+
+	return idx
 
 
-def _strip_prepare_xfixes(xfixes):
+def _strip_prepare_xfixes(xfixes, mode):
 	if isinstance(xfixes, str):
 		return (xfixes,)
 
-	it_xfixes = iter(xfixes)
-	l_xfix = len(next(it_xfixes, ""))
-	if l_xfix and any(map(l_xfix.__ne__, map(len, it_xfixes))):
-		raise ValueError(
-			"All pre- and/or suffixes must be of equal length, but got: "
-				+ ", ".join(tuple(map("{!r}[{:d}]".format, xfixes, map(len, xfixes)))))
+	if __debug__:
+		assert isinstance(xfixes, collections.abc.Sized)
+
+		if "l" in mode and any(
+			map_pairs(str.startswith, sorted(xfixes, reverse=True))
+		):
+			warn("not prefix-free", UserWarning)
+
+		if "r" in mode and any(
+			map_pairs(str.startswith, sorted(
+				map(operator.itemgetter(slice(None, None, -1)), xfixes), reverse=True))
+		):
+			warn("not suffix-free", UserWarning)
+
 	return xfixes
 
 
 def _lstrip_start(s, start, stop, prefixes):
-	prefixlen = len(next(iter(prefixes), ""))
-	if prefixlen:
-		step = start + prefixlen
-		while step <= stop:
-			if all(s.find(prefix, start, step) < 0 for prefix in prefixes):
+	assert start >= 0
+	while start < stop:
+		for prefix in prefixes:
+			step = start + len(prefix)
+			if start < step <= stop and s.find(prefix, start, step) >= 0:
+				start = step
 				break
-			start = step
-			step += prefixlen
+		else:
+			break
 	return start
 
 
 def _rstrip_stop(s, start, stop, suffixes):
-	suffixlen = len(next(iter(suffixes), ""))
-	if suffixlen:
-		step = stop - suffixlen
-		while start <= step:
-			if all(s.find(suffix, step, stop) < 0 for suffix in suffixes):
+	assert start >= 0
+	while start < stop:
+		for suffix in suffixes:
+			step = stop - len(suffix)
+			if start <= step < stop and s.find(suffix, step, stop) >= 0:
+				stop = step
 				break
-			stop = step
-			step -= suffixlen
+		else:
+			break
 	return stop
 
 

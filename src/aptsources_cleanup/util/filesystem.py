@@ -1,13 +1,16 @@
 # -*- coding: utf-8
 """Filesystem-related utilities"""
 
-__all__ = ('samefile', 'remove_sources_files')
+__all__ = ("dirseps", "samefile", "remove_sources_files")
 
 from .gettext import _
 from .terminal import termwrap
 import sys
-import os, os.path
+import os
 import errno
+
+
+dirseps = { os.sep, os.altsep or os.sep }
 
 
 def samefile(a, b):

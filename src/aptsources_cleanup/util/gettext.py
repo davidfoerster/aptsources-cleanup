@@ -12,6 +12,7 @@ from .operator import identity, methodcaller, peek, itemgetter0
 from .itertools import unique, last, filterfalse
 from .functools import LazyInstance, comp, partial as fpartial
 from .zipfile import ZipFile
+from .filesystem import dirseps
 import gettext as _gettext
 import operator
 import sys
@@ -99,7 +100,8 @@ def translation(domain, localedir=None, languages=None, _class=None,
 	languages = tuple(unique(get_fallback_languages(languages)))
 	translations = None
 	if languages:
-		localedir = strip(localedir[ len(archive) + len(os.sep): ], os.sep)
+		assert prefix(localedir, archive, dirseps)
+		localedir = strip(localedir, dirseps, start=len(archive) + len(os.sep))
 		locale_suffix = os.path.join('LC_MESSAGES', os.extsep.join((domain, 'mo')))
 		with ZipFile(archive) as archive:
 			#archive.debug = 3

@@ -1,10 +1,13 @@
 # -*- coding: utf-8
 
-__all__ = ('filterfalse', 'accumulate', 'foreach', 'unique', 'count')
+__all__ = (
+	"filterfalse", "accumulate", "foreach", "unique", "count", "pairs",
+	"map_pairs",
+)
 
 from .functools import comp
 from .collections import ExtSet
-from itertools import filterfalse, accumulate
+from itertools import accumulate, count, filterfalse, islice, tee
 
 
 def foreach(func, iterable0, *iterables, star_call=False):
@@ -58,3 +61,17 @@ def last(iterable, *default):
 	for x in iterable:
 		pass
 	return x
+
+
+def pairs(iterable, n=2):
+	return zip(*_pairs_helper(iterable, n))
+
+
+def map_pairs(func, iterable, n=2):
+	return map(func, *_pairs_helper(iterable, n))
+
+
+def _pairs_helper(iterable, n, *,
+	_mapper=lambda i, it: islice(it, i, None) if i else it
+):
+	return map(_mapper, count(), tee(iterable, n))
