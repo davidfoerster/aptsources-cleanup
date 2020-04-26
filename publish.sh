@@ -15,7 +15,7 @@ Args:
     # These environment variables must / should be set
     TWINE_USERNAME : username for pypi
     TWINE_PASSWORD : password for pypi
-    USE_GPG : defaults to True
+    USE_GPG : defaults to False
 
 Requirements:
      twine >= 1.13.0
@@ -35,10 +35,7 @@ Usage:
     export TWINE_USERNAME=<pypi-username>
     export TWINE_PASSWORD=<pypi-password>
 
-    source $(secret_loader.sh)
-    DEPLOY_BRANCH=master DEPLOY_REMOTE=<yourmod> ./publish.sh yes
-
-    MB_PYTHON_TAG=py3-none-any ./publish.sh
+    TAG_AND_UPLOAD=yes DEPLOY_BRANCH=master ./publish.sh
 '''
 
 check_variable(){
@@ -57,11 +54,12 @@ check_variable(){
 }
 
 # Options
+PYTHON_EXE=${PYTHON_EXE:=python3}
 CURRENT_BRANCH=${CURRENT_BRANCH:=$(git branch | grep \* | cut -d ' ' -f2)}
 DEPLOY_BRANCH=${DEPLOY_BRANCH:=release}
 DEPLOY_REMOTE=${DEPLOY_REMOTE:=origin}
-NAME=${NAME:=$(python -c "import setup; print(setup.NAME)")}
-VERSION=$(python -c "import setup; print(setup.VERSION)")
+NAME=${NAME:=$($PYTHON_EXE -c "import setup; print(setup.NAME)")}
+VERSION=$($PYTHON_EXE -c "import setup; print(setup.VERSION)")
 MB_PYTHON_TAG=${MB_PYTHON_TAG:py3-none-any}
 
 # The default should change depending on the application
@@ -78,7 +76,7 @@ TAG_AND_UPLOAD=${TAG_AND_UPLOAD:=$1}
 TWINE_USERNAME=${TWINE_USERNAME:=""}
 TWINE_PASSWORD=${TWINE_PASSWORD:=""}
 
-USE_GPG=${USE_GPG:="True"}
+USE_GPG=${USE_GPG:="False"}
 
 if [[ "$(which gpg2)" != "" ]]; then
     GPG_EXECUTABLE=${GPG_EXECUTABLE:=gpg2}
@@ -125,15 +123,15 @@ for _MODE in "${MODE_LIST[@]}"
 do
     echo "_MODE = $_MODE"
     if [[ "$_MODE" == "sdist" ]]; then
-        python setup.py sdist 
+        $PYTHON_EXE setup.py sdist 
         WHEEL_PATH=$(ls dist/$NAME-$VERSION*.tar.gz)
         WHEEL_PATHS+=($WHEEL_PATH)
     elif [[ "$_MODE" == "native" ]]; then
-        python setup.py bdist_wheel 
+        $PYTHON_EXE setup.py bdist_wheel 
         WHEEL_PATH=$(ls dist/$NAME-$VERSION*.whl)
         WHEEL_PATHS+=($WHEEL_PATH)
     elif [[ "$_MODE" == "universal" ]]; then
-        python setup.py bdist_wheel --universal
+        $PYTHON_EXE setup.py bdist_wheel --universal
         UNIVERSAL_TAG="py3-none-any"
         WHEEL_PATH=$(ls dist/$NAME-$VERSION-$UNIVERSAL_TAG*.whl)
         WHEEL_PATHS+=($WHEEL_PATH)
@@ -234,7 +232,7 @@ if [[ "$TAG_AND_UPLOAD" == "yes" ]]; then
         !!! FINISH: LIVE RUN !!!
     """
 else
-    ls wheelhouse
+    #ls wheelhouse
     echo """
         DRY RUN ... Skiping tag and upload
 
