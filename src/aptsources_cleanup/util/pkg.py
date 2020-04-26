@@ -19,8 +19,7 @@ def check_integrity(pkg, paragraphs, debug_fail=0, *,
 	md5sums_file = '/var/lib/dpkg/info/{:s}.md5sums'.format(pkg)
 
 	try:
-		md5sums_fd = FileDescriptor(md5sums_file)
-		with md5sums_fd:
+		with FileDescriptor(md5sums_file) as md5sums_fd:
 			if isinstance(md5sums_fd, int):
 				raise EnvironmentError(
 					'Got error code {} when opening {}'.format(md5sums_fd, md5sums_file))
