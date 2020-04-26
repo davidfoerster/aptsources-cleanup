@@ -1,15 +1,21 @@
 # -*- coding: utf-8
-from . import strings
-from . import collections
-from .itertools import filterfalse
 import sys
 import os
 import stat
 import errno
+import operator
 import functools
+from . import strings, collections
+from .itertools import filterfalse
+from .operator import methodcaller, identity as _sanitize_path_sep
+
 from zipfile import *
 import zipfile as _zipfile
 __all__ = _zipfile.__all__
+
+
+if os.sep != "/":
+	_sanitize_path_sep = methodcaller(str.replace, os.sep, "/")
 
 
 class ZipFile(_zipfile.ZipFile):
@@ -60,16 +66,25 @@ class ZipFile(_zipfile.ZipFile):
 		if isinstance(path, ZipInfo):
 			path = path.filename
 		else:
-			path = os.fspath(path)
+			path = _sanitize_path_sep(os.fspath(path))
+		assert os.sep == "/" or os.sep not in path
+		is_dir = path.endswith("/")
+		path = path.strip("/")
 
 		inspected = []
-		uninspected = path.split(os.sep)
+		uninspected = path.split("/")
 		uninspected.reverse()
 		seen_set = collections.ExtSet()
 		c_info = None
+
 		while uninspected:
 			c_info = self._resolve_path_component(
 				inspected, uninspected, pwd, seen_set)
+
+		if is_dir and inspected:
+			inspected.append("")
+			c_info = self.NameToInfo.get("/".join(inspected))
+
 		return self._check_missing(c_info, path, fail_missing)
 
 
@@ -85,13 +100,13 @@ class ZipFile(_zipfile.ZipFile):
 				uninspected.append(c)
 				uninspected.reverse()
 				raise self._OSError(
-					errno.EINVAL, 'Path points outside of this archive',
-					os.sep.join(uninspected))
+					errno.ENOENT, 'Path points outside of this archive',
+					"/".join(uninspected))
 			inspected.pop()
 			return None
 
 		inspected.append(c)
-		c_full = os.sep.join(inspected)
+		c_full = "/".join(inspected)
 		c_info = self.NameToInfo.get(c_full)
 		if c_info is None or not stat.S_ISLNK(c_info.external_attr >> 16):
 			if self.debug >= 2:
@@ -99,23 +114,53 @@ class ZipFile(_zipfile.ZipFile):
 					('Not a symlink', 'Does not exist')[c_info is None],
 					':'.join((self.filename, c_full)))
 			return c_info
-		if len(c_full) - len(c) + c_info.file_size > self._max_path:
-			raise self._OSError(errno.ENAMETOOLONG, None, c_full)
+		if c_info.is_dir():
+			raise BadZipFile(
+				"{:s}:{!r} claims to be both a directory and a symbolic link."
+					.format(self.filename, c_info))
+		if len(c_info.filename) - len(c) + c_info.file_size > self._max_path:
+			raise self._OSError(errno.ENAMETOOLONG, None, c_info.filename)
 
-		if not seen_set.add(c_full):
-			raise self._OSError(errno.ELOOP, None, c_full)
-		resolved = os.fsdecode(super().read(c_info, pwd))
-		if not resolved:
-			raise self._OSError(errno.ENOENT, "Empty symbolic link", c_full)
-		if "\0" in resolved:
-			raise self._OSError(errno.ENOENT, "NUL char in symbolic link", c_full)
-		if self.debug >= 2:
-			_eprintf('Found symbolic link: {!r} => {!r}',
-				':'.join((self.filename, c_full)), resolved)
-
+		if not seen_set.add(c_info.filename):
+			raise self._OSError(errno.ELOOP, None, c_info.filename)
+		uninspected.extend(reversed(
+			self._read_symlink(c_info, pwd).rstrip("/").split("/")))
 		inspected.pop()
-		uninspected.extend(reversed(resolved.split(os.sep)))
 		return c_info
+
+
+	def _read_symlink(self, info, pwd):
+		target = super().read(info, pwd)
+
+		if info.flag_bits & 0x800:
+			encoding = "utf-8"
+			errmsg = None
+		else:
+			encoding = "ascii"
+			errmsg = (
+				"Non-ASCII character in symbolic link with legacy file name encoding")
+		try:
+			target = target.decode(encoding)
+		except UnicodeDecodeError:
+			raise self._OSError(errno.EILSEQ, errmsg, info.filename)
+
+		for f_test, errmsg in self._read_symlink_tests:
+			if f_test is not None and f_test(target):
+				raise self._OSError(errno.ENOENT, errmsg, info.filename)
+
+		if self.debug >= 2:
+			_eprintf("Found symbolic link: {!r} => {!r}",
+				":".join((self.filename, info.filename)), target)
+
+		return target
+
+
+	_read_symlink_tests = (
+		(operator.not_, "Empty symbolic link"),
+		(methodcaller(str.startswith, "/"),
+			"Absolute symbolic link target inside an archive"),
+		(methodcaller(str.__contains__, "\0"), "NUL char in symbolic link"),
+	)
 
 
 	def _check_missing(self, info, path, fail_missing):
