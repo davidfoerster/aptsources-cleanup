@@ -21,11 +21,8 @@ def check_integrity(pkg, paragraphs, debug_fail=0, *,
 	try:
 		with FileDescriptor(md5sums_file) as md5sums_fd:
 			md5sum_proc = subprocess.Popen(
-				md5sum_cmd, cwd='/', stdin=md5sums_fd.fd, close_fds=True)
-			try:
-				md5sums_fd.close()
-			finally:
-				md5sum_proc.wait()
+				md5sum_cmd, cwd="/", stdin=md5sums_fd, close_fds=True)
+			md5sum_proc.wait()
 	except EnvironmentError as ex:
 		paragraphs.append('{:s}: {:s}: {!s}'.format(
 			_('Warning'), _('Cannot check package integrity'), ex))
