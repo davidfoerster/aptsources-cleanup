@@ -1,6 +1,7 @@
 # -*- coding: utf-8
 import sys
 import os
+import io
 import stat
 import errno
 import operator
@@ -128,8 +129,6 @@ class ZipFile(_zipfile.ZipFile):
 
 
 	def _read_symlink(self, info, pwd):
-		target = super().read(info, pwd)
-
 		if info.flag_bits & 0x800:
 			encoding = "utf-8"
 			errmsg = None
@@ -137,10 +136,18 @@ class ZipFile(_zipfile.ZipFile):
 			encoding = "ascii"
 			errmsg = (
 				"Non-ASCII character in symbolic link with legacy file name encoding")
-		try:
-			target = target.decode(encoding)
-		except UnicodeDecodeError:
-			raise self._OSError(errno.EILSEQ, errmsg, info.filename)
+
+		with io.TextIOWrapper(super().open(info, "r", pwd), encoding) as fp:
+			try:
+				target = fp.read(self._max_path)
+			except UnicodeDecodeError:
+				raise self._OSError(errno.EILSEQ, errmsg, info.filename)
+			assert not fp.read(1), (
+				"The size of {info.filename!r} inside {self.filename!r} "
+				"({info.file_size:d}) exceeds "
+				"{type.__module__:s}.{type.__qualname__:s}._max_path "
+				"({self._max_path:d})."
+					.format(type=type(self), self=self, info=info))
 
 		for f_test, errmsg in self._read_symlink_tests:
 			if f_test is not None and f_test(target):
