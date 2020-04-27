@@ -100,7 +100,7 @@ def translation(domain, localedir=None, languages=None, _class=None,
 	languages = tuple(unique(get_fallback_languages(languages)))
 	translations = None
 	if languages:
-		assert prefix(localedir, archive, dirseps)
+		assert startswith_token(localedir, archive, dirseps)
 		localedir = strip(localedir, dirseps, start=len(archive) + len(os.sep))
 		locale_suffix = os.path.join('LC_MESSAGES', os.extsep.join((domain, 'mo')))
 		with ZipFile(archive) as archive:

@@ -1,8 +1,7 @@
 # -*- coding: utf-8
 
 __all__ = (
-	"filterfalse", "accumulate", "foreach", "unique", "count", "pairs",
-	"map_pairs",
+	"filterfalse", "accumulate", "foreach", "unique", "pairs", "map_pairs",
 )
 
 from .functools import comp
@@ -34,16 +33,6 @@ def unique(iterable, key=None):
 	if key is not None:
 		not_seen = comp(key, not_seen)
 	return filter(not_seen, iterable)
-
-
-def count(iterable):
-	"""Simply returns the number of entries (left) in the given iterable."""
-
-	try:
-		return len(iterable)
-	except TypeError:
-		pass
-	return sum(1 for _ in iterable)
 
 
 def last(iterable, *default):
