@@ -30,21 +30,28 @@ For details see below.
 
 ## Download / Installation
 
-You can download a pre-bundled ZIP file executable by your Python interpreter:
+### Option 1: Python ZIP application
 
-  * [Latest Release](https://github.com/davidfoerster/aptsources-cleanup/releases/latest)
-  * [All Releases](https://github.com/davidfoerster/aptsources-cleanup/releases)
+ 1. Download the ZIP application bundle:
 
-Or you can download the source code and run it in Python albeit without translations.
+      * [Latest Release](https://github.com/davidfoerster/aptsources-cleanup/releases/latest)
+      * [All Releases](https://github.com/davidfoerster/aptsources-cleanup/releases)
+
+ 2. Mark it as executable through your file manager or the command-line:
+
+        chmod a+x aptsources-cleanup.pyz
+
+
+### Option 2: From source
+
+Alternatively, you can download the source code and run it in Python (albeit without translations).
 
 
 ## Usage
 
-  * From a ZIP bundle:
+  * From a ZIP application bundle:
 
-        sudo python3 -OEs aptsources-cleanup.pyz
-
-    I advise the use of the above interpreter options `-OEs` to avoid potential issues with your Python environment but they aren't strictly necessary.
+        sudo ./aptsources-cleanup.pyz
 
   * From source code:
 
@@ -53,7 +60,7 @@ Or you can download the source code and run it in Python albeit without translat
 For a (slightly more) detailed description and individual command-line options
 see the output of
 
-    python3 -OEs aptsources-cleanup.pyz --help
+    ./aptsources-cleanup.pyz --help
 
 or
 

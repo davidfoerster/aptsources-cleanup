@@ -31,20 +31,22 @@ MESSAGES_MO = $(patsubst $(PO_DIR)/%.po,$(LOCALES_DIR)/%.mo,$(MESSAGES_PO))
 MESSAGES_POT = $(PO_DIR)/$(LOCALES_DOMAIN).pot
 MESSAGES_SYMLINKS = $(notdir $(call dirname,$(call dirname,$(filter-out $(MESSAGES_PO), $(wildcard $(PO_DIR)/*/LC_MESSAGES/*.po)))))
 
-ZIP_TARGET = $(BUILD_DIR)/$(APPLICATION_NAME).pyz
+ZIP_TARGET = $(BUILD_DIR)/$(APPLICATION_NAME).zip
+PYZ_TARGET = $(BUILD_DIR)/$(APPLICATION_NAME).pyz
 ZIP_TARGET_PKG = $(basename $(ZIP_TARGET)).pkg
 CHECKSUMMED_FILES = $(addprefix $(ZIP_TARGET_PKG)/,$(patsubst $(SRC_DIR)/%,%,$(SOURCES)) $(MESSAGES_MO) $(VERSION_DATA) VERSION README.md)
 DIST_FILES = $(CHECKSUMMED_FILES) $(addprefix $(ZIP_TARGET_PKG)/,$(addprefix $(LOCALES_DIR)/,$(MESSAGES_SYMLINKS)) SHA256SUM SHA256SUM.sig)
 
 
-pyz: $(ZIP_TARGET)
+zip: $(ZIP_TARGET)
 
+pyz: $(PYZ_TARGET)
 
 dist: $(DIST_FILES)
 
 
 clean:
-	rm -f -- $(ZIP_TARGET) $(MESSAGES_POT) $(wildcard $(LOCALES_DIR)/*/LC_MESSAGES/*.mo) $(DIST_FILES)
+	rm -f -- $(ZIP_TARGET) $(PYZ_TARGET) $(MESSAGES_POT) $(wildcard $(LOCALES_DIR)/*/LC_MESSAGES/*.mo) $(DIST_FILES)
 
 
 %/$(VERSION_DATA): export PYTHONPATH = $(abspath $(SRC_DIR))
@@ -81,7 +83,7 @@ $(sort $(LOCALES_DIR)/ $(ZIP_TARGET_PKG)/ $(dir $(MESSAGES_MO) $(ZIP_TARGET) $(D
 	mkdir -p -- $@
 
 
-.PHONY: pyz clean dist messages messages_template messages_update
+.PHONY: zip pyz clean dist messages messages_template messages_update
 
 
 DIST_CP_CMP = install -pDT -- $< $@
@@ -91,6 +93,11 @@ $(ZIP_TARGET_PKG)/%.py: $(SRC_DIR)/%.py
 
 $(ZIP_TARGET_PKG)/%: %
 	$(DIST_CP_CMP)
+
+
+%.pyz: %.zip $(SRC_DIR)/__main__.py
+	head -n 1 < $(SRC_DIR)/__main__.py | cat -- - $< > $@
+	chmod a+x -- $@
 
 
 .SECONDEXPANSION:
