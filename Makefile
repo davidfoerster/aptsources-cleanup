@@ -15,7 +15,7 @@ GETTEXT = xgettext -F -L Python -k_ -k_U -k_N:1,2 \
 MSGFMT = msgfmt
 MSGMERGE = msgmerge -F --backup=none
 PYTHON = python3 -s
-GPG = $(shell command -v gpg2 || { gpg --version | grep -qe '^gpg.*[ v]2\.[0-9]' && echo gpg; })
+GPG = gpg
 
 rwildcard = $(foreach d,$(wildcard $(1)*),$(call rwildcard,$(d)/,$(2)) $(filter $(subst *,%,$(2)),$(d)))
 dirname = $(patsubst %/,%,$(dir $(1)))
