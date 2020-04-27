@@ -24,6 +24,7 @@ has_msgtools = 1
 
 VERSION_DATA = aptsources_cleanup/util/version/_data.py
 SOURCES = $(filter-out $(SRC_DIR)/$(VERSION_DATA),$(call rwildcard,$(SRC_DIR),*.py))
+ARGPARSE_PY = $(shell $(PYTHON) tools/get_module_file.py argparse)
 
 MESSAGES_PO = $(shell find $(PO_DIR) -mindepth 1 -name '*.po')
 MESSAGES_MO = $(patsubst $(PO_DIR)/%.po,$(LOCALES_DIR)/%.mo,$(MESSAGES_PO))
@@ -61,7 +62,7 @@ $(ZIP_TARGET_PKG)/SHA256SUM: $(CHECKSUMMED_FILES)
 
 messages_template: $(MESSAGES_POT)
 
-$(PO_DIR)/%.pot: $(SOURCES) $(shell $(PYTHON) tools/get_module_file.py argparse) | $(LOCALES_DIR)/
+$(PO_DIR)/%.pot: $(SOURCES) $(ARGPARSE_PY) | $(LOCALES_DIR)/
 	$(GETTEXT) -d $(basename $(notdir $@)) -o $@ -- $^
 
 
@@ -102,7 +103,7 @@ $(addprefix $(LOCALES_DIR)/,$(MESSAGES_SYMLINKS)): $$(patsubst $$(LOCALES_DIR)/%
 
 
 $(ZIP_TARGET): $$(DIST_FILES) | $$(@D)
-	cd $(ZIP_TARGET_PKG) && exec $(ZIP) -FS -XD --symlinks $(abspath $@) -- $(patsubst $(ZIP_TARGET_PKG)/%,%,$^)
+	cd -- $(ZIP_TARGET_PKG) && exec $(ZIP) -FS -XD --symlinks $(abspath $@) -- $(patsubst $(ZIP_TARGET_PKG)/%,%,$^)
 
 
 $(LOCALES_DIR)/%.mo: $$(PO_DIR)/%.po | $$(@D)
