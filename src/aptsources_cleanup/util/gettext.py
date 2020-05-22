@@ -210,8 +210,9 @@ class ChoiceHighlighters(
 
 	unprintable_delimiters = ("｛｛", "｝｝")
 
-	assert all(map(operator.eq,
-		unprintable_delimiters, map(re.escape, unprintable_delimiters))), \
+	assert (
+		frozenset("()[]{}?*+-|^$\\.# \t\n\r\v\f")
+			.isdisjoint(frozenset("".join(unprintable_delimiters)))), \
 		'"unprintable_delimiters" contains regex meta-characters.'
 
 	unprintable_pattern = re.compile(r"(.*?)".join(unprintable_delimiters))
