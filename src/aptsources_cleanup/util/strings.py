@@ -88,7 +88,7 @@ def _strip_prepare_xfixes(xfixes, mode):
 		return (xfixes,)
 
 	if __debug__:
-		assert isinstance(xfixes, collections.abc.Sized)
+		assert isinstance(xfixes, collections.abc.Collection)
 
 		if "l" in mode and any(
 			map_pairs(str.startswith, sorted(xfixes, reverse=True))

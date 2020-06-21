@@ -211,7 +211,7 @@ class termwrap(textwrap.TextWrapper):
 		optional_attrs=(
 			'max_lines', 'placeholder', 'tabsize')
 	):
-		assert isinstance(mandatory_attrs, collections.abc.Sized)
+		assert isinstance(mandatory_attrs, collections.abc.Collection)
 		self_getattr = fpartial(getattr, self)
 		yield from zip(mandatory_attrs, map(self_getattr, mandatory_attrs))
 
