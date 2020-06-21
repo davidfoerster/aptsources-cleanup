@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
-"""Returns the paths of the files behind the given modules."""
 # -*- coding: utf-8
+
+"""Returns the paths of the files behind the given modules."""
+
 from __future__ import absolute_import, print_function
 import sys, operator, importlib
 
@@ -10,7 +12,8 @@ except ImportError:
 	pass
 
 
-print(
-	*map(operator.attrgetter('__file__'),
-		map(importlib.import_module, sys.argv[1:])),
-	sep='\n')
+if __name__ == "__main__":
+	print(
+		*map(operator.attrgetter("__file__"),
+			map(importlib.import_module, sys.argv[1:])),
+		sep="\n")
