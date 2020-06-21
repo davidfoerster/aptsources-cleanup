@@ -27,6 +27,10 @@ try:
 	import bz2
 except ImportError:
 	bz2 = None
+try:
+	import lzma
+except ImportError:
+	lzma = None
 
 
 itemgetter0 = operator.itemgetter(0)
@@ -63,11 +67,7 @@ class ZipInfo(zipfile.ZipInfo):
 zipfile.ZipInfo = ZipInfo
 
 
-try:
-	import lzma
-except ImportError:
-	lzma = None
-else:
+if lzma is not None:
 	import struct
 
 	class LZMACompressor(zipfile.LZMACompressor):
@@ -643,15 +643,15 @@ class ArgumentParser(
 		if ns.names_file is not None:
 			assert ns.names_file0 is None
 			names_file = ns.names_file
+			ns.names_file = None
 			delim = names_file.newlines
 			assert delim != ""
 		elif ns.names_file0 is not None:
 			names_file = ns.names_file0
+			ns.names_file0 = None
 			delim = "\0"
 		else:
 			names_file = None
-
-		del ns.names_file, ns.names_file0
 
 		if names_file is not None:
 			with names_file:
@@ -730,7 +730,7 @@ class ArgumentParser(
 			stdout_fileno = stdout_fileno()
 			if stdout_fileno is not None:
 				try:
-					return os.path.samestat(os.stat(stdout_fileno), os.stat(b"/dev/null"))
+					return is_dev_null(stdout_fileno)
 				except OSError as ex:
 					e = errno
 					if ex.errno not in { e.EACCES, e.EBADF, e.ENOENT, e.ENOTDIR }:
@@ -748,6 +748,29 @@ class ArgumentParser(
 		ns.archive = self.exitstack.enter_context(
 			ZipFile(f_archive, "w", ns.compression_method,
 				compress_options=ns.compression_level))
+
+
+def is_dev_null(file, *,
+	null_device_paths=(b"/dev/null", b"/dev/zero"),
+	null_device_numbers=set() if hasattr(os.stat_result, "st_rdev") else None
+):
+	assert null_device_paths
+	f_stat = os.stat(file)
+
+	if null_device_numbers is not None:
+		if not f_stat.st_rdev:
+			return False
+		if not null_device_numbers:
+			null_device_numbers.update(
+				map(operator.attrgetter("st_rdev"), map(os.stat, null_device_paths)))
+		if null_device_numbers:
+			return f_stat.st_rdev in null_device_numbers
+		is_dev_null.__kwdefaults__["null_device_numbers"] = None
+
+	return (
+		stat.S_ISCHR(f_stat.st_mode) and
+		any(map(
+			fpartial(os.path.samestat, f_stat), map(os.stat, null_device_paths))))
 
 
 def format_size(num, unit="B", num_fmt=None,
@@ -776,7 +799,8 @@ def format_size(num, unit="B", num_fmt=None,
 	for next_prefix, next_magnitude in magnitudes:
 		len_prefix = max(len_prefix, len(next_prefix))
 		if abs_num < next_magnitude:
-			len_prefix = max(len_prefix, max(map(len, map(itemgetter0, magnitudes))))
+			len_prefix = max(
+				len_prefix, max(map(len, map(itemgetter0, magnitudes)), default=0))
 			break
 		prefix = next_prefix
 		magnitude = next_magnitude
@@ -807,25 +831,24 @@ def main(args=None):
 			del shebang
 
 		if not quiet:
-			s_bytes = _("bytes")
 			print(
 				_("Compressing files into {:s}").format(archive.fp.name),
 				end=":\n\n")
 
-		success = 0
+		fail_count = 0
 		for file in args.files:
 			try:
 				info = archive.write(
 					file, dir_fd=directory, follow_symlinks=follow_symlinks)
 			except EnvironmentError as ex:
 				print(ex, file=sys.stderr)
+				fail_count += 1
 			else:
-				success += 1
 				if not quiet:
 					print(
 						"{:s} => {:s} ({:4.0%})".format(
 							format_size(info.file_size), format_size(info.compress_size),
-							not info.file_size or info.compress_size / info.file_size),
+							info.file_size and info.compress_size / info.file_size),
 						file, sep="  ")
 
 		main_py = "__main__.py"
@@ -836,9 +859,9 @@ def main(args=None):
 						.format(main_py),
 				file=sys.stderr)
 
-	if success:
+	if not fail_count:
 		print("", _("Everything is OK."), sep="\n")
-	return not success
+	return int(bool(fail_count))
 
 
 if __name__ == "__main__":
