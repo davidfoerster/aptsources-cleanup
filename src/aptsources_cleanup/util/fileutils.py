@@ -1,10 +1,10 @@
 # -*- coding: utf-8
 __all__ = ("display_file", "remove_sources_files")
 
-import os
 import sys
 import mmap
 import errno
+from . import os
 from .gettext import _
 from .terminal import termwrap
 
@@ -37,7 +37,9 @@ def remove_sources_files(filename):
 
 	rv = 0
 	removed_count = 0
-	for may_fail_missing, f in enumerate((filename, filename + ".save")):
+	for may_fail_missing, f in enumerate(
+		(filename, os.fspath(filename) + ".save")
+	):
 		try:
 			os.remove(f)
 		except EnvironmentError as ex:
@@ -46,6 +48,7 @@ def remove_sources_files(filename):
 				termwrap.stderr().print("{:s}: {!s}".format(_("Error"), ex))
 		else:
 			removed_count += not may_fail_missing
-			termwrap.stderr().print(_("'{path:s}' removed.").format(path=f))
+			termwrap.stderr().print(_("'{path:s}' removed.").format(
+				path=os.fspath(f)))
 
 	return rv, removed_count

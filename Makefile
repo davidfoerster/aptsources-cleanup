@@ -102,7 +102,7 @@ $(addprefix $(LOCALES_DIR)/,$(MESSAGES_SYMLINKS)): $$(patsubst $$(LOCALES_DIR)/%
 
 
 $(ZIP_TARGET): $$(DIST_FILES) | $$(@D)
-	tools/zip.py -q  --compression-level=9 --symlinks \
+	tools/zip.py -q --compression-level=9 --symlinks \
 		--executable='/usr/bin/python3 -OEs' -d $(ZIP_TARGET_PKG) -- \
 		$@ $(patsubst $(ZIP_TARGET_PKG)/%,%,$^)
 

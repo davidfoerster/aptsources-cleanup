@@ -6,7 +6,7 @@ import stat
 import errno
 import operator
 import functools
-from . import strings, collections
+from . import os, strings, collections
 from .itertools import filterfalse
 from .operator import methodcaller, identity as _sanitize_path_sep
 
