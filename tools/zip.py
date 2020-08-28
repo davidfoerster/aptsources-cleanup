@@ -212,7 +212,7 @@ class ZipFile(zipfile.ZipFile):
 			try:
 				fd = os.open(filename_or_fd, open_flags, dir_fd=dir_fd)
 			except OSError as ex:
-				if not (ex.errno == errno.ELOOP and open_flags & os.O_NOFOLLOW):
+				if follow_symlinks or ex.errno != errno.ELOOP:
 					raise
 				open_flags |= os.O_PATH
 				fd = os.open(filename_or_fd, open_flags, dir_fd=dir_fd)
@@ -234,6 +234,7 @@ class ZipFile(zipfile.ZipFile):
 				compress_options = self.compress_options
 
 			if stat.S_ISLNK(fd_stat.st_mode):
+				assert not follow_symlinks and open_flags & os.O_NOFOLLOW
 				target = os.readlink(b"", dir_fd=fd.fd)
 				fd.close()
 				info = zipfile.ZipInfo(arcname, time.localtime(fd_stat.st_mtime))
@@ -275,9 +276,10 @@ class FileDescriptor(contextlib.AbstractContextManager):
 	def close(self):
 		"""Close the underlying file descriptor."""
 
-		if self._fd is not None:
-			os.close(self._fd)
+		fd = self._fd
+		if fd is not None:
 			self._fd = None
+			os.close(fd)
 
 
 	@property
@@ -530,11 +532,11 @@ class ArgumentParser(
 
 		self.add_argument("--compression-level", metavar="N",
 			dest="compression_level", type=self._parse_compression_level, default=-1,
-			help="Set the compression level: 0 indicates no compression (store all "
+			help=_("Set the compression level: 0 indicates no compression (store all "
 				"files), lower indicates the fastest compression speed (less "
 				"compression), higher indicates the slowest compression (optimal "
 				"compression) and -1 indicates the default for the chosen compression "
-				"method.")
+				"method."))
 		for level in range(ZipFile.compression_level_max + 1):
 			self.add_argument("-" + format(level, "d"),
 				action="store_const", dest="compression_level", const=level,
