@@ -866,5 +866,8 @@ def main(args=None):
 
 if __name__ == "__main__":
 	import locale
-	locale.setlocale(locale.LC_ALL, "")
+	try:
+		locale.setlocale(locale.LC_ALL, "")
+	except locale.Error as ex:
+		print("Error setting locale:", ex, file=sys.stderr)
 	sys.exit(main())
