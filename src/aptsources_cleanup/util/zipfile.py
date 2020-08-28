@@ -113,7 +113,7 @@ class ZipFile(_zipfile.ZipFile):
 					('Not a symlink', 'Does not exist')[c_info is None],
 					':'.join((self.filename, c_full)))
 			return c_info
-		if c_info.is_dir():
+		if _info_is_dir(c_info):
 			raise BadZipFile(
 				"{:s}:{!r} claims to be both a directory and a symbolic link."
 					.format(self.filename, c_info))
@@ -183,6 +183,13 @@ class ZipFile(_zipfile.ZipFile):
 			filename = ':'.join((self.filename, filename))
 
 		return OSError(err, msg or os.strerror(err), filename, None, filename2)
+
+
+try:
+	_info_is_dir = _zipfile.ZipInfo.is_dir
+except AttributeError:
+	def _info_is_dir(info):
+		return info.filename.endswith("/")
 
 
 def _eprintf(fmt, *args):
