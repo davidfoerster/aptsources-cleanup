@@ -6,9 +6,24 @@ functonality if any.
 __all__ = []
 
 from collections.abc import *
-from _collections_abc import _check_methods
 from collections import abc as _abc
 __all__ += _abc.__all__
+
+
+try:
+	from _collections_abc import _check_methods
+except ImportError:
+	def _check_methods(C, *methods):
+		mro = C.__mro__
+		for method in methods:
+			for B in mro:
+				if method in B.__dict__:
+					if B.__dict__[method] is None:
+						return NotImplemented
+					break
+			else:
+				return NotImplemented
+		return True
 
 
 if "Collection" not in locals():
@@ -24,3 +39,6 @@ if "Collection" not in locals():
 				return NotImplemented
 			return _check_methods(C,  "__len__", "__iter__", "__contains__")
 
+	Collection.register(Set)
+	Collection.register(Sequence)
+	Collection.register(Mapping)
