@@ -6,7 +6,6 @@ functonality if any.
 __all__ = ['ExtSet']
 
 from collections import *
-from collections import abc
 
 import collections as _collections
 __all__ += _collections.__all__

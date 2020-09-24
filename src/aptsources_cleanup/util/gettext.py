@@ -7,6 +7,8 @@ __all__ = (
 )
 
 from . import terminal, collections
+# Only needed to trigger the import of "collections.abc":
+from .collections import abc as _
 from .strings import startswith_token, prefix, strip, contains_ordered
 from .operator import identity, methodcaller, peek, itemgetter0
 from .itertools import unique, last, filterfalse
