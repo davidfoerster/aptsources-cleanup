@@ -7,13 +7,14 @@ import errno
 from . import os
 from .gettext import _
 from .terminal import termwrap
+from .io import FileDescriptor
 
 
 def display_file(filename):
 	"""Copy the content of the file at a path to standard output."""
 
 	try:
-		with io.FileDescriptor(filename) as fd_in:
+		with FileDescriptor(filename) as fd_in:
 			with mmap.mmap(fd_in, 0, access=mmap.ACCESS_READ) as buf_in:
 				if buf_in:
 					sys.stdout.flush()
