@@ -6,6 +6,7 @@ __all__ = (
 )
 
 import operator
+import collections.abc
 
 
 itemgetter0, itemgetter1 = map(operator.itemgetter, range(2))
@@ -16,7 +17,7 @@ def identity(x):
 	return x
 
 
-class methodcaller:
+class methodcaller(collections.abc.Callable):
 	"""Binds arguments for instance(-like) method calls.
 
 	Instances of this class are callable and pass their single positional
@@ -33,6 +34,7 @@ class methodcaller:
 
 
 	def __init__(self, func, *args):
+		super().__init__()
 		self.func = func
 		self.args = args
 

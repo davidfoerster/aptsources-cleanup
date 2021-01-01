@@ -7,11 +7,12 @@ from functools import *
 import functools as _functools
 __all__ += _functools.__all__
 
+import collections.abc
 from  operator import attrgetter
 from .operator import identity
 
 
-class comp:
+class comp(collections.abc.Callable):
 	"""A function object that concatenates the passed functions from left to
 	right.
 	"""
@@ -68,9 +69,8 @@ class LazyInstance:
 		LazyInstance nor on the type of the (future) wrapped object.
 		"""
 
-		self._li_instance = None
-		self._li_factory = factory
-		self._li_strict = strict
+		if not callable(factory):
+			raise TypeError()
 
 		if type_hint is None:
 			if isinstance(factory, type):
@@ -78,7 +78,11 @@ class LazyInstance:
 		elif not isinstance(type_hint, type):
 			raise TypeError(
 				'type_hint must be None or a type, not ' + str(type(type_hint)))
+
+		self._li_instance = None
+		self._li_factory = factory
 		self._li_type_hint = type_hint
+		self._li_strict = strict
 
 
 	__hash__ = None
