@@ -4,7 +4,7 @@ __all__ = ("display_file", "remove_sources_files")
 import sys
 import mmap
 import errno
-from . import os
+from . import io, os
 from .gettext import _
 from .terminal import termwrap
 
