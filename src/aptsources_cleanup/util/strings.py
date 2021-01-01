@@ -132,22 +132,18 @@ def _rstrip_stop(s, start, stop, suffixes):
 
 
 def contains_ordered(s, infixes, *, reverse=False):
+	limit = None
+
 	if reverse:
-		offset = len(s)
-		find = _contains_ordered_rfind
-		advance = operator.sub
+		for infix in infixes:
+			limit = s.rfind(infix, 0, limit)
+			if limit < 0:
+				return False
 	else:
-		offset = 0
-		find = str.find
-		advance = operator.add
+		for infix in infixes:
+			limit = s.find(infix, limit)
+			if limit < 0:
+				return False
+			limit += len(infix)
 
-	for infix in infixes:
-		offset = find(s, infix, offset)
-		if offset < 0:
-			return False
-		offset = advance(offset, len(infix))
 	return True
-
-
-def _contains_ordered_rfind(s, infix, offset):
-	return s.rfind(infix, 0, max(offset, 0))
