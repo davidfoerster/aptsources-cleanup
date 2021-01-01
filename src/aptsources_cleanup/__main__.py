@@ -197,8 +197,8 @@ def parse_args(args):
 		None if args and '--help-debug' in args else argparse.SUPPRESS)
 
 	translations.add_fallback(
-		DictTranslations(ID_DESCRIPTION=
-			prefix(aptsources_cleanup.__doc__, '\n\n\n', reverse=True).strip()))
+		DictTranslations(
+			ID_DESCRIPTION=rprefix(aptsources_cleanup.__doc__, "\n\n\n").strip()))
 
 	ap = MyArgumentParser(formatter_class=TerminalHelpFormatter,
 		add_help=False, description=_('ID_DESCRIPTION'),

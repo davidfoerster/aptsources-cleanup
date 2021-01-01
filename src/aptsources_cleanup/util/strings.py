@@ -2,14 +2,15 @@
 """String utilities"""
 
 __all__ = (
-	"startswith_token", "prefix", "strip", "lstrip", "rstrip",
+	"startswith_token", "prefix", "rprefix", "strip", "lstrip", "rstrip",
 	"contains_ordered"
 )
 
 import operator
+import collections
+import collections.abc
 
 if __debug__:
-	import collections
 	from warnings import warn
 	from .itertools import map_pairs
 
@@ -24,30 +25,49 @@ def startswith_token(s, prefix, separators=None):
 
 	if separators is None:
 		return s == prefix
-
-	prefix_len = len(prefix)
-
-	if s.startswith(prefix):
-		if len(s) == prefix_len:
-			return True
-
-		if isinstance(separators, str):
-			sep = separators
-			return s.find(sep, prefix_len) >= 0
-
-		for sep in separators:
-			if s.find(sep, prefix_len) >= 0:
-				return True
-
-	return False
+	return (
+		s.startswith(prefix) and
+		(len(s) == len(prefix) or s.startswith(separators, len(prefix))))
 
 
-def prefix(s, *prefixes, reverse=False):
-	if reverse:
-		pos = s.rfind(*prefixes)
-	else:
-		pos = s.find(*prefixes)
-	return s[:pos] if pos >= 0 else s
+def prefix(s, sep):
+	"""Returns the prefix of s delimited by a separator.
+
+	sep may be a collection in which case the separator with the least position
+	in s is used.
+
+	If none of the separators occurs in s, s itself is returned.
+	"""
+
+	limit = None
+	for sep in _prepare_xfixes(sep, 1):
+		pos = s.find(sep, 0, limit and (limit + len(sep) - 1))
+		if pos >= 0:
+			limit = pos
+			if not limit:
+				break
+
+	return s[:limit]
+
+
+def rprefix(s, sep):
+	"""Returns the prefix of s delimited by a separator looking from the back.
+
+	sep may be a collection in which case the separator with the greatest position
+	in s is used.
+
+	If none of the separators occurs in s, s itself is returned.
+	"""
+
+	offset = None
+	limit = None
+	for sep in _prepare_xfixes(sep, 2):
+		pos = s.rfind(sep, limit and max(limit - len(sep) + 1, 0))
+		if pos >= 0:
+			offset = pos
+			limit = pos + len(sep)
+
+	return s[:offset]
 
 
 def strip(s, xfixes, *, start=None, stop=None):
