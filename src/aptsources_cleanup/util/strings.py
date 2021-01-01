@@ -14,6 +14,9 @@ if __debug__:
 	from .itertools import map_pairs
 
 
+StringTypes = (str, collections.UserString, collections.abc.ByteString)
+
+
 def startswith_token(s, prefix, separators=None):
 	"""Tests if a string is either equal to a given prefix or prefixed by it
 	followed by a separator.
@@ -48,25 +51,25 @@ def prefix(s, *prefixes, reverse=False):
 
 
 def strip(s, xfixes, *, start=None, stop=None):
-	return _strip_impl("lr", s, xfixes, start, stop)
+	return _strip_impl(3, s, xfixes, start, stop)
 
 def lstrip(s, prefixes, *, start=None, stop=None):
-	return _strip_impl("l", s, xfixes, start, stop)
+	return _strip_impl(1, s, xfixes, start, stop)
 
 def rstrip(s, suffixes, *, start=None, stop=None):
-	return _strip_impl("r", s, xfixes, start, stop)
+	return _strip_impl(2, s, xfixes, start, stop)
 
 
 def _strip_impl(mode, s, xfixes, start, stop):
-	assert mode and not mode.strip("lr")
+	assert 0 < mode <= 3
 	len_s = len(s)
 	start = _normalize_index(start, 0, len_s)
 	stop  = _normalize_index(stop, len_s, len_s)
-	xfixes = _strip_prepare_xfixes(xfixes, mode)
+	xfixes = _prepare_xfixes(xfixes, mode)
 
-	if "l" in mode:
+	if mode & 1:
 		start = _lstrip_start(s, start, stop, xfixes)
-	if "r" in mode:
+	if mode & 2:
 		stop = _rstrip_stop(s, start, stop, xfixes)
 
 	return s[ start : stop ]
@@ -74,32 +77,30 @@ def _strip_impl(mode, s, xfixes, start, stop):
 
 def _normalize_index(idx, default, sequence_len):
 	if idx is None:
-		idx = default
-	elif idx < 0:
-		idx += sequence_len
-		if idx < 0:
-			raise IndexError(format(idx - sequence_len, "d"))
-
-	return idx
+		return default
+	if idx >= 0:
+		return min(idx, sequence_len)
+	return max(idx + sequence_len, 0)
 
 
-def _strip_prepare_xfixes(xfixes, mode):
-	if isinstance(xfixes, str):
+def _prepare_xfixes(xfixes, mode):
+	if isinstance(xfixes, StringTypes):
 		return (xfixes,)
 
 	if __debug__:
-		assert isinstance(xfixes, collections.abc.Collection)
-
-		if "l" in mode and any(
-			map_pairs(str.startswith, sorted(xfixes, reverse=True))
+		for mode_name, mode_flag, slice_step in (
+			("prefix", 1, 1), ("suffix", 2, -1)
 		):
-			warn("not prefix-free", UserWarning)
-
-		if "r" in mode and any(
-			map_pairs(str.startswith, sorted(
-				map(operator.itemgetter(slice(None, None, -1)), xfixes), reverse=True))
-		):
-			warn("not suffix-free", UserWarning)
+			if (mode & mode_flag and
+				any(map_pairs(
+					lambda a, b: b.startswith(a),
+					sorted(
+						map(operator.itemgetter(slice(None, None, slice_step)), xfixes))))
+			):
+				warn(
+					"Not {:s}-free; results may be ambiguous: {!r}".format(
+						mode_name, xfixes),
+					UserWarning)
 
 	return xfixes
 
