@@ -16,7 +16,6 @@ import argparse
 import operator
 import itertools
 import contextlib
-import collections
 from argparse import _, ngettext as _N
 from functools import partial as fpartial
 if __debug__:
@@ -355,7 +354,7 @@ def getlines(stream, delim, chunk_size=0, *, _exitstack):
 	if delim_alt is not None:
 		return map(operator.methodcaller("rstrip", delim_alt), stream)
 
-	if isinstance(delim, collections.abc.ByteString):
+	if isinstance(delim, (bytes, bytearray)):
 		return _getlines_impl_bytes(stream, delim, chunk_size, _exitstack)
 
 	assert isinstance(delim, str)
@@ -364,7 +363,7 @@ def getlines(stream, delim, chunk_size=0, *, _exitstack):
 	except UnicodeEncodeError:
 		pass
 	else:
-		assert isinstance(delim_alt, collections.abc.ByteString)
+		assert isinstance(delim_alt, (bytes, bytearray))
 		if delim_alt:
 			stream.flush()
 			return map(

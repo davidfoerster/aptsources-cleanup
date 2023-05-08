@@ -8,14 +8,13 @@ __all__ = (
 
 import operator
 import collections
-import collections.abc
 
 if __debug__:
 	from warnings import warn
 	from .itertools import map_pairs
 
 
-StringTypes = (str, collections.UserString, collections.abc.ByteString)
+StringTypes = (str, collections.UserString, bytes, bytearray)
 
 
 def startswith_token(s, prefix, separators=None):
