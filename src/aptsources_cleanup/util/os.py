@@ -2,11 +2,9 @@
 from os import __all__
 from os import *
 
-import collections.abc
-
 
 if "fspath" not in globals():
-	def fspath(path, *, _string_types=(str, collections.abc.ByteString)):
+	def fspath(path, *, _string_types=(str, bytes, bytearray)):
 		if not isinstance(path, _string_types):
 			try:
 				path = path.__fspath__()
