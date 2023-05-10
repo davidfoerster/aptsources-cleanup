@@ -1,5 +1,6 @@
 #!/usr/bin/python3 -OEs
 # -*- coding: utf-8
+# Main script for the pyz distribution
 
 import sys
 from pathlib import PurePath

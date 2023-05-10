@@ -20,6 +20,9 @@ def check_integrity(pkg, paragraphs, debug_fail=0, *,
 
 	try:
 		with FileDescriptor(md5sums_file) as md5sums_fd:
+			if isinstance(md5sums_fd, int):
+				raise EnvironmentError(
+					'Got error code {} when opening {}'.format(md5sums_fd, md5sums_file))
 			md5sum_proc = subprocess.Popen(
 				md5sum_cmd, cwd="/", stdin=md5sums_fd, close_fds=True)
 			md5sum_proc.wait()
