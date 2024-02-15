@@ -81,8 +81,8 @@ def get_fallback_languages(languages):
 			yield lang[:p]
 
 
-def translation(domain, localedir=None, languages=None, _class=None,
-	fallback=False, codeset=None
+def translation(
+	domain, localedir=None, languages=None, _class=None, fallback=False
 ):
 	"""Similar to gettext.translation() but also search inside ZIP archives
 
@@ -93,11 +93,11 @@ def translation(domain, localedir=None, languages=None, _class=None,
 		languages = get_languages()
 
 	archive = __archive__
-	if (localedir is None or archive is None or
+	if (
+		localedir is None or archive is None or
 		not startswith_token(localedir, archive, os.sep)
 	):
-		return _gettext.translation(
-			domain, localedir, languages, _class, fallback, codeset)
+		return _gettext.translation(domain, localedir, languages, _class, fallback)
 
 	languages = tuple(unique(get_fallback_languages(languages)))
 	translations = None
@@ -125,8 +125,6 @@ def translation(domain, localedir=None, languages=None, _class=None,
 				"No translation in '{:s}:{:s}' for: {:s}"
 					.format(archive, localedir, ', '.join(languages)))
 		translations = NullTranslations()
-	if codeset is not None:
-		translations.set_output_charset(codeset)
 
 	return translations
 
